@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Share Bank Details</title>
+<style>
+body { font-family: 'Segoe UI', sans-serif; background:#0a0a0a; color:#fff; padding:40px; }
+.container { max-width:500px; margin:auto; background:#1a1a1a; padding:30px; border-radius:15px; border:2px solid #ffc107; }
+input { width:100%; padding:10px; margin:10px 0; border-radius:8px; border:none; }
+button { padding:10px 20px; border:none; border-radius:8px; background:#ffc107; color:#000; font-weight:700; cursor:pointer; }
+a { color:#ffc107; display:inline-block; margin-top:20px; }
+</style>
+</head>
+<body>
+<div class="container">
+    <h2>Share Bank Details for {{ app.loanname }}</h2>
+    <form method="POST">
+        <input type="text" name="bank_name" placeholder="Bank Name" value="{{ app.bank_name }}" required>
+        <input type="text" name="account_number" placeholder="Account Number" value="{{ app.account_number }}" required>
+        <input type="text" name="ifsc_code" placeholder="IFSC Code" value="{{ app.ifsc_code }}" required>
+        <button type="submit">Submit</button>
+    </form>
+    <a href="{{ url_for('loan_status') }}">← Back to Loan Status</a>
+</div>
+</body>
+</html>

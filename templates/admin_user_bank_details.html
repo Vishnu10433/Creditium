@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>User Bank Details — Creditium Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold:#C9A84C;--gold-light:#E2C06B;--gold-dark:#A8862E;--gold-dim:rgba(201,168,76,0.1);
+  --bg:#0A0A0D;--surface:#111116;--surface2:#18181F;--surface3:#1F1F28;
+  --border:rgba(201,168,76,0.12);--border-hover:rgba(201,168,76,0.35);
+  --text:#F0EBE0;--text-muted:#7A7585;--text-dim:#45424F;
+  --green:#27AE60;--green-dim:rgba(39,174,96,0.12);
+  --red:#C0392B;--red-dim:rgba(192,57,43,0.12);
+  --orange:#E67E22;--orange-dim:rgba(230,126,34,0.12);
+  --radius:16px;--radius-sm:10px;--radius-xs:7px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:0.6;}
+.glow{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0;}
+.g1{width:600px;height:600px;top:-200px;right:-150px;background:radial-gradient(circle,rgba(201,168,76,0.07) 0%,transparent 65%);}
+.g2{width:450px;height:450px;bottom:-100px;left:-100px;background:radial-gradient(circle,rgba(201,168,76,0.04) 0%,transparent 65%);}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--gold-dark);border-radius:4px}
+
+/* ── TOP BAR ── */
+.topbar{position:sticky;top:0;z-index:100;height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 2rem;background:rgba(10,10,13,0.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+.topbar-logo{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;letter-spacing:-0.02em;background:linear-gradient(120deg,var(--gold-light),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.topbar-right{display:flex;align-items:center;gap:1rem;}
+.topbar-meta{font-size:0.72rem;color:var(--text-dim);font-family:'IBM Plex Mono',monospace;}
+.back-btn{display:inline-flex;align-items:center;gap:0.35rem;padding:0.4rem 0.85rem;border-radius:50px;border:1px solid var(--border);background:transparent;color:var(--text-muted);text-decoration:none;font-size:0.76rem;font-weight:600;transition:all 0.2s;}
+.back-btn:hover{border-color:var(--border-hover);color:var(--gold-light);}
+
+/* ── LAYOUT ── */
+.container{max-width:1100px;margin:0 auto;padding:2.5rem 2rem 5rem;position:relative;z-index:1;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── PAGE HEADER ── */
+.page-header{margin-bottom:2rem;animation:fadeUp 0.5s ease both;}
+.page-label{display:inline-flex;align-items:center;gap:0.5rem;font-family:'IBM Plex Mono',monospace;font-size:0.65rem;font-weight:600;color:var(--gold);letter-spacing:0.14em;text-transform:uppercase;margin-bottom:0.6rem;}
+.page-label::before{content:'';width:18px;height:1px;background:var(--gold);}
+.page-title{font-family:'Syne',sans-serif;font-size:clamp(1.5rem,3.5vw,2.1rem);font-weight:800;letter-spacing:-0.03em;line-height:1.1;}
+.page-title .accent{color:var(--gold-light);}
+
+/* ── SUMMARY BAR ── */
+.summary-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:2.5rem;animation:fadeUp 0.5s 0.1s ease both;}
+.sum-cell{background:var(--surface);padding:1rem 1.4rem;}
+.sum-cell-label{font-size:0.63rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:0.3rem;}
+.sum-cell-val{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--text);}
+.sum-cell-val.gold{color:var(--gold-light);}
+
+/* ── LOAN CARD ── */
+.loan-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.2rem;transition:border-color 0.25s,box-shadow 0.25s;animation:fadeUp 0.5s ease both;}
+.loan-card:hover{border-color:var(--border-hover);box-shadow:0 8px 40px rgba(0,0,0,0.5);}
+.loan-card-top-bar{height:2px;background:linear-gradient(90deg,transparent,var(--gold),var(--gold-light),var(--gold),transparent);}
+
+/* Card Head */
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.5rem;border-bottom:1px solid var(--border);gap:1rem;flex-wrap:wrap;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;}
+.user-name{font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:700;color:var(--text);letter-spacing:-0.01em;}
+.user-email{font-size:0.74rem;color:var(--text-dim);margin-top:2px;font-family:'IBM Plex Mono',monospace;}
+.head-right{display:flex;align-items:center;gap:0.75rem;}
+.badge{padding:0.28rem 0.75rem;border-radius:50px;font-size:0.68rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;}
+.badge-active{background:var(--green-dim);color:var(--green);border:1px solid rgba(39,174,96,0.25);}
+.badge-pending{background:var(--orange-dim);color:var(--orange);border:1px solid rgba(230,126,34,0.25);}
+.badge-closed{background:var(--surface3);color:var(--text-muted);border:1px solid var(--border);}
+.badge-sent{background:var(--green-dim);color:var(--green);border:1px solid rgba(39,174,96,0.25);}
+.badge-unsent{background:var(--orange-dim);color:var(--orange);border:1px solid rgba(230,126,34,0.25);}
+.toggle-icon{font-size:1rem;color:var(--text-dim);transition:transform 0.3s,color 0.2s;}
+.loan-card.open .toggle-icon{transform:rotate(180deg);}
+.card-head:hover .toggle-icon{color:var(--gold-light);}
+
+/* Quick row — always visible */
+.quick-row{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);}
+.quick-cell{background:var(--surface2);padding:0.85rem 1.1rem;}
+.quick-cell-label{font-size:0.6rem;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:var(--text-dim);margin-bottom:0.25rem;}
+.quick-cell-val{font-family:'IBM Plex Mono',monospace;font-size:0.82rem;font-weight:600;color:var(--text);}
+.quick-cell-val.gold{color:var(--gold-light);}
+.quick-cell-val.red{color:var(--red);}
+
+/* Collapsible body */
+.card-body{display:none;padding:1.5rem;border-top:1px solid var(--border);animation:bodyReveal 0.3s ease;}
+.loan-card.open .card-body{display:block;}
+@keyframes bodyReveal{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+
+/* Section label */
+.section-label{font-size:0.62rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);font-family:'IBM Plex Mono',monospace;margin-bottom:0.85rem;display:flex;align-items:center;gap:0.5rem;}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* Bank details */
+.bank-row{display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-bottom:1.5rem;}
+.bank-tile{background:var(--surface3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.9rem 1rem;}
+.bank-tile-label{font-size:0.6rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:0.3rem;}
+.bank-tile-val{font-family:'IBM Plex Mono',monospace;font-size:0.82rem;font-weight:600;color:var(--text);word-break:break-all;}
+.copy-btn{display:inline-flex;align-items:center;gap:0.25rem;font-size:0.62rem;color:var(--text-dim);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:0.3rem;padding:0;transition:color 0.2s;}
+.copy-btn:hover{color:var(--gold-light);}
+.copy-btn.copied{color:var(--green);}
+
+/* Send money */
+.action-row{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;}
+.send-money-btn{display:inline-flex;align-items:center;gap:0.4rem;padding:0.6rem 1.4rem;border:none;border-radius:var(--radius-xs);background:linear-gradient(135deg,var(--gold-light),var(--gold));color:#0A0A0D;font-family:'Syne',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;transition:all 0.25s;letter-spacing:0.01em;}
+.send-money-btn:hover:not(:disabled){box-shadow:0 6px 24px rgba(201,168,76,0.3);transform:translateY(-1px);}
+.send-money-btn:disabled{opacity:0.5;cursor:not-allowed;}
+.send-money-btn.sent{background:var(--green-dim);color:var(--green);border:1px solid rgba(39,174,96,0.3);}
+.action-note{font-size:0.72rem;color:var(--text-dim);}
+
+/* EMI section */
+.emi-meta{display:flex;gap:1.5rem;margin-bottom:0.85rem;flex-wrap:wrap;}
+.emi-stat{font-size:0.72rem;color:var(--text-dim);}
+.emi-stat strong{color:var(--text);font-weight:600;}
+.emi-progress-bar{height:4px;background:var(--surface3);border-radius:2px;margin-bottom:1.25rem;overflow:hidden;}
+.emi-progress-fill{height:100%;background:linear-gradient(90deg,var(--gold-dark),var(--gold-light));border-radius:2px;}
+
+/* Table */
+.table-wrap{overflow-x:auto;border-radius:var(--radius-sm);border:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;font-size:0.8rem;}
+thead th{padding:0.7rem 1rem;text-align:left;background:var(--surface3);color:var(--text-dim);font-size:0.62rem;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;font-family:'IBM Plex Mono',monospace;}
+tbody td{padding:0.72rem 1rem;color:var(--text-muted);border-bottom:1px solid rgba(255,255,255,0.03);white-space:nowrap;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:rgba(201,168,76,0.025);}
+.td-num{font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--text)!important;}
+.td-id{font-family:'IBM Plex Mono',monospace;font-size:0.72rem;}
+.s-paid{display:inline-flex;align-items:center;gap:0.3rem;color:var(--green)!important;font-weight:700;font-size:0.75rem;}
+.s-overdue{display:inline-flex;align-items:center;gap:0.3rem;color:var(--red)!important;font-weight:700;font-size:0.75rem;}
+.s-pending{display:inline-flex;align-items:center;gap:0.3rem;color:var(--gold-light)!important;font-weight:700;font-size:0.75rem;}
+.dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;display:inline-block;}
+.dot-g{background:var(--green);}
+.dot-r{background:var(--red);}
+.dot-o{background:var(--gold-light);}
+
+/* ── SEARCH & FILTER BAR ── */
+.search-bar{display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap;animation:fadeUp 0.5s 0.15s ease both;}
+.search-wrap{position:relative;flex:1;min-width:220px;}
+.search-icon{position:absolute;left:0.9rem;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:0.85rem;pointer-events:none;}
+.search-input{width:100%;padding:0.65rem 1rem 0.65rem 2.4rem;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.83rem;outline:none;transition:border-color 0.2s,box-shadow 0.2s;}
+.search-input::placeholder{color:var(--text-dim);}
+.search-input:focus{border-color:var(--border-hover);box-shadow:0 0 0 3px rgba(201,168,76,0.08);}
+.filter-pills{display:flex;gap:0.5rem;flex-wrap:wrap;}
+.filter-pill{padding:0.5rem 0.9rem;border-radius:50px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);font-size:0.72rem;font-weight:600;cursor:pointer;transition:all 0.18s;letter-spacing:0.03em;white-space:nowrap;}
+.filter-pill:hover{border-color:var(--border-hover);color:var(--text);}
+.filter-pill.active{background:var(--gold-dim);border-color:var(--gold);color:var(--gold-light);}
+.filter-pill.active-green{background:var(--green-dim);border-color:rgba(39,174,96,0.4);color:var(--green);}
+.filter-pill.active-orange{background:var(--orange-dim);border-color:rgba(230,126,34,0.4);color:var(--orange);}
+.search-clear{padding:0.5rem 0.85rem;border-radius:50px;border:1px solid var(--border);background:transparent;color:var(--text-dim);font-size:0.72rem;font-weight:600;cursor:pointer;transition:all 0.18s;display:none;}
+.search-clear:hover{color:var(--red);border-color:rgba(192,57,43,0.4);}
+.search-clear.visible{display:inline-flex;align-items:center;gap:0.3rem;}
+.results-count{font-size:0.72rem;color:var(--text-dim);font-family:'IBM Plex Mono',monospace;padding:0.5rem 0;white-space:nowrap;}
+.results-count strong{color:var(--gold-light);}
+.no-results{text-align:center;padding:3.5rem 1rem;color:var(--text-dim);display:none;}
+.no-results .nr-icon{font-size:2rem;margin-bottom:0.5rem;}
+.no-results p{font-size:0.85rem;}
+
+/* Highlight matched text */
+mark{background:rgba(201,168,76,0.25);color:var(--gold-light);border-radius:2px;padding:0 2px;}
+
+/* Empty */
+.empty-state{text-align:center;padding:5rem 1rem;color:var(--text-dim);}
+.empty-state .icon{font-size:2rem;margin-bottom:0.5rem;}
+
+@media(max-width:768px){
+  .container{padding:1.5rem 1rem 4rem;}
+  .topbar{padding:0 1rem;}
+  .summary-bar{grid-template-columns:1fr 1fr;}
+  .quick-row{grid-template-columns:1fr 1fr;}
+  .bank-row{grid-template-columns:1fr;}
+  .quick-cell:last-child{grid-column:span 2;}
+}
+</style>
+</head>
+<body>
+<div class="glow g1"></div>
+<div class="glow g2"></div>
+
+<div class="topbar">
+  <div class="topbar-logo">Creditium</div>
+  <div class="topbar-right">
+    <span class="topbar-meta" id="liveTime"></span>
+    <a href="{{ url_for('admin_dashboard') }}" class="back-btn">← Dashboard</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="page-header">
+    <div class="page-label">Admin · Loans</div>
+    <div class="page-title">Bank Details <span class="accent">&amp; Loan Overview</span></div>
+  </div>
+
+  {% if not loans %}
+    <div class="empty-state">
+      <div class="icon">🏦</div>
+      <p>No loans with bank details found.</p>
+    </div>
+  {% else %}
+
+  <!-- Summary Bar -->
+  <div class="summary-bar">
+    <div class="sum-cell">
+      <div class="sum-cell-label">Total Loans</div>
+      <div class="sum-cell-val gold">{{ loans | length }}</div>
+    </div>
+    <div class="sum-cell">
+      <div class="sum-cell-label">Total Disbursed</div>
+      <div class="sum-cell-val">₹ {{ "{:,.0f}".format(loans | sum(attribute='amount')) }}</div>
+    </div>
+    <div class="sum-cell">
+      <div class="sum-cell-label">Money Sent</div>
+      <div class="sum-cell-val">{{ loans | selectattr('money_sent') | list | length }} / {{ loans | length }}</div>
+    </div>
+    <div class="sum-cell">
+      <div class="sum-cell-label">Pending Send</div>
+      <div class="sum-cell-val">{{ loans | rejectattr('money_sent') | list | length }} loans</div>
+    </div>
+  </div>
+
+  <!-- Search & Filter Bar -->
+  <div class="search-bar">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" id="searchInput" placeholder="Search by name, email, bank, account no, IFSC, loan…" oninput="applyFilters()" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="filter-pills">
+      <button class="filter-pill active" data-filter="all" onclick="setFilter('all',this)">All</button>
+      <button class="filter-pill" data-filter="active" onclick="setFilter('active',this)">Active</button>
+      <button class="filter-pill" data-filter="closed" onclick="setFilter('closed',this)">Closed</button>
+      <button class="filter-pill" data-filter="unsent" onclick="setFilter('unsent',this)">⏳ Unsent</button>
+      <button class="filter-pill" data-filter="overdue" onclick="setFilter('overdue',this)">⚠ Overdue</button>
+    </div>
+    <button class="search-clear" id="clearBtn" onclick="clearSearch()">✕ Clear</button>
+    <span class="results-count" id="resultsCount"></span>
+  </div>
+
+  <div class="no-results" id="noResults">
+    <div class="nr-icon">🔎</div>
+    <p>No loans match your search.</p>
+  </div>
+
+  <!-- Loan Cards -->
+  {% for loan in loans %}
+  {% set paid_emis = loan.emis | selectattr('status', 'equalto', 'Paid') | list %}
+  {% set overdue_emis = loan.emis | selectattr('status', 'equalto', 'Overdue') | list %}
+  {% set total_emis = loan.emis | length %}
+  {% set progress = ((paid_emis | length) / total_emis * 100) | int if total_emis > 0 else 0 %}
+
+  <div class="loan-card" id="card-{{ loan.id }}"
+    data-name="{{ loan.user.name | lower }}"
+    data-email="{{ loan.user.email | lower }}"
+    data-loanname="{{ loan.loanname | lower }}"
+    data-bank="{{ loan.bank_name | lower if loan.bank_name else '' }}"
+    data-account="{{ loan.account_number if loan.account_number else '' }}"
+    data-ifsc="{{ loan.ifsc_code | lower if loan.ifsc_code else '' }}"
+    data-status="{{ loan.status | lower }}"
+    data-moneysent="{{ 'sent' if loan.money_sent else 'unsent' }}"
+    data-overdue="{{ overdue_emis | length }}"
+    style="animation-delay: {{ loop.index0 * 0.07 }}s">
+    <div class="loan-card-top-bar"></div>
+
+    <!-- Head (always visible, clickable to expand) -->
+    <div class="card-head" onclick="toggleCard({{ loan.id }})">
+      <div>
+        <div class="user-name">{{ loan.user.name }}</div>
+        <div class="user-email">{{ loan.user.email }}</div>
+      </div>
+      <div class="head-right">
+        <span class="badge {% if loan.status == 'Active' %}badge-active{% elif loan.status == 'Closed' %}badge-closed{% else %}badge-pending{% endif %}">
+          {{ loan.status }}
+        </span>
+        {% if loan.money_sent %}
+          <span class="badge badge-sent">💸 Sent</span>
+        {% else %}
+          <span class="badge badge-unsent">⏳ Unsent</span>
+        {% endif %}
+        <span class="toggle-icon">▾</span>
+      </div>
+    </div>
+
+    <!-- Quick stats row (always visible) -->
+    <div class="quick-row">
+      <div class="quick-cell">
+        <div class="quick-cell-label">Loan</div>
+        <div class="quick-cell-val">{{ loan.loanname }}</div>
+      </div>
+      <div class="quick-cell">
+        <div class="quick-cell-label">Amount</div>
+        <div class="quick-cell-val gold">₹ {{ "{:,.0f}".format(loan.amount) }}</div>
+      </div>
+      <div class="quick-cell">
+        <div class="quick-cell-label">Tenure</div>
+        <div class="quick-cell-val">{{ loan.tenure }} mo</div>
+      </div>
+      <div class="quick-cell">
+        <div class="quick-cell-label">EMI Progress</div>
+        <div class="quick-cell-val">{{ paid_emis | length }}/{{ total_emis }} <span style="color:var(--text-dim);font-size:0.7rem">({{ progress }}%)</span></div>
+      </div>
+      <div class="quick-cell">
+        <div class="quick-cell-label">Overdue</div>
+        <div class="quick-cell-val {% if overdue_emis %}red{% endif %}">
+          {% if overdue_emis %}{{ overdue_emis | length }} EMI{% else %}—{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Expandable body -->
+    <div class="card-body">
+
+      <div class="section-label">Bank Details</div>
+      <div class="bank-row">
+        <div class="bank-tile">
+          <div class="bank-tile-label">Bank Name</div>
+          <div class="bank-tile-val">{{ loan.bank_name or '—' }}</div>
+        </div>
+        <div class="bank-tile">
+          <div class="bank-tile-label">Account Number</div>
+          <div class="bank-tile-val">{{ loan.account_number or '—' }}</div>
+          {% if loan.account_number %}
+          <button class="copy-btn" onclick="copyText('{{ loan.account_number }}', this)">⧉ Copy</button>
+          {% endif %}
+        </div>
+        <div class="bank-tile">
+          <div class="bank-tile-label">IFSC Code</div>
+          <div class="bank-tile-val">{{ loan.ifsc_code or '—' }}</div>
+          {% if loan.ifsc_code %}
+          <button class="copy-btn" onclick="copyText('{{ loan.ifsc_code }}', this)">⧉ Copy</button>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="action-row">
+        <form action="{{ url_for('admin_send_money', loan_id=loan.id) }}" method="POST" style="display:inline">
+          <button type="submit" class="send-money-btn {% if loan.money_sent %}sent{% endif %}" {% if loan.money_sent %}disabled{% endif %}>
+            {% if loan.money_sent %}✔ Money Sent{% else %}💸 Send Money{% endif %}
+          </button>
+        </form>
+        <span class="action-note">
+          {% if loan.money_sent %}Funds dispatched to account{% else %}Verify bank details before sending{% endif %}
+        </span>
+      </div>
+
+      {% if loan.emis %}
+      <div class="section-label">EMI Schedule</div>
+      <div class="emi-meta">
+        <span class="emi-stat"><strong>{{ paid_emis | length }}</strong> Paid</span>
+        <span class="emi-stat"><strong>{{ overdue_emis | length }}</strong> Overdue</span>
+        <span class="emi-stat"><strong>{{ total_emis - (paid_emis | length) - (overdue_emis | length) }}</strong> Pending</span>
+        <span class="emi-stat"><strong>{{ progress }}%</strong> Complete</span>
+      </div>
+      <div class="emi-progress-bar">
+        <div class="emi-progress-fill" style="width: {{ progress }}%"></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Amount</th>
+              <th>Due Date</th>
+              <th>Status</th>
+              <th>Paid On</th>
+              <th>Transaction ID</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for emi in loan.emis %}
+            <tr>
+              <td class="td-num">{{ loop.index }}</td>
+              <td class="td-num">₹ {{ "{:,.2f}".format(emi.emi_amount) }}</td>
+              <td>{{ emi.due_date.strftime('%d %b %Y') }}</td>
+              <td>
+                {% if emi.status == 'Paid' %}
+                  <span class="s-paid"><span class="dot dot-g"></span>Paid</span>
+                {% elif emi.due_date.date() < today %}
+                  <span class="s-overdue"><span class="dot dot-r"></span>Overdue</span>
+                {% else %}
+                  <span class="s-pending"><span class="dot dot-o"></span>Pending</span>
+                {% endif %}
+              </td>
+              <td>{{ emi.paid_on.strftime('%d %b %Y') if emi.paid_on else '—' }}</td>
+              <td class="td-id">{{ emi.transaction.transaction_id if emi.transaction else '—' }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+  {% endfor %}
+
+  {% endif %}
+</div>
+
+<script>
+// Live clock
+(function(){
+  const el = document.getElementById('liveTime');
+  function tick(){
+    el.textContent = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false})+' IST';
+  }
+  tick(); setInterval(tick, 1000);
+})();
+
+// Toggle expand/collapse
+function toggleCard(id) {
+  const card = document.getElementById('card-' + id);
+  card.classList.toggle('open');
+}
+
+// Copy to clipboard
+function copyText(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✔ Copied';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '⧉ Copy'; btn.classList.remove('copied'); }, 1500);
+  });
+}
+
+// ── Search & Filter ──
+let activeFilter = 'all';
+
+// Store original text content for highlight targets once on load
+// so innerHTML mutations never corrupt data-* attributes
+const originalTexts = new WeakMap();
+
+function initHighlightTargets() {
+  document.querySelectorAll('.loan-card').forEach(card => {
+    const targets = card.querySelectorAll('.user-name, .user-email, .quick-cell-val, .bank-tile-val');
+    targets.forEach(el => {
+      if (!originalTexts.has(el)) {
+        originalTexts.set(el, el.textContent);
+      }
+    });
+  });
+}
+
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function highlightInCard(card, query) {
+  const targets = card.querySelectorAll('.user-name, .user-email, .quick-cell-val, .bank-tile-val');
+  const regex = new RegExp('(' + escapeRegex(query) + ')', 'gi');
+  targets.forEach(el => {
+    const original = originalTexts.get(el) || el.textContent;
+    if (regex.test(original)) {
+      el.innerHTML = original.replace(regex, '<mark>$1</mark>');
+    } else {
+      el.textContent = original;
+    }
+  });
+}
+
+function removeHighlights(card) {
+  const targets = card.querySelectorAll('.user-name, .user-email, .quick-cell-val, .bank-tile-val');
+  targets.forEach(el => {
+    const original = originalTexts.get(el);
+    if (original !== undefined) el.textContent = original;
+  });
+}
+
+function setFilter(filter, btn) {
+  activeFilter = filter;
+  document.querySelectorAll('.filter-pill').forEach(p => {
+    p.classList.remove('active', 'active-green', 'active-orange');
+  });
+  if (filter === 'active') btn.classList.add('active-green');
+  else if (filter === 'unsent' || filter === 'overdue') btn.classList.add('active-orange');
+  else btn.classList.add('active');
+  applyFilters();
+}
+
+function applyFilters() {
+  const query = document.getElementById('searchInput').value.trim().toLowerCase();
+  const cards = document.querySelectorAll('.loan-card');
+  const clearBtn = document.getElementById('clearBtn');
+  const resultsCount = document.getElementById('resultsCount');
+  const noResults = document.getElementById('noResults');
+
+  clearBtn.classList.toggle('visible', query.length > 0 || activeFilter !== 'all');
+
+  let visible = 0;
+
+  cards.forEach(card => {
+    const d = card.dataset;
+    const searchable = [d.name, d.email, d.loanname, d.bank, d.account, d.ifsc, d.status, d.moneysent].join(' ');
+
+    const textMatch = query === '' || searchable.includes(query);
+
+    let filterMatch = true;
+    if (activeFilter === 'active')  filterMatch = d.status === 'active';
+    if (activeFilter === 'closed')  filterMatch = d.status === 'closed';
+    if (activeFilter === 'unsent')  filterMatch = d.moneysent === 'unsent';
+    if (activeFilter === 'overdue') filterMatch = parseInt(d.overdue || 0) > 0;
+
+    const show = textMatch && filterMatch;
+    card.style.display = show ? '' : 'none';
+    if (show) visible++;
+
+    if (show && query) {
+      highlightInCard(card, query);
+    } else {
+      removeHighlights(card);
+    }
+  });
+
+  const total = cards.length;
+  resultsCount.innerHTML = (query || activeFilter !== 'all')
+    ? `<strong>${visible}</strong> of ${total} loans`
+    : '';
+
+  noResults.style.display = (visible === 0) ? 'block' : 'none';
+}
+
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  activeFilter = 'all';
+  document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active', 'active-green', 'active-orange'));
+  document.querySelector('[data-filter="all"]').classList.add('active');
+  applyFilters();
+}
+
+// Keyboard shortcut: "/" focuses search
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
+    e.preventDefault();
+    document.getElementById('searchInput').focus();
+  }
+  if (e.key === 'Escape') {
+    clearSearch();
+    document.getElementById('searchInput').blur();
+  }
+});
+
+window.addEventListener('DOMContentLoaded', initHighlightTargets);
+</script>
+</body>
+</html>

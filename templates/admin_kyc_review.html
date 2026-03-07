@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Review KYC — Creditium Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold:#C9A84C; --gold-light:#E2C06B; --gold-dark:#A8862E;
+  --bg:#0C0C0F; --surface:#141418; --surface2:#1A1A20; --surface3:#22222A;
+  --border:rgba(201,168,76,0.15); --border-hover:rgba(201,168,76,0.4);
+  --text:#F5F0E8; --text-muted:#8A8490; --text-dim:#5A5560;
+  --green:#2ECC71; --red:#E74C3C;
+  --radius:14px; --radius-sm:10px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text);
+  min-height:100vh; overflow-x:hidden;
+}
+body::before{
+  content:''; position:fixed; inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none; z-index:9999; opacity:0.5;
+}
+.ambient{position:fixed;border-radius:50%;filter:blur(130px);pointer-events:none;z-index:0;}
+.a1{width:500px;height:500px;background:radial-gradient(circle,rgba(201,168,76,0.08) 0%,transparent 70%);top:-180px;right:-120px;animation:dA 22s ease-in-out infinite;}
+.a2{width:400px;height:400px;background:radial-gradient(circle,rgba(201,168,76,0.05) 0%,transparent 70%);bottom:-120px;left:-80px;animation:dB 26s ease-in-out infinite;}
+@keyframes dA{0%,100%{transform:translate(0,0)}50%{transform:translate(-45px,65px)}}
+@keyframes dB{0%,100%{transform:translate(0,0)}50%{transform:translate(55px,-45px)}}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--gold),var(--gold-dark));border-radius:4px}
+
+.topbar{
+  position:sticky; top:0; z-index:100; height:60px;
+  display:flex; align-items:center; justify-content:space-between; padding:0 1.5rem;
+  background:rgba(12,12,15,0.92); backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border); box-shadow:0 4px 24px rgba(0,0,0,0.4);
+}
+.topbar-logo{
+  font-family:'Playfair Display',serif; font-size:1.25rem; font-weight:800;
+  background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  background-size:200% auto; animation:shimmer 4s ease-in-out infinite;
+}
+@keyframes shimmer{0%,100%{background-position:0% center}50%{background-position:100% center}}
+.topbar-nav{display:flex;align-items:center;gap:0.6rem;}
+.back-btn{
+  display:inline-flex;align-items:center;gap:0.4rem;
+  padding:0.45rem 1rem;border-radius:50px;
+  border:1px solid var(--border);background:var(--surface2);
+  color:var(--text-muted);text-decoration:none;font-size:0.8rem;font-weight:600;transition:all 0.22s;
+}
+.back-btn:hover,.back-btn:active{border-color:var(--border-hover);color:var(--gold-light);background:var(--surface3);}
+
+/* Page */
+.page{max-width:560px;margin:0 auto;padding:2rem 1.25rem 4rem;position:relative;z-index:1;animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+.page-header{text-align:center;margin-bottom:2rem;}
+.page-eyebrow{display:inline-flex;align-items:center;gap:0.5rem;color:var(--gold);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.5rem;justify-content:center;}
+.page-eyebrow::before{content:'';width:20px;height:1px;background:var(--gold);}
+.page-title{font-family:'Playfair Display',serif;font-size:clamp(1.4rem,5vw,1.9rem);font-weight:800;color:var(--text);letter-spacing:-0.02em;}
+.page-title .gold{color:var(--gold-light);}
+
+/* Card */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.25rem;}
+.card-stripe{height:3px;background:linear-gradient(90deg,var(--gold-dark),var(--gold-light),var(--gold-dark));}
+.card-header{padding:1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.6rem;}
+.card-header-title{font-size:0.88rem;font-weight:700;color:var(--text);}
+.card-body{padding:1.4rem;}
+
+/* Info rows */
+.info-grid{display:flex;flex-direction:column;gap:0.7rem;}
+.info-row{display:flex;justify-content:space-between;align-items:flex-start;gap:0.75rem;padding:0.6rem 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.info-row:last-child{border-bottom:none;}
+.info-label{font-size:0.72rem;font-weight:700;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase;flex-shrink:0;}
+.info-val{font-size:0.85rem;font-weight:600;color:var(--text);text-align:right;}
+
+/* Status badge */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:50px;font-size:0.7rem;font-weight:700;letter-spacing:0.05em;}
+.badge-verified{background:rgba(46,204,113,0.12);color:var(--green);border:1px solid rgba(46,204,113,0.25);}
+.badge-rejected{background:rgba(231,76,60,0.12);color:var(--red);border:1px solid rgba(231,76,60,0.25);}
+.badge-pending{background:rgba(201,168,76,0.12);color:var(--gold-light);border:1px solid rgba(201,168,76,0.25);}
+
+/* Doc links */
+.doc-list{display:flex;flex-direction:column;gap:0.55rem;}
+.doc-link{
+  display:flex;align-items:center;gap:0.75rem;
+  padding:0.75rem 1rem;border-radius:var(--radius-sm);
+  background:var(--surface2);border:1px solid var(--border);
+  text-decoration:none;color:var(--text-muted);
+  font-size:0.82rem;font-weight:600;transition:all 0.22s;
+}
+.doc-link:hover,.doc-link:active{border-color:var(--border-hover);color:var(--gold-light);background:var(--surface3);}
+.doc-icon{font-size:1rem;flex-shrink:0;}
+.doc-name{flex:1;}
+.doc-arrow{font-size:0.75rem;color:var(--text-dim);transition:all 0.22s;}
+.doc-link:hover .doc-arrow{color:var(--gold-light);transform:translateX(2px);}
+
+/* Action buttons */
+.action-row{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-top:0.25rem;}
+.btn-approve,.btn-reject{
+  display:flex;align-items:center;justify-content:center;gap:0.5rem;
+  width:100%;height:52px;border:none;border-radius:var(--radius-sm);
+  font-family:inherit;font-size:0.92rem;font-weight:700;cursor:pointer;
+  transition:all 0.25s;-webkit-tap-highlight-color:transparent;
+}
+.btn-approve{background:linear-gradient(135deg,#27ae60,#2ECC71);color:#0C0C0F;box-shadow:0 4px 16px rgba(46,204,113,0.25);}
+.btn-approve:hover{box-shadow:0 8px 24px rgba(46,204,113,0.4);transform:translateY(-2px);}
+.btn-reject{background:linear-gradient(135deg,#c0392b,var(--red));color:#fff;box-shadow:0 4px 16px rgba(231,76,60,0.25);}
+.btn-reject:hover{box-shadow:0 8px 24px rgba(231,76,60,0.4);transform:translateY(-2px);}
+.btn-approve:active,.btn-reject:active{transform:translateY(0);}
+
+@media(max-width:480px){
+  .page{padding:1.25rem 1rem 3rem;}
+  .topbar{padding:0 1rem;}
+  .action-row{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<div class="ambient a1"></div>
+<div class="ambient a2"></div>
+
+<div class="topbar">
+  <div class="topbar-logo">Creditium</div>
+  <div class="topbar-nav">
+    <a href="{{ url_for('admin_kyc_list') }}" class="back-btn">← KYC List</a>
+    <a href="{{ url_for('admin_dashboard') }}" class="back-btn">🏠</a>
+  </div>
+</div>
+
+<div class="page">
+
+  <div class="page-header">
+    <div class="page-eyebrow">KYC Review</div>
+    <div class="page-title"><span class="gold">{{ user.username }}</span></div>
+  </div>
+
+  <!-- KYC Details -->
+  <div class="card">
+    <div class="card-stripe"></div>
+    <div class="card-header">
+      <span>🪪</span>
+      <div class="card-header-title">Identity Details</div>
+    </div>
+    <div class="card-body">
+      <div class="info-grid">
+        <div class="info-row">
+          <span class="info-label">Status</span>
+          <span class="info-val">
+            <span class="badge {% if kyc.status == 'Verified' %}badge-verified{% elif kyc.status == 'Rejected' %}badge-rejected{% else %}badge-pending{% endif %}">
+              {{ kyc.status }}
+            </span>
+          </span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Full Name</span>
+          <span class="info-val">{{ kyc.full_name }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Date of Birth</span>
+          <span class="info-val">{{ kyc.dob }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Address</span>
+          <span class="info-val" style="max-width:260px;text-align:right;">{{ kyc.address }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Aadhaar</span>
+          <span class="info-val">{{ kyc.aadhaar }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">PAN</span>
+          <span class="info-val">{{ kyc.pan }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Documents -->
+  <div class="card">
+    <div class="card-header">
+      <span>📁</span>
+      <div class="card-header-title">Uploaded Documents</div>
+    </div>
+    <div class="card-body">
+      <div class="doc-list">
+        {% if kyc.live_photo %}
+        <a href="{{ url_for('serve_kyc_uploads', filename=kyc.live_photo) }}" target="_blank" class="doc-link">
+          <span class="doc-icon">📷</span>
+          <span class="doc-name">Live Photo</span>
+          <span class="doc-arrow">↗</span>
+        </a>
+        {% endif %}
+        {% if kyc.id_front %}
+        <a href="{{ url_for('serve_kyc_uploads', filename=kyc.id_front) }}" target="_blank" class="doc-link">
+          <span class="doc-icon">🪪</span>
+          <span class="doc-name">ID Front</span>
+          <span class="doc-arrow">↗</span>
+        </a>
+        {% endif %}
+        {% if kyc.id_back %}
+        <a href="{{ url_for('serve_kyc_uploads', filename=kyc.id_back) }}" target="_blank" class="doc-link">
+          <span class="doc-icon">🪪</span>
+          <span class="doc-name">ID Back</span>
+          <span class="doc-arrow">↗</span>
+        </a>
+        {% endif %}
+        {% if kyc.salary_slip %}
+        <a href="{{ url_for('serve_kyc_uploads', filename=kyc.salary_slip) }}" target="_blank" class="doc-link">
+          <span class="doc-icon">💼</span>
+          <span class="doc-name">Salary Slip</span>
+          <span class="doc-arrow">↗</span>
+        </a>
+        {% endif %}
+        {% if kyc.bank_statement %}
+        <a href="{{ url_for('serve_kyc_uploads', filename=kyc.bank_statement) }}" target="_blank" class="doc-link">
+          <span class="doc-icon">🏦</span>
+          <span class="doc-name">Bank Statement</span>
+          <span class="doc-arrow">↗</span>
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="card">
+    <div class="card-header">
+      <span>⚡</span>
+      <div class="card-header-title">Review Decision</div>
+    </div>
+    <div class="card-body">
+      <form method="POST">
+        <div class="action-row">
+          <button type="submit" name="action" value="approve" class="btn-approve">✔ Approve KYC</button>
+          <button type="submit" name="action" value="reject" class="btn-reject">✘ Reject KYC</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

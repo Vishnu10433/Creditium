@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Login — Creditium</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #C9A84C;
+  --gold-light: #E2C06B;
+  --gold-dark: #A8862E;
+  --bg: #0C0C0F;
+  --surface: #141418;
+  --surface2: #1A1A20;
+  --surface3: #22222A;
+  --border: rgba(201,168,76,0.15);
+  --border-hover: rgba(201,168,76,0.45);
+  --text: #F5F0E8;
+  --text-muted: #8A8490;
+  --text-dim: #5A5560;
+  --green: #2ECC71;
+  --red: #E74C3C;
+  --radius-sm: 12px;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 9999; opacity: 0.5;
+}
+
+.ambient { position: fixed; border-radius: 50%; filter: blur(120px); pointer-events: none; z-index: 0; }
+.a1 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(201,168,76,0.09) 0%, transparent 70%); top: -180px; left: -100px; animation: dA 22s ease-in-out infinite; }
+.a2 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 70%); bottom: -120px; right: -80px; animation: dB 18s ease-in-out infinite; }
+@keyframes dA { 0%,100%{transform:translate(0,0)} 50%{transform:translate(50px,70px)} }
+@keyframes dB { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-50px,-45px)} }
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 4px; }
+
+/* ── TOP BAR ── */
+.topbar {
+  position: sticky; top: 0; z-index: 200;
+  height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 1rem;
+  background: rgba(12,12,15,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.back-btn {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  color: var(--text-muted); text-decoration: none;
+  font-size: 0.8rem; font-weight: 600;
+  padding: 0 0.85rem; height: 36px;
+  border-radius: 50px; border: 1px solid var(--border);
+  transition: all 0.22s; -webkit-tap-highlight-color: transparent;
+}
+.back-btn:active { background: var(--surface2); color: var(--gold-light); }
+
+.topbar-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem; font-weight: 800;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dark));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  background-size: 200% auto; animation: shimmer 4s ease-in-out infinite;
+}
+@keyframes shimmer { 0%,100%{background-position:0% center} 50%{background-position:100% center} }
+
+.topbar-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  color: #0C0C0F; padding: 3px 9px; border-radius: 50px;
+  font-size: 0.6rem; font-weight: 800; letter-spacing: 0.06em;
+}
+
+/* ── MAIN ── */
+.main {
+  position: relative; z-index: 1;
+  padding: 1.75rem 1rem 4rem;
+  max-width: 460px; margin: 0 auto;
+  animation: fadeUp 0.65s cubic-bezier(0.16,1,0.3,1) both;
+}
+@keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── HERO TOP ── */
+.hero-top { text-align: center; margin-bottom: 2rem; }
+
+.icon-ring {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 64px; height: 64px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dark));
+  font-size: 1.6rem; margin-bottom: 1rem;
+  box-shadow: 0 8px 28px rgba(201,168,76,0.35);
+  animation: pulse 3s ease-in-out 0.8s infinite;
+}
+@keyframes pulse {
+  0%,100%{box-shadow:0 8px 28px rgba(201,168,76,0.35)}
+  50%{box-shadow:0 12px 38px rgba(201,168,76,0.55)}
+}
+
+.hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.6rem, 6vw, 2rem); font-weight: 800;
+  color: var(--text); letter-spacing: -0.02em; margin-bottom: 0.3rem;
+}
+.hero-sub { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
+
+/* ── STATS ROW (mobile-friendly 3-col) ── */
+.stats-row {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem;
+  margin-bottom: 1.75rem;
+}
+.s-stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px; padding: 0.75rem 0.5rem;
+  text-align: center; transition: border-color 0.22s;
+}
+.s-stat:hover { border-color: rgba(201,168,76,0.3); }
+.s-stat-icon { font-size: 1.1rem; margin-bottom: 0.3rem; }
+.s-stat-val { font-family: 'Playfair Display', serif; font-size: 0.95rem; font-weight: 800; color: var(--gold-light); line-height: 1.1; }
+.s-stat-lbl { font-size: 0.62rem; color: var(--text-dim); margin-top: 0.15rem; line-height: 1.3; }
+
+/* ── CARD ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px; overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.45);
+}
+.card-stripe { height: 3px; background: linear-gradient(90deg, var(--gold-dark), var(--gold-light), var(--gold-dark)); }
+.card-body { padding: 1.5rem 1.25rem; }
+
+@media (min-width: 420px) { .card-body { padding: 1.75rem 1.5rem; } }
+@media (min-width: 500px) { .card-body { padding: 2rem 2rem; } }
+
+/* ── FIELD ── */
+.field { margin-bottom: 1rem; }
+.field label {
+  display: block; font-size: 0.7rem; font-weight: 700;
+  color: var(--text-muted); letter-spacing: 0.07em; text-transform: uppercase;
+  margin-bottom: 0.4rem; padding-left: 0.1rem;
+}
+.field input {
+  display: block; width: 100%;
+  padding: 0 1rem; height: 52px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface2); color: var(--text);
+  font-family: inherit; font-size: 1rem; font-weight: 500;
+  transition: border-color 0.22s, background 0.22s, box-shadow 0.22s;
+  outline: none; -webkit-appearance: none; appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.field input::placeholder { color: var(--text-dim); }
+.field input:focus {
+  border-color: var(--border-hover); background: var(--surface3);
+  box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
+}
+
+/* Show password toggle */
+.toggle-row {
+  display: flex; align-items: center; gap: 0.55rem;
+  margin-bottom: 1.4rem; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.toggle-row input[type="checkbox"] {
+  width: 18px; height: 18px; accent-color: var(--gold); cursor: pointer; flex-shrink: 0;
+}
+.toggle-row span { font-size: 0.82rem; color: var(--text-muted); user-select: none; }
+
+/* Submit */
+.btn-submit {
+  display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+  width: 100%; height: 56px;
+  border: none; border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dark));
+  color: #0C0C0F; font-family: inherit; font-size: 1rem; font-weight: 700;
+  cursor: pointer; position: relative; overflow: hidden;
+  transition: box-shadow 0.28s, opacity 0.2s;
+  box-shadow: 0 6px 24px rgba(201,168,76,0.3);
+  letter-spacing: 0.02em; -webkit-tap-highlight-color: transparent;
+}
+.btn-submit::before {
+  content: ''; position: absolute; inset: 0;
+  background: rgba(255,255,255,0.14);
+  transform: translateX(-100%); transition: transform 0.45s ease;
+}
+.btn-submit:hover::before { transform: translateX(100%); }
+.btn-submit:hover { box-shadow: 0 10px 32px rgba(201,168,76,0.5); }
+.btn-submit:active { opacity: 0.82; }
+.btn-submit.loading { pointer-events: none; opacity: 0.7; }
+.btn-submit .spinner {
+  display: none; width: 20px; height: 20px;
+  border: 3px solid rgba(0,0,0,0.2); border-top-color: #0C0C0F;
+  border-radius: 50%; animation: spin 0.75s linear infinite; flex-shrink: 0;
+}
+.btn-submit.loading .btn-text { display: none; }
+.btn-submit.loading .spinner { display: block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Divider */
+.divider {
+  display: flex; align-items: center; gap: 0.6rem; margin: 1.25rem 0;
+}
+.divider::before, .divider::after { content:''; flex:1; height:1px; background:var(--border); }
+.divider span { font-size: 0.67rem; font-weight: 700; color: var(--text-dim); letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; }
+
+/* Register link button */
+.btn-register {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: 52px;
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--surface2); color: var(--text-muted);
+  font-family: inherit; font-size: 0.9rem; font-weight: 600;
+  text-decoration: none; transition: all 0.22s; letter-spacing: 0.01em;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-register span { color: var(--gold-light); font-weight: 700; margin-left: 0.3rem; }
+.btn-register:hover, .btn-register:active { border-color: var(--border-hover); background: var(--surface3); color: var(--text); }
+
+/* Messages */
+.msg { border-radius: 10px; padding: 0.8rem 1rem; font-size: 0.82rem; font-weight: 600; margin-bottom: 1.1rem; }
+.msg.success { background: rgba(46,204,113,0.1); color: var(--green); border: 1px solid rgba(46,204,113,0.25); }
+.msg.error { background: rgba(231,76,60,0.1); color: var(--red); border: 1px solid rgba(231,76,60,0.25); }
+
+/* Admin link */
+.admin-link {
+  text-align: center; margin-top: 1.25rem;
+  font-size: 0.78rem; color: var(--text-dim);
+}
+.admin-link a { color: var(--text-muted); text-decoration: none; font-weight: 600; transition: color 0.2s; }
+.admin-link a:hover { color: var(--gold-light); }
+</style>
+</head>
+<body>
+
+<div class="ambient a1"></div>
+<div class="ambient a2"></div>
+
+<!-- Top bar -->
+<div class="topbar">
+  <a href="/" class="back-btn">← Home</a>
+  <div class="topbar-logo">Creditium</div>
+  <div class="topbar-pill">⭐ PREMIUM</div>
+</div>
+
+<!-- Main content -->
+<div class="main">
+
+  <!-- Hero -->
+  <div class="hero-top">
+    <div class="icon-ring">🔐</div>
+    <div class="hero-title">Welcome Back</div>
+    <div class="hero-sub">Sign in to your Creditium account</div>
+  </div>
+
+  <!-- Stats row -->
+  <div class="stats-row">
+    <div class="s-stat">
+      <div class="s-stat-icon">⚡</div>
+      <div class="s-stat-val">2 Min</div>
+      <div class="s-stat-lbl">Avg Approval</div>
+    </div>
+    <div class="s-stat">
+      <div class="s-stat-icon">👥</div>
+      <div class="s-stat-val">50K+</div>
+      <div class="s-stat-lbl">Active Users</div>
+    </div>
+    <div class="s-stat">
+      <div class="s-stat-icon">🔒</div>
+      <div class="s-stat-val">99.9%</div>
+      <div class="s-stat-lbl">Uptime</div>
+    </div>
+  </div>
+
+  <!-- Login card -->
+  <div class="card">
+    <div class="card-stripe"></div>
+    <div class="card-body">
+
+      <!-- Flask flash messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="msg {{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST" action="/login" id="loginForm" novalidate>
+
+        <div class="field">
+          <label>Email Address</label>
+          <input type="email" name="email" placeholder="you@example.com" required autocomplete="email" inputmode="email" />
+        </div>
+
+        <div class="field">
+          <label>Password</label>
+          <input type="password" name="password" id="password" placeholder="••••••••" required autocomplete="current-password" />
+        </div>
+
+        <label class="toggle-row">
+          <input type="checkbox" id="showPass" />
+          <span>Show password</span>
+        </label>
+
+        <button type="submit" class="btn-submit" id="submitBtn">
+          <span class="btn-text">Sign In →</span>
+          <div class="spinner"></div>
+        </button>
+
+      </form>
+
+      <div class="divider"><span>New to Creditium?</span></div>
+
+      <a href="/register" class="btn-register">
+        Create free account <span>→</span>
+      </a>
+
+    </div>
+  </div>
+
+  <div class="admin-link">
+    Admin? <a href="/admin_login">Go to Admin Portal →</a>
+  </div>
+
+</div>
+
+<script>
+  document.getElementById('showPass').addEventListener('change', function() {
+    document.getElementById('password').type = this.checked ? 'text' : 'password';
+  });
+
+  document.getElementById('loginForm').addEventListener('submit', function() {
+    const btn = document.getElementById('submitBtn');
+    btn.classList.add('loading');
+  });
+</script>
+</body>
+</html>

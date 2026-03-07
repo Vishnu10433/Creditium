@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMI Schedule — Creditium</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #C9A84C;
+  --gold-light: #E2C06B;
+  --gold-dark: #A8862E;
+  --gold-glow: rgba(201,168,76,0.18);
+  --bg: #0C0C0F;
+  --surface: #141418;
+  --surface2: #1A1A20;
+  --surface3: #22222A;
+  --border: rgba(201,168,76,0.15);
+  --border-hover: rgba(201,168,76,0.45);
+  --text: #F5F0E8;
+  --text-muted: #8A8490;
+  --text-dim: #5A5560;
+  --green: #2ECC71;
+  --green-bg: rgba(46,204,113,0.1);
+  --green-border: rgba(46,204,113,0.25);
+  --orange: #F39C12;
+  --orange-bg: rgba(243,156,18,0.1);
+  --orange-border: rgba(243,156,18,0.25);
+  --red: #E74C3C;
+  --red-bg: rgba(231,76,60,0.1);
+  --red-border: rgba(231,76,60,0.25);
+  --nav-h: 64px;
+  --sidebar-w: 240px;
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg); color:var(--text);
+  min-height:100vh; overflow-x:hidden;
+}
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none; z-index:9999; opacity:0.35;
+}
+.amb { position:fixed; border-radius:50%; filter:blur(130px); pointer-events:none; z-index:0; }
+.amb-1 { width:500px;height:500px; background:radial-gradient(circle,rgba(201,168,76,0.07) 0%,transparent 70%); top:-120px;right:-80px; }
+.amb-2 { width:380px;height:380px; background:radial-gradient(circle,rgba(201,168,76,0.05) 0%,transparent 70%); bottom:80px;left:-60px; }
+
+/* ══ NAVBAR ══ */
+.navbar {
+  position:fixed; top:0;left:0;right:0;
+  height:var(--nav-h); z-index:500;
+  background:rgba(12,12,15,0.94); backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 1.5rem;
+}
+.nav-left { display:flex; align-items:center; gap:0.75rem; }
+.hamburger {
+  display:none; flex-direction:column; gap:4px;
+  cursor:pointer; padding:6px; border-radius:8px; transition:background 0.2s;
+}
+.hamburger:hover { background:var(--surface3); }
+.hamburger span { display:block; width:20px;height:2px; background:var(--text-muted); border-radius:2px; }
+.logo {
+  font-family:'Playfair Display',serif;
+  font-size:1.5rem; font-weight:800;
+  background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  letter-spacing:-0.02em;
+}
+.premium-pill {
+  display:flex; align-items:center; gap:5px;
+  background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+  color:#0C0C0F; padding:3px 10px; border-radius:50px;
+  font-size:0.7rem; font-weight:700; letter-spacing:0.05em;
+}
+.nav-right { display:flex; align-items:center; gap:0.5rem; }
+.nav-icon-btn {
+  width:38px;height:38px; border-radius:10px; border:none;
+  background:var(--surface2); color:var(--text-muted);
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  font-size:1rem; transition:all 0.2s; text-decoration:none; position:relative;
+}
+.nav-icon-btn:hover { background:var(--surface3); color:var(--text); }
+.notif-dot { position:absolute; top:7px;right:7px; width:7px;height:7px; background:var(--gold); border-radius:50%; border:2px solid var(--bg); }
+
+/* Wallet chip in navbar */
+.wallet-chip {
+  display:flex; align-items:center; gap:0.5rem;
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:10px; padding:0.35rem 0.85rem;
+  font-size:0.8rem; font-weight:700; color:var(--gold-light);
+  white-space:nowrap;
+}
+.wallet-chip span { color:var(--text-muted); font-weight:500; font-size:0.72rem; }
+
+/* ══ SIDEBAR ══ */
+.sidebar-overlay { display:none; position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:395; }
+.sidebar {
+  position:fixed; top:var(--nav-h);left:0;bottom:0;
+  width:var(--sidebar-w); background:var(--surface);
+  border-right:1px solid var(--border); z-index:400;
+  display:flex; flex-direction:column;
+  padding:1.5rem 0.75rem; overflow-y:auto;
+  transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.sidebar-section-label {
+  font-size:0.65rem; font-weight:700; letter-spacing:0.12em;
+  color:var(--text-dim); text-transform:uppercase;
+  padding:0 0.75rem; margin:1.25rem 0 0.5rem;
+}
+.sidebar-section-label:first-child { margin-top:0; }
+.nav-item {
+  display:flex; align-items:center; gap:0.75rem;
+  padding:0.65rem 0.75rem; border-radius:var(--radius-sm);
+  text-decoration:none; color:var(--text-muted);
+  font-size:0.875rem; font-weight:500; transition:all 0.2s;
+  cursor:pointer; border:none; background:none; width:100%; text-align:left;
+}
+.nav-item:hover { background:var(--surface3); color:var(--text); }
+.nav-item.active {
+  background:linear-gradient(135deg,rgba(201,168,76,0.15),rgba(201,168,76,0.05));
+  color:var(--gold-light); border:1px solid rgba(201,168,76,0.2);
+}
+.nav-item .icon {
+  width:32px;height:32px; border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.9rem; flex-shrink:0; background:var(--surface2);
+}
+.nav-item.active .icon {
+  background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+  filter:drop-shadow(0 2px 8px rgba(201,168,76,0.4));
+}
+.sidebar-bottom { margin-top:auto; padding-top:1rem; border-top:1px solid var(--border); }
+
+/* ══ LAYOUT ══ */
+.layout { display:flex; margin-top:var(--nav-h); }
+.main { flex:1; margin-left:var(--sidebar-w); min-height:calc(100vh - var(--nav-h)); display:flex; flex-direction:column; }
+
+/* ══ PAGE HERO ══ */
+.page-hero {
+  background:var(--surface); border-bottom:1px solid var(--border);
+  padding:2rem 2rem 1.75rem; position:relative; overflow:hidden;
+}
+.page-hero::before {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg,rgba(201,168,76,0.06) 0%,transparent 60%);
+  pointer-events:none;
+}
+.hero-eyebrow {
+  display:inline-flex; align-items:center; gap:0.4rem;
+  font-size:0.72rem; font-weight:700; letter-spacing:0.1em;
+  color:var(--gold); text-transform:uppercase; margin-bottom:0.6rem; position:relative;
+}
+.hero-eyebrow::before { content:''; display:block; width:16px;height:2px;background:var(--gold);border-radius:2px; }
+.page-hero h1 {
+  font-family:'Playfair Display',serif;
+  font-size:1.85rem; font-weight:800; color:var(--text);
+  line-height:1.2; margin-bottom:0.35rem; position:relative;
+}
+.page-hero p { font-size:0.85rem; color:var(--text-muted); position:relative; }
+
+/* ══ CONTENT ══ */
+.content { padding:2rem; flex:1; position:relative; z-index:1; }
+
+/* Summary stats */
+.summary-grid {
+  display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:2rem;
+}
+.sum-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:1.25rem 1.5rem;
+  display:flex; align-items:center; gap:1rem; transition:all 0.25s;
+  position:relative; overflow:hidden;
+}
+.sum-card::after {
+  content:''; position:absolute; top:0;left:0;right:0;height:2px;
+  opacity:0; transition:opacity 0.3s;
+}
+.sum-card:hover { border-color:var(--border-hover); transform:translateY(-2px); }
+.sum-card:hover::after { opacity:1; }
+.sum-card.total::after { background:linear-gradient(90deg,var(--gold),var(--gold-light)); }
+.sum-card.paid::after { background:linear-gradient(90deg,var(--green),#27AE60); }
+.sum-card.pending::after { background:linear-gradient(90deg,var(--orange),#E67E22); }
+.sum-card.overdue::after { background:linear-gradient(90deg,var(--red),#C0392B); }
+.sum-icon {
+  width:42px;height:42px; border-radius:10px; flex-shrink:0;
+  display:flex;align-items:center;justify-content:center; font-size:1.1rem;
+}
+.sum-card.total .sum-icon { background:rgba(201,168,76,0.12); border:1px solid rgba(201,168,76,0.2); }
+.sum-card.paid .sum-icon { background:var(--green-bg); border:1px solid var(--green-border); }
+.sum-card.pending .sum-icon { background:var(--orange-bg); border:1px solid var(--orange-border); }
+.sum-card.overdue .sum-icon { background:var(--red-bg); border:1px solid var(--red-border); }
+.sum-val {
+  font-family:'Playfair Display',serif;
+  font-size:1.6rem; font-weight:800; line-height:1;
+}
+.sum-card.total .sum-val { color:var(--gold-light); }
+.sum-card.paid .sum-val { color:var(--green); }
+.sum-card.pending .sum-val { color:var(--orange); }
+.sum-card.overdue .sum-val { color:var(--red); }
+.sum-lbl { font-size:0.72rem; color:var(--text-muted); margin-top:0.2rem; font-weight:500; }
+
+/* ══ LOAN CARD ══ */
+.loan-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); margin-bottom:1.5rem; overflow:hidden;
+  animation:fadeUp 0.4s ease backwards;
+}
+.loan-card:nth-child(1){animation-delay:0.05s}
+.loan-card:nth-child(2){animation-delay:0.1s}
+.loan-card:nth-child(3){animation-delay:0.15s}
+@keyframes fadeUp {
+  from{opacity:0;transform:translateY(14px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.loan-head {
+  background:var(--surface2); padding:1.5rem 1.75rem;
+  border-bottom:1px solid var(--border);
+  position:relative; overflow:hidden;
+}
+.loan-head::before {
+  content:''; position:absolute; top:0;left:0; width:3px; height:100%;
+  background:linear-gradient(180deg,var(--gold-light),var(--gold-dark));
+}
+.loan-head-top { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; flex-wrap:wrap; margin-bottom:1rem; }
+.loan-name {
+  font-family:'Playfair Display',serif;
+  font-size:1.15rem; font-weight:800; color:var(--text);
+}
+.loan-id { font-size:0.75rem; color:var(--text-dim); margin-top:0.2rem; }
+.loan-meta-chips { display:flex; gap:0.6rem; flex-wrap:wrap; }
+.meta-chip {
+  display:flex; flex-direction:column; gap:0.15rem;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius-sm); padding:0.5rem 0.85rem;
+}
+.meta-chip-label { font-size:0.65rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.06em; font-weight:700; }
+.meta-chip-val { font-size:0.88rem; font-weight:700; color:var(--text); }
+
+/* Progress bar */
+.loan-progress { margin-top:1rem; }
+.progress-top {
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:0.5rem; font-size:0.75rem;
+}
+.progress-top span { color:var(--text-muted); }
+.progress-top strong { color:var(--gold-light); }
+.prog-bar {
+  width:100%; height:5px; background:var(--surface3);
+  border-radius:4px; overflow:hidden;
+}
+.prog-fill {
+  height:100%; border-radius:4px;
+  background:linear-gradient(90deg,var(--gold-dark),var(--gold-light));
+  transition:width 0.8s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ══ TABLE ══ */
+.table-wrap { padding:0; overflow-x:auto; }
+.data-table { width:100%; border-collapse:collapse; }
+.data-table th {
+  padding:0.85rem 1.25rem; text-align:left;
+  font-size:0.68rem; font-weight:700; letter-spacing:0.08em;
+  color:var(--text-dim); text-transform:uppercase;
+  background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+.data-table td {
+  padding:1rem 1.25rem; font-size:0.85rem;
+  color:var(--text-muted); border-bottom:1px solid rgba(255,255,255,0.04);
+  vertical-align:middle;
+}
+.data-table tr:last-child td { border-bottom:none; }
+.data-table tbody tr { transition:background 0.18s; }
+.data-table tbody tr:hover td { background:rgba(201,168,76,0.03); }
+
+.td-num { font-weight:700; color:var(--gold-light); font-size:0.82rem; }
+.td-amount { font-weight:700; color:var(--text); }
+.td-date { color:var(--text-muted); }
+.td-paid-on { display:block; font-size:0.68rem; color:var(--green); margin-top:3px; }
+
+/* Status badges */
+.badge {
+  display:inline-flex; align-items:center; gap:0.35rem;
+  padding:0.28rem 0.7rem; border-radius:50px;
+  font-size:0.68rem; font-weight:700; letter-spacing:0.04em; white-space:nowrap;
+}
+.badge::before { content:''; width:5px;height:5px;border-radius:50%;flex-shrink:0; }
+.badge-paid { background:var(--green-bg); color:var(--green); border:1px solid var(--green-border); }
+.badge-paid::before { background:var(--green); }
+.badge-pending { background:var(--orange-bg); color:var(--orange); border:1px solid var(--orange-border); }
+.badge-pending::before { background:var(--orange); }
+.badge-overdue { background:var(--red-bg); color:var(--red); border:1px solid var(--red-border); }
+.badge-overdue::before { background:var(--red); }
+
+/* Action buttons */
+.btn-pay {
+  display:inline-flex; align-items:center; gap:0.35rem;
+  background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));
+  color:#0C0C0F; border:none; border-radius:8px;
+  font-family:inherit; font-size:0.75rem; font-weight:700;
+  padding:0.5rem 1rem; cursor:pointer; transition:all 0.2s;
+  box-shadow:0 3px 10px rgba(201,168,76,0.25);
+}
+.btn-pay:hover { transform:translateY(-1px); box-shadow:0 5px 16px rgba(201,168,76,0.4); }
+.btn-overdue {
+  display:inline-flex; align-items:center; gap:0.35rem;
+  background:var(--red-bg); color:var(--red);
+  border:1px solid var(--red-border); border-radius:8px;
+  font-family:inherit; font-size:0.75rem; font-weight:700;
+  padding:0.5rem 1rem; cursor:pointer; transition:all 0.2s;
+}
+.btn-overdue:hover { background:rgba(231,76,60,0.2); transform:translateY(-1px); }
+.btn-done {
+  display:inline-flex; align-items:center; gap:0.35rem;
+  background:transparent; color:var(--text-dim);
+  border:1px solid rgba(255,255,255,0.08); border-radius:8px;
+  font-family:inherit; font-size:0.75rem; font-weight:600;
+  padding:0.5rem 1rem; cursor:not-allowed; opacity:0.6;
+}
+
+/* ══ MOBILE ROWS ══ */
+.mobile-emis { display:none; flex-direction:column; gap:0.6rem; padding:1rem; }
+.m-emi {
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:var(--radius-sm); padding:1rem;
+  display:flex; align-items:center; gap:0.85rem;
+}
+.m-emi-num {
+  width:36px;height:36px; border-radius:9px; flex-shrink:0;
+  background:linear-gradient(135deg,rgba(201,168,76,0.2),rgba(201,168,76,0.05));
+  border:1px solid rgba(201,168,76,0.2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.72rem; font-weight:800; color:var(--gold-light);
+}
+.m-emi-body { flex:1; min-width:0; }
+.m-emi-amount { font-size:0.95rem; font-weight:700; color:var(--text); }
+.m-emi-date { font-size:0.72rem; color:var(--text-muted); margin-top:0.15rem; }
+.m-emi-right { display:flex; flex-direction:column; align-items:flex-end; gap:0.5rem; }
+
+/* ══ EMPTY STATE ══ */
+.empty-state {
+  padding:5rem 2rem; text-align:center;
+  display:flex; flex-direction:column; align-items:center; gap:1rem;
+}
+.empty-icon { font-size:2.8rem; }
+.empty-state h2 { font-size:1.15rem; color:var(--text); }
+.empty-state p { font-size:0.85rem; color:var(--text-muted); max-width:360px; }
+.no-emi { padding:2rem; text-align:center; font-size:0.85rem; color:var(--text-dim); }
+
+/* Back link */
+.back-link {
+  display:inline-flex; align-items:center; gap:0.4rem;
+  color:var(--gold); text-decoration:none; font-size:0.82rem; font-weight:600;
+  margin-top:1.5rem; transition:color 0.2s;
+}
+.back-link:hover { color:var(--gold-light); }
+
+/* Footer */
+.footer {
+  background:var(--surface); border-top:1px solid var(--border);
+  padding:1.25rem 2rem; text-align:center;
+  font-size:0.78rem; color:var(--text-dim);
+}
+.footer span { color:var(--gold); }
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:1100px) { .summary-grid { grid-template-columns:repeat(2,1fr); } }
+@media(max-width:900px) {
+  :root { --sidebar-w:0px; }
+  .sidebar { width:240px; transform:translateX(-100%); z-index:396; }
+  .sidebar.open { transform:translateX(0); }
+  .sidebar-overlay.open { display:block; }
+  .hamburger { display:flex; }
+  .content { padding:1.25rem; }
+  .page-hero { padding:1.5rem 1.25rem 1.25rem; }
+  .desktop-table { display:none; }
+  .mobile-emis { display:flex; }
+  .loan-head { padding:1.25rem; }
+  .wallet-chip .wlabel { display:none; }
+}
+@media(max-width:600px) {
+  .navbar { padding:0 1rem; }
+  .summary-grid { grid-template-columns:1fr 1fr; }
+  .loan-meta-chips { gap:0.4rem; }
+  .meta-chip { padding:0.4rem 0.65rem; }
+}
+@media(max-width:400px) {
+  .summary-grid { grid-template-columns:1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="amb amb-1"></div>
+<div class="amb amb-2"></div>
+
+<!-- ══ NAVBAR ══ -->
+<nav class="navbar">
+  <div class="nav-left">
+    <div class="hamburger" onclick="toggleSidebar()">
+      <span></span><span></span><span></span>
+    </div>
+    <div class="logo">Creditium</div>
+    <div class="premium-pill">⭐ PREMIUM</div>
+  </div>
+  <div class="nav-right">
+    <div class="wallet-chip">
+      💰&nbsp;<span class="wlabel">Wallet&nbsp;</span>₹ {{ user.wallet.balance if user.wallet else 0 }}
+    </div>
+    <a href="/notifications" class="nav-icon-btn" title="Notifications">🔔<span class="notif-dot"></span></a>
+    <a href="/support" class="nav-icon-btn" title="Support">🎧</a>
+    <a href="/dashboard" class="nav-icon-btn" title="Dashboard">🏠</a>
+  </div>
+</nav>
+
+<!-- ══ SIDEBAR ══ -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<aside class="sidebar" id="sidebar">
+  <span class="sidebar-section-label">Navigation</span>
+  <a href="/dashboard" class="nav-item"><span class="icon">🏠</span> Dashboard</a>
+  <a href="/loan-discovery" class="nav-item"><span class="icon">🔍</span> Loan Discovery</a>
+  <a href="/loan-status" class="nav-item"><span class="icon">📊</span> Loan Status</a>
+  <a href="/emi_schedule" class="nav-item active"><span class="icon">💳</span> EMI Schedule</a>
+  <a href="/wallet" class="nav-item"><span class="icon">💰</span> Wallet</a>
+  <a href="/credit_rewards" class="nav-item"><span class="icon">⭐</span> Credit Rewards</a>
+  <span class="sidebar-section-label">Account</span>
+  <a href="/settings" class="nav-item"><span class="icon">⚙️</span> Settings</a>
+  <a href="/support" class="nav-item"><span class="icon">🎧</span> Support</a>
+  <div class="sidebar-bottom">
+    <a href="/logout" class="nav-item" style="color:#E74C3C"><span class="icon">🚪</span> Logout</a>
+  </div>
+</aside>
+
+<!-- ══ LAYOUT ══ -->
+<div class="layout">
+  <main class="main">
+
+    <!-- Hero -->
+    <div class="page-hero">
+      <div class="hero-eyebrow">Repayment Tracker</div>
+      <h1>EMI Payment Schedule</h1>
+      <p>Track, manage and pay your EMIs directly from your wallet.</p>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+      {% if loans %}
+      <!-- Summary -->
+      <div class="summary-grid">
+        <div class="sum-card total">
+          <div class="sum-icon">📋</div>
+          <div><div class="sum-val">{{ total_emis }}</div><div class="sum-lbl">Total EMIs</div></div>
+        </div>
+        <div class="sum-card paid">
+          <div class="sum-icon">✅</div>
+          <div><div class="sum-val">{{ paid_emis }}</div><div class="sum-lbl">Paid</div></div>
+        </div>
+        <div class="sum-card pending">
+          <div class="sum-icon">⏳</div>
+          <div><div class="sum-val">{{ pending_emis }}</div><div class="sum-lbl">Pending</div></div>
+        </div>
+        <div class="sum-card overdue">
+          <div class="sum-icon">⚠️</div>
+          <div><div class="sum-val">{{ overdue_emis }}</div><div class="sum-lbl">Overdue</div></div>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if not loans %}
+      <div class="loan-card">
+        <div class="empty-state">
+          <div class="empty-icon">📋</div>
+          <h2>No Loans Found</h2>
+          <p>You haven't taken any loans yet. Once you do, your EMI schedule will appear here.</p>
+          <a href="/loan-discovery" style="margin-top:0.5rem;display:inline-flex;align-items:center;gap:0.4rem;background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));color:#0C0C0F;padding:0.7rem 1.4rem;border-radius:var(--radius-sm);font-weight:700;text-decoration:none;font-size:0.85rem;">🔍 Discover Loans</a>
+        </div>
+      </div>
+
+      {% else %}
+        {% for item in loans %}
+        <div class="loan-card">
+          <div class="loan-head">
+            <div class="loan-head-top">
+              <div>
+                <div class="loan-name">{{ item.loan.loanname }}</div>
+                <div class="loan-id">Loan ID #{{ item.loan.id }}</div>
+              </div>
+              <div class="loan-meta-chips">
+                <div class="meta-chip">
+                  <span class="meta-chip-label">Amount</span>
+                  <span class="meta-chip-val">₹ {{ "{:,.2f}".format(item.loan.amount) }}</span>
+                </div>
+                <div class="meta-chip">
+                  <span class="meta-chip-label">Tenure</span>
+                  <span class="meta-chip-val">{{ item.loan.tenure }} mo.</span>
+                </div>
+                <div class="meta-chip">
+                  <span class="meta-chip-label">Rate</span>
+                  <span class="meta-chip-val">{{ item.loan.interest_rate }}% p.a.</span>
+                </div>
+              </div>
+            </div>
+
+            {% if item.emis %}
+            <div class="loan-progress">
+              <div class="progress-top">
+                <span>Payment Progress</span>
+                <strong>{{ item.paid_count }} / {{ item.emis|length }} Paid</strong>
+              </div>
+              <div class="prog-bar">
+                <div class="prog-fill" style="width:{{ (item.paid_count / item.emis|length * 100)|round }}%"></div>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+
+          {% if not item.emis %}
+            <p class="no-emi">No EMI schedule created for this loan yet.</p>
+          {% else %}
+
+          <!-- Desktop Table -->
+          <div class="table-wrap desktop-table">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>EMI #</th>
+                  <th>Amount</th>
+                  <th>Due Date</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for emi in item.emis %}
+                  {% set emi_due = emi.due_date.date() if emi.due_date.__class__.__name__ == 'datetime' else emi.due_date %}
+                  <tr>
+                    <td><span class="td-num">EMI {{ loop.index }}</span></td>
+                    <td><span class="td-amount">₹ {{ "{:,.2f}".format(emi.emi_amount) }}</span></td>
+                    <td><span class="td-date">{{ emi_due.strftime('%d %b %Y') }}</span></td>
+                    <td>
+                      {% if emi.status == 'Paid' %}
+                        <span class="badge badge-paid">Paid</span>
+                        <span class="td-paid-on">on {{ emi.paid_on.strftime('%d %b %Y') }}</span>
+                      {% elif emi.status == 'Pending' and emi_due < today %}
+                        <span class="badge badge-overdue">Overdue</span>
+                      {% else %}
+                        <span class="badge badge-pending">Pending</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if emi.status == 'Paid' %}
+                        <button class="btn-done" disabled>✓ Paid</button>
+                      {% else %}
+                        <form action="{{ url_for('pay_emi', emi_id=emi.id) }}" method="POST" style="display:inline;">
+                          {% if emi_due < today %}
+                            <button type="submit" class="btn-overdue">⚠ Pay Now</button>
+                          {% else %}
+                            <button type="submit" class="btn-pay">💳 Pay from Wallet</button>
+                          {% endif %}
+                        </form>
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Mobile Cards -->
+          <div class="mobile-emis">
+            {% for emi in item.emis %}
+              {% set emi_due = emi.due_date.date() if emi.due_date.__class__.__name__ == 'datetime' else emi.due_date %}
+              <div class="m-emi">
+                <div class="m-emi-num">{{ loop.index }}</div>
+                <div class="m-emi-body">
+                  <div class="m-emi-amount">₹ {{ "{:,.2f}".format(emi.emi_amount) }}</div>
+                  <div class="m-emi-date">
+                    Due {{ emi_due.strftime('%d %b %Y') }}
+                    {% if emi.status == 'Paid' %} · Paid {{ emi.paid_on.strftime('%d %b') }}{% endif %}
+                  </div>
+                </div>
+                <div class="m-emi-right">
+                  {% if emi.status == 'Paid' %}
+                    <span class="badge badge-paid">Paid</span>
+                    <button class="btn-done" disabled>✓</button>
+                  {% elif emi.status == 'Pending' and emi_due < today %}
+                    <span class="badge badge-overdue">Overdue</span>
+                    <form action="{{ url_for('pay_emi', emi_id=emi.id) }}" method="POST">
+                      <button type="submit" class="btn-overdue">Pay Now</button>
+                    </form>
+                  {% else %}
+                    <span class="badge badge-pending">Pending</span>
+                    <form action="{{ url_for('pay_emi', emi_id=emi.id) }}" method="POST">
+                      <button type="submit" class="btn-pay">Pay</button>
+                    </form>
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+
+          {% endif %}
+        </div>
+        {% endfor %}
+      {% endif %}
+
+      <a href="{{ url_for('dashboard') }}" class="back-link">← Back to Dashboard</a>
+
+    </div>
+
+    <footer class="footer">
+      © 2025 <span>Creditium</span>. All Rights Reserved. · Premium Financial Experience ✨
+    </footer>
+
+  </main>
+</div>
+
+<script>
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+</script>
+</body>
+</html>

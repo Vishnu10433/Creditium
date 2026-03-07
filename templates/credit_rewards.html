@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Credit Score & Rewards — Creditium</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #C9A84C;
+  --gold-light: #E2C06B;
+  --gold-dark: #A8862E;
+  --gold-glow: rgba(201,168,76,0.18);
+  --bg: #0C0C0F;
+  --surface: #141418;
+  --surface2: #1A1A20;
+  --surface3: #22222A;
+  --border: rgba(201,168,76,0.15);
+  --border-hover: rgba(201,168,76,0.45);
+  --text: #F5F0E8;
+  --text-muted: #8A8490;
+  --text-dim: #5A5560;
+  --green: #2ECC71;
+  --green-bg: rgba(46,204,113,0.1);
+  --green-border: rgba(46,204,113,0.25);
+  --nav-h: 64px;
+  --sidebar-w: 240px;
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg); color:var(--text);
+  min-height:100vh; overflow-x:hidden;
+}
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none; z-index:9999; opacity:0.35;
+}
+.amb { position:fixed; border-radius:50%; filter:blur(130px); pointer-events:none; z-index:0; }
+.amb-1 { width:500px;height:500px; background:radial-gradient(circle,rgba(201,168,76,0.08) 0%,transparent 70%); top:-120px;right:-80px; }
+.amb-2 { width:380px;height:380px; background:radial-gradient(circle,rgba(201,168,76,0.05) 0%,transparent 70%); bottom:80px;left:-60px; }
+
+/* ══ NAVBAR ══ */
+.navbar {
+  position:fixed; top:0;left:0;right:0;
+  height:var(--nav-h); z-index:500;
+  background:rgba(12,12,15,0.94); backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 1.5rem;
+}
+.nav-left { display:flex; align-items:center; gap:0.75rem; }
+.hamburger {
+  display:none; flex-direction:column; gap:4px;
+  cursor:pointer; padding:6px; border-radius:8px; transition:background 0.2s;
+}
+.hamburger:hover { background:var(--surface3); }
+.hamburger span { display:block; width:20px;height:2px; background:var(--text-muted); border-radius:2px; }
+.logo {
+  font-family:'Playfair Display',serif;
+  font-size:1.5rem; font-weight:800;
+  background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  letter-spacing:-0.02em;
+}
+.premium-pill {
+  display:flex; align-items:center; gap:5px;
+  background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+  color:#0C0C0F; padding:3px 10px; border-radius:50px;
+  font-size:0.7rem; font-weight:700; letter-spacing:0.05em;
+}
+.nav-right { display:flex; align-items:center; gap:0.5rem; }
+.nav-icon-btn {
+  width:38px;height:38px; border-radius:10px; border:none;
+  background:var(--surface2); color:var(--text-muted);
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  font-size:1rem; transition:all 0.2s; text-decoration:none; position:relative;
+}
+.nav-icon-btn:hover { background:var(--surface3); color:var(--text); }
+.notif-dot { position:absolute; top:7px;right:7px; width:7px;height:7px; background:var(--gold); border-radius:50%; border:2px solid var(--bg); }
+
+/* ══ SIDEBAR ══ */
+.sidebar-overlay { display:none; position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:395; }
+.sidebar {
+  position:fixed; top:var(--nav-h);left:0;bottom:0;
+  width:var(--sidebar-w); background:var(--surface);
+  border-right:1px solid var(--border); z-index:400;
+  display:flex; flex-direction:column;
+  padding:1.5rem 0.75rem; overflow-y:auto;
+  transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.sidebar-section-label {
+  font-size:0.65rem; font-weight:700; letter-spacing:0.12em;
+  color:var(--text-dim); text-transform:uppercase;
+  padding:0 0.75rem; margin:1.25rem 0 0.5rem;
+}
+.sidebar-section-label:first-child { margin-top:0; }
+.nav-item {
+  display:flex; align-items:center; gap:0.75rem;
+  padding:0.65rem 0.75rem; border-radius:var(--radius-sm);
+  text-decoration:none; color:var(--text-muted);
+  font-size:0.875rem; font-weight:500; transition:all 0.2s;
+  cursor:pointer; border:none; background:none; width:100%; text-align:left;
+}
+.nav-item:hover { background:var(--surface3); color:var(--text); }
+.nav-item.active {
+  background:linear-gradient(135deg,rgba(201,168,76,0.15),rgba(201,168,76,0.05));
+  color:var(--gold-light); border:1px solid rgba(201,168,76,0.2);
+}
+.nav-item .icon {
+  width:32px;height:32px; border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.9rem; flex-shrink:0; background:var(--surface2);
+}
+.nav-item.active .icon {
+  background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+  filter:drop-shadow(0 2px 8px rgba(201,168,76,0.4));
+}
+.sidebar-bottom { margin-top:auto; padding-top:1rem; border-top:1px solid var(--border); }
+
+/* ══ LAYOUT ══ */
+.layout { display:flex; margin-top:var(--nav-h); }
+.main { flex:1; margin-left:var(--sidebar-w); min-height:calc(100vh - var(--nav-h)); display:flex; flex-direction:column; }
+
+/* ══ PAGE HERO ══ */
+.page-hero {
+  background:var(--surface); border-bottom:1px solid var(--border);
+  padding:2rem 2rem 1.75rem; position:relative; overflow:hidden;
+}
+.page-hero::before {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg,rgba(201,168,76,0.06) 0%,transparent 60%);
+  pointer-events:none;
+}
+.hero-eyebrow {
+  display:inline-flex; align-items:center; gap:0.4rem;
+  font-size:0.72rem; font-weight:700; letter-spacing:0.1em;
+  color:var(--gold); text-transform:uppercase; margin-bottom:0.6rem; position:relative;
+}
+.hero-eyebrow::before { content:''; display:block; width:16px;height:2px;background:var(--gold);border-radius:2px; }
+.page-hero h1 {
+  font-family:'Playfair Display',serif;
+  font-size:1.85rem; font-weight:800; color:var(--text);
+  line-height:1.2; margin-bottom:0.35rem; position:relative;
+}
+.page-hero p { font-size:0.85rem; color:var(--text-muted); position:relative; }
+
+/* ══ CONTENT ══ */
+.content { padding:2rem; flex:1; position:relative; z-index:1; }
+
+/* ══ CREDIT SECTION ══ */
+.credit-grid {
+  display:grid;
+  grid-template-columns:280px 1fr;
+  gap:1.5rem;
+  margin-bottom:1.5rem;
+}
+
+/* Gauge card */
+.gauge-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:2rem;
+  display:flex; flex-direction:column; align-items:center; gap:1.5rem;
+  position:relative; overflow:hidden;
+}
+.gauge-card::before {
+  content:''; position:absolute; top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--gold-dark),var(--gold-light));
+}
+
+/* SVG Ring */
+.score-ring-wrap { position:relative; width:160px;height:160px; }
+.score-ring-wrap svg { transform:rotate(-90deg); }
+.ring-bg { fill:none; stroke:var(--surface3); stroke-width:12; }
+.ring-fill {
+  fill:none; stroke:url(#gGrad); stroke-width:12; stroke-linecap:round;
+  stroke-dasharray:440; stroke-dashoffset:440;
+  transition:stroke-dashoffset 1.6s cubic-bezier(0.4,0,0.2,1);
+}
+.score-center {
+  position:absolute; inset:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:0.1rem;
+}
+.score-num {
+  font-family:'Playfair Display',serif;
+  font-size:2.2rem; font-weight:800; color:var(--gold-light); line-height:1;
+}
+.score-sub { font-size:0.68rem; color:var(--text-dim); font-weight:600; letter-spacing:0.05em; }
+
+.score-status {
+  display:flex; align-items:center; gap:0.4rem;
+  background:var(--green-bg); border:1px solid var(--green-border);
+  color:var(--green); padding:0.35rem 1rem;
+  border-radius:50px; font-size:0.75rem; font-weight:700;
+}
+
+.gauge-actions { display:flex; gap:0.6rem; width:100%; }
+.btn-sm {
+  flex:1; padding:0.65rem 0.75rem;
+  border-radius:var(--radius-sm); border:none;
+  font-family:inherit; font-size:0.78rem; font-weight:700;
+  cursor:pointer; transition:all 0.25s; text-decoration:none;
+  display:flex; align-items:center; justify-content:center; gap:0.3rem;
+}
+.btn-sm-gold {
+  background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));
+  color:#0C0C0F; box-shadow:0 3px 12px rgba(201,168,76,0.25);
+}
+.btn-sm-gold:hover { transform:translateY(-1px); box-shadow:0 6px 18px rgba(201,168,76,0.4); }
+.btn-sm-ghost {
+  background:var(--surface2); border:1px solid var(--border); color:var(--text-muted);
+}
+.btn-sm-ghost:hover { background:var(--surface3); color:var(--text); border-color:var(--border-hover); }
+
+/* Score breakdown card */
+.breakdown-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:1.75rem;
+  display:flex; flex-direction:column; gap:1.25rem;
+}
+.breakdown-card::before {
+  content:''; display:block;
+}
+
+.card-section-title {
+  font-size:0.72rem; font-weight:700; letter-spacing:0.1em;
+  color:var(--gold); text-transform:uppercase;
+  display:flex; align-items:center; gap:0.5rem;
+}
+.card-section-title::after { content:''; flex:1; height:1px; background:var(--border); }
+
+.pills-grid {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:0.75rem;
+}
+.pill {
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:var(--radius-sm); padding:1rem 0.75rem;
+  text-align:center; transition:all 0.25s;
+}
+.pill:hover { border-color:var(--border-hover); transform:translateY(-2px); }
+.pill-label { font-size:0.65rem; color:var(--text-dim); font-weight:700; text-transform:uppercase; letter-spacing:0.07em; margin-bottom:0.5rem; }
+.pill-val {
+  font-family:'Playfair Display',serif;
+  font-size:1.4rem; font-weight:800; color:var(--gold-light);
+}
+
+/* Factor bars */
+.factors { display:flex; flex-direction:column; gap:0.85rem; }
+.factor-row { display:flex; flex-direction:column; gap:0.35rem; }
+.factor-top {
+  display:flex; justify-content:space-between; align-items:center;
+  font-size:0.75rem;
+}
+.factor-top span:first-child { color:var(--text-muted); }
+.factor-top span:last-child { color:var(--text); font-weight:700; }
+.factor-bar { height:5px; background:var(--surface3); border-radius:3px; overflow:hidden; }
+.factor-fill {
+  height:100%; border-radius:3px;
+  background:linear-gradient(90deg,var(--gold-dark),var(--gold-light));
+  transition:width 1.2s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* Points strip */
+.points-strip {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:1.25rem 1.5rem;
+  display:flex; align-items:center; justify-content:space-between; gap:1rem;
+  flex-wrap:wrap; margin-bottom:1.25rem;
+  position:relative; overflow:hidden;
+}
+.points-strip::before {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg,rgba(201,168,76,0.06),transparent 60%);
+  pointer-events:none;
+}
+.pts-left { display:flex; align-items:center; gap:1rem; }
+.pts-icon {
+  width:44px;height:44px; border-radius:11px; flex-shrink:0;
+  background:linear-gradient(135deg,rgba(201,168,76,0.2),rgba(201,168,76,0.05));
+  border:1px solid rgba(201,168,76,0.2);
+  display:flex;align-items:center;justify-content:center; font-size:1.2rem;
+}
+.pts-label { font-size:0.72rem; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:0.07em; }
+.pts-val {
+  font-family:'Playfair Display',serif;
+  font-size:1.6rem; font-weight:800; color:var(--gold-light);
+}
+
+/* ══ REWARDS GRID ══ */
+.rewards-grid {
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:1.25rem;
+}
+
+.reward-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:1.5rem;
+  position:relative; overflow:hidden;
+  display:flex; flex-direction:column; gap:0.85rem;
+  transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.reward-card::before {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg,rgba(201,168,76,0.06),transparent 60%);
+  opacity:0; transition:opacity 0.3s;
+}
+.reward-card::after {
+  content:''; position:absolute; top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--gold),var(--gold-light));
+  opacity:0; transition:opacity 0.3s;
+}
+.reward-card:hover { border-color:var(--border-hover); transform:translateY(-4px); box-shadow:0 16px 40px rgba(0,0,0,0.4); }
+.reward-card:hover::before, .reward-card:hover::after { opacity:1; }
+
+.reward-top { display:flex; align-items:flex-start; justify-content:space-between; gap:0.5rem; }
+.reward-icon {
+  width:44px;height:44px; border-radius:11px; flex-shrink:0;
+  background:linear-gradient(135deg,rgba(201,168,76,0.2),rgba(201,168,76,0.05));
+  border:1px solid rgba(201,168,76,0.2);
+  display:flex;align-items:center;justify-content:center; font-size:1.2rem;
+  transition:all 0.3s;
+}
+.reward-card:hover .reward-icon {
+  background:linear-gradient(135deg,rgba(201,168,76,0.35),rgba(201,168,76,0.1));
+  box-shadow:0 4px 14px rgba(201,168,76,0.2);
+}
+.reward-badge {
+  font-size:0.65rem; font-weight:700; letter-spacing:0.06em;
+  padding:3px 9px; border-radius:50px;
+  background:linear-gradient(135deg,rgba(201,168,76,0.15),rgba(201,168,76,0.05));
+  border:1px solid rgba(201,168,76,0.25); color:var(--gold-light);
+  white-space:nowrap;
+}
+
+.reward-title { font-size:1rem; font-weight:700; color:var(--text); }
+.reward-desc { font-size:0.8rem; color:var(--text-muted); line-height:1.6; flex:1; }
+.reward-pts {
+  font-size:0.85rem; font-weight:800; color:var(--gold-light);
+  display:flex; align-items:center; gap:0.3rem;
+}
+
+.claim-btn {
+  display:flex; align-items:center; justify-content:center; gap:0.4rem;
+  width:100%; padding:0.7rem;
+  background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));
+  color:#0C0C0F; border:none; border-radius:var(--radius-sm);
+  font-family:inherit; font-size:0.8rem; font-weight:700;
+  cursor:pointer; transition:all 0.25s;
+  box-shadow:0 3px 12px rgba(201,168,76,0.2);
+}
+.claim-btn:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(201,168,76,0.4); }
+.claim-btn:active { transform:translateY(0); }
+
+/* Toast */
+.toast {
+  position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%) translateY(20px);
+  background:var(--surface2); border:1px solid rgba(201,168,76,0.35);
+  color:var(--gold-light); padding:0.7rem 1.5rem;
+  border-radius:12px; font-size:0.85rem; font-weight:700;
+  z-index:9998; opacity:0; pointer-events:none;
+  transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+  box-shadow:0 8px 24px rgba(0,0,0,0.4);
+  white-space:nowrap;
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* Footer */
+.footer {
+  background:var(--surface); border-top:1px solid var(--border);
+  padding:1.25rem 2rem; text-align:center;
+  font-size:0.78rem; color:var(--text-dim);
+}
+.footer span { color:var(--gold); }
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:900px) {
+  :root { --sidebar-w:0px; }
+  .sidebar { width:240px; transform:translateX(-100%); z-index:396; }
+  .sidebar.open { transform:translateX(0); }
+  .sidebar-overlay.open { display:block; }
+  .hamburger { display:flex; }
+  .content { padding:1.25rem; }
+  .page-hero { padding:1.5rem 1.25rem 1.25rem; }
+  .credit-grid { grid-template-columns:1fr; }
+  .pills-grid { grid-template-columns:repeat(3,1fr); }
+}
+@media(max-width:640px) {
+  .navbar { padding:0 1rem; }
+  .rewards-grid { grid-template-columns:1fr; }
+  .pills-grid { grid-template-columns:1fr 1fr 1fr; }
+  .gauge-card { padding:1.5rem; }
+  .points-strip { flex-direction:column; align-items:flex-start; }
+}
+@media(max-width:400px) {
+  .pills-grid { grid-template-columns:1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="amb amb-1"></div>
+<div class="amb amb-2"></div>
+
+<!-- ══ NAVBAR ══ -->
+<nav class="navbar">
+  <div class="nav-left">
+    <div class="hamburger" onclick="toggleSidebar()">
+      <span></span><span></span><span></span>
+    </div>
+    <div class="logo">Creditium</div>
+    <div class="premium-pill">⭐ PREMIUM</div>
+  </div>
+  <div class="nav-right">
+    <a href="/notifications" class="nav-icon-btn" title="Notifications">🔔<span class="notif-dot"></span></a>
+    <a href="/support" class="nav-icon-btn" title="Support">🎧</a>
+    <a href="/dashboard" class="nav-icon-btn" title="Dashboard">🏠</a>
+  </div>
+</nav>
+
+<!-- ══ SIDEBAR ══ -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<aside class="sidebar" id="sidebar">
+  <span class="sidebar-section-label">Navigation</span>
+  <a href="/dashboard" class="nav-item"><span class="icon">🏠</span> Dashboard</a>
+  <a href="/loan-discovery" class="nav-item"><span class="icon">🔍</span> Loan Discovery</a>
+  <a href="/loan-status" class="nav-item"><span class="icon">📊</span> Loan Status</a>
+  <a href="/emi_schedule" class="nav-item"><span class="icon">💳</span> EMI Schedule</a>
+  <a href="/wallet" class="nav-item"><span class="icon">💰</span> Wallet</a>
+  <a href="/credit_rewards" class="nav-item active"><span class="icon">⭐</span> Credit Rewards</a>
+  <span class="sidebar-section-label">Account</span>
+  <a href="/settings" class="nav-item"><span class="icon">⚙️</span> Settings</a>
+  <a href="/support" class="nav-item"><span class="icon">🎧</span> Support</a>
+  <div class="sidebar-bottom">
+    <a href="/logout" class="nav-item" style="color:#E74C3C"><span class="icon">🚪</span> Logout</a>
+  </div>
+</aside>
+
+<!-- ══ LAYOUT ══ -->
+<div class="layout">
+  <main class="main">
+
+    <!-- Hero -->
+    <div class="page-hero">
+      <div class="hero-eyebrow">Credit Insights</div>
+      <h1>Credit Score & Rewards</h1>
+      <p>Track your credit score, monitor factors, and earn loyalty rewards.</p>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- Credit Section -->
+      <div class="credit-grid">
+
+        <!-- Gauge Card -->
+        <div class="gauge-card">
+          <div class="score-ring-wrap">
+            <svg width="160" height="160" viewBox="0 0 160 160">
+              <defs>
+                <linearGradient id="gGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#A8862E"/>
+                  <stop offset="100%" stop-color="#E2C06B"/>
+                </linearGradient>
+              </defs>
+              <circle class="ring-bg" cx="80" cy="80" r="70"/>
+              <circle class="ring-fill" id="ringFill" cx="80" cy="80" r="70"/>
+            </svg>
+            <div class="score-center">
+              <div class="score-num" id="scoreVal">0</div>
+              <div class="score-sub">/ 850</div>
+            </div>
+          </div>
+
+          <div class="score-status">✦ Good Standing</div>
+
+          <div class="gauge-actions">
+            <a class="btn-sm btn-sm-ghost" href="#tips">📈 Improve</a>
+            <a class="btn-sm btn-sm-gold" href="{{ url_for('wallet_page') }}">💰 Wallet</a>
+          </div>
+        </div>
+
+        <!-- Breakdown Card -->
+        <div class="breakdown-card">
+          <div class="card-section-title">Score Breakdown</div>
+
+          <div class="pills-grid">
+            <div class="pill">
+              <div class="pill-label">Utilization</div>
+              <div class="pill-val" id="utilization">—</div>
+            </div>
+            <div class="pill">
+              <div class="pill-label">On-time</div>
+              <div class="pill-val" id="onTime">—</div>
+            </div>
+            <div class="pill">
+              <div class="pill-label">Active Loans</div>
+              <div class="pill-val" id="activeLoans">—</div>
+            </div>
+          </div>
+
+          <div class="card-section-title">Score Factors</div>
+          <div class="factors">
+            <div class="factor-row">
+              <div class="factor-top"><span>Payment History</span><span>94%</span></div>
+              <div class="factor-bar"><div class="factor-fill" style="width:0%" data-width="94%"></div></div>
+            </div>
+            <div class="factor-row">
+              <div class="factor-top"><span>Credit Utilization</span><span id="utilPct">23%</span></div>
+              <div class="factor-bar"><div class="factor-fill" style="width:0%" data-width="23%"></div></div>
+            </div>
+            <div class="factor-row">
+              <div class="factor-top"><span>Credit Age</span><span>78%</span></div>
+              <div class="factor-bar"><div class="factor-fill" style="width:0%" data-width="78%"></div></div>
+            </div>
+            <div class="factor-row">
+              <div class="factor-top"><span>Enquiries</span><span>88%</span></div>
+              <div class="factor-bar"><div class="factor-fill" style="width:0%" data-width="88%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Points Strip -->
+      <div class="points-strip">
+        <div class="pts-left">
+          <div class="pts-icon">⭐</div>
+          <div>
+            <div class="pts-label">Total Reward Points</div>
+            <div class="pts-val" id="rewardPoints">—</div>
+          </div>
+        </div>
+        <a href="{{ url_for('dashboard') }}" class="btn-sm btn-sm-ghost" style="text-decoration:none;padding:0.65rem 1.25rem;">← Dashboard</a>
+      </div>
+
+      <!-- Rewards Grid -->
+      <!-- <div style="margin-bottom:1rem;">
+        <div class="card-section-title" style="font-size:0.72rem;">Rewards & Offers</div>
+      </div>
+      <div class="rewards-grid">
+
+        <div class="reward-card">
+          <div class="reward-top">
+            <div class="reward-icon">💳</div>
+            <div class="reward-badge">✨ NEW</div>
+          </div>
+          <div class="reward-title">On-time EMI Bonus</div>
+          <div class="reward-desc">Earn bonus points for every on-time repayment. Keep your streak going to unlock higher tiers.</div>
+          <div class="reward-pts">⭐ +50 points per EMI</div>
+          <button class="claim-btn" onclick="claimReward(50)">Claim Reward →</button>
+        </div>
+
+        <div class="reward-card">
+          <div class="reward-top">
+            <div class="reward-icon">👥</div>
+            <div class="reward-badge">🔥 HOT</div>
+          </div>
+          <div class="reward-title">Refer & Earn</div>
+          <div class="reward-desc">Invite friends to Creditium. Earn 100 points when they make their first repayment.</div>
+          <div class="reward-pts">⭐ +100 points per referral</div>
+          <button class="claim-btn" onclick="claimReward(100)">Refer a Friend →</button>
+        </div>
+
+      </div>
+
+    </div> -->
+
+    <footer class="footer">
+      © 2025 <span>Creditium</span>. All Rights Reserved. · Premium Financial Experience ✨
+    </footer>
+  </main>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── Original data ── */
+const userData = {
+  creditScore: 742,
+  utilization: 23,
+  onTimePayment: 94,
+  activeLoans: 3,
+  rewardPoints: 340
+};
+
+/* ── Sidebar ── */
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+
+/* ── On load ── */
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('utilization').textContent = userData.utilization + '%';
+  document.getElementById('onTime').textContent = userData.onTimePayment + '%';
+  document.getElementById('activeLoans').textContent = userData.activeLoans;
+  document.getElementById('rewardPoints').textContent = userData.rewardPoints;
+
+  renderGauge();
+  animateBars();
+});
+
+/* ── Gauge ring (original logic) ── */
+function renderGauge() {
+  const score = userData.creditScore;
+  const circumference = 2 * Math.PI * 70; // r=70
+  const pct = score / 850;
+  const offset = circumference * (1 - pct);
+
+  const ring = document.getElementById('ringFill');
+  ring.style.strokeDasharray = circumference;
+  ring.style.strokeDashoffset = circumference;
+
+  setTimeout(() => { ring.style.strokeDashoffset = offset; }, 100);
+
+  // Count-up (original logic)
+  let cur = 0;
+  const el = document.getElementById('scoreVal');
+  const step = Math.max(1, Math.floor(score / 40));
+  const id = setInterval(() => {
+    cur += step;
+    if (cur >= score) { cur = score; clearInterval(id); }
+    el.textContent = cur;
+  }, 10);
+}
+
+/* ── Animate factor bars ── */
+function animateBars() {
+  document.querySelectorAll('.factor-fill').forEach(bar => {
+    const w = bar.dataset.width;
+    setTimeout(() => { bar.style.width = w; }, 200);
+  });
+}
+
+/* ── claimReward (original logic) ── */
+function claimReward(pts) {
+  userData.rewardPoints += pts;
+  document.getElementById('rewardPoints').textContent = userData.rewardPoints;
+
+  const toast = document.getElementById('toast');
+  toast.textContent = `⭐ +${pts} points added to your account!`;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>

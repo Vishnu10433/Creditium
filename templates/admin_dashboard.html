@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Admin Dashboard — Creditium</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold:#C9A84C;--gold-light:#E2C06B;--gold-dark:#A8862E;--gold-glow:rgba(201,168,76,0.18);
+  --bg:#0C0C0F;--surface:#141418;--surface2:#1A1A20;--surface3:#22222A;
+  --border:rgba(201,168,76,0.13);--border-hover:rgba(201,168,76,0.4);
+  --text:#F5F0E8;--text-muted:#8A8490;--text-dim:#5A5560;
+  --green:#2ECC71;--red:#E74C3C;--blue:#3498DB;--orange:#E67E22;
+  --sidebar-w:280px;--header-h:64px;--radius:14px;--radius-sm:10px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.5;}
+.ambient{position:fixed;border-radius:50%;filter:blur(140px);pointer-events:none;z-index:0;}
+.a1{width:600px;height:600px;background:radial-gradient(circle,rgba(201,168,76,.07) 0%,transparent 70%);top:-200px;right:-150px;animation:dA 22s ease-in-out infinite;}
+.a2{width:500px;height:500px;background:radial-gradient(circle,rgba(201,168,76,.05) 0%,transparent 70%);bottom:-150px;left:-100px;animation:dB 28s ease-in-out infinite;}
+@keyframes dA{0%,100%{transform:translate(0,0)}50%{transform:translate(-50px,70px)}}
+@keyframes dB{0%,100%{transform:translate(0,0)}50%{transform:translate(60px,-50px)}}
+::-webkit-scrollbar{width:5px;height:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--gold),var(--gold-dark));border-radius:4px;}
+
+/* HEADER */
+.header{position:fixed;top:0;left:0;right:0;height:var(--header-h);z-index:300;background:rgba(12,12,15,.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;box-shadow:0 4px 30px rgba(0,0,0,.4);}
+.header-left{display:flex;align-items:center;gap:.75rem;}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:8px;border-radius:8px;transition:background .2s;-webkit-tap-highlight-color:transparent;}
+.hamburger:hover{background:var(--surface2);}
+.hamburger span{display:block;width:20px;height:2px;background:var(--text-muted);border-radius:2px;transition:all .3s;}
+.hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+.hamburger.open span:nth-child(2){opacity:0;transform:scaleX(0);}
+.hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+.logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:800;background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% auto;animation:shimmer 4s ease-in-out infinite;letter-spacing:-.02em;text-decoration:none;}
+@keyframes shimmer{0%,100%{background-position:0% center}50%{background-position:100% center}}
+.admin-badge{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,rgba(201,168,76,.2),rgba(201,168,76,.08));border:1px solid rgba(201,168,76,.3);color:var(--gold-light);padding:3px 10px;border-radius:50px;font-size:.62rem;font-weight:700;letter-spacing:.08em;}
+.header-right{display:flex;align-items:center;gap:.75rem;}
+.welcome-chip{display:flex;align-items:center;gap:.5rem;background:var(--surface2);border:1px solid var(--border);border-radius:50px;padding:.35rem .85rem .35rem .35rem;}
+.welcome-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--gold-light),var(--gold-dark));display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;color:#0C0C0F;font-family:'Playfair Display',serif;}
+.welcome-text{font-size:.78rem;font-weight:600;color:var(--text-muted);}
+.welcome-name{color:var(--gold-light);}
+.logout-btn{display:inline-flex;align-items:center;gap:.35rem;padding:.45rem 1rem;border-radius:50px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);text-decoration:none;font-size:.78rem;font-weight:700;transition:all .22s;}
+.logout-btn:hover{border-color:rgba(231,76,60,.4);color:var(--red);background:rgba(231,76,60,.08);}
+
+/* LAYOUT */
+.layout{display:flex;padding-top:var(--header-h);min-height:100dvh;position:relative;z-index:1;}
+.sidebar-overlay{display:none;position:fixed;inset:0;top:var(--header-h);background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:199;}
+.sidebar-overlay.open{display:block;}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);height:calc(100dvh - var(--header-h));position:sticky;top:var(--header-h);background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;transition:transform .3s cubic-bezier(.4,0,.2,1);}
+.sidebar-section-label{padding:1.25rem 1.25rem .5rem;font-size:.62rem;font-weight:700;color:var(--text-dim);letter-spacing:.12em;text-transform:uppercase;}
+.nav-item{display:flex;align-items:center;gap:.85rem;padding:.85rem 1.25rem;cursor:pointer;border:none;background:none;width:100%;text-align:left;border-left:3px solid transparent;transition:all .22s;position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent;}
+.nav-item::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(201,168,76,.08),transparent);opacity:0;transition:opacity .22s;}
+.nav-item:hover::before,.nav-item.active::before{opacity:1;}
+.nav-item:hover{border-left-color:rgba(201,168,76,.4);}
+.nav-item.active{border-left-color:var(--gold-light);}
+.nav-icon{width:36px;height:36px;border-radius:10px;flex-shrink:0;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all .22s;}
+.nav-item:hover .nav-icon,.nav-item.active .nav-icon{background:linear-gradient(135deg,rgba(201,168,76,.22),rgba(201,168,76,.07));border-color:rgba(201,168,76,.3);box-shadow:0 4px 12px rgba(201,168,76,.15);}
+.nav-text{flex:1;min-width:0;}
+.nav-title{font-size:.85rem;font-weight:700;color:var(--text-muted);transition:color .22s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.nav-item:hover .nav-title,.nav-item.active .nav-title{color:var(--text);}
+.nav-item.active .nav-title{color:var(--gold-light);}
+.nav-desc{font-size:.7rem;color:var(--text-dim);margin-top:1px;}
+.nav-arrow{font-size:.7rem;color:var(--text-dim);transition:all .22s;flex-shrink:0;}
+.nav-item:hover .nav-arrow,.nav-item.active .nav-arrow{color:var(--gold-light);transform:translateX(2px);}
+.sidebar-footer{margin-top:auto;padding:1rem 1.25rem;border-top:1px solid var(--border);}
+.sidebar-footer-text{font-size:.68rem;color:var(--text-dim);text-align:center;line-height:1.5;}
+
+/* MAIN */
+.main{flex:1;min-width:0;padding:2rem 1.75rem 4rem;overflow-x:hidden;}
+.content-section{display:none;animation:secIn .45s cubic-bezier(.16,1,.3,1) both;}
+.content-section.active{display:block;}
+@keyframes secIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+/* SECTION HEADER */
+.sec-header{margin-bottom:2rem;}
+.sec-eyebrow{display:inline-flex;align-items:center;gap:.5rem;color:var(--gold);font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.6rem;}
+.sec-eyebrow::before{content:'';width:20px;height:1px;background:var(--gold);}
+.sec-title{font-family:'Playfair Display',serif;font-size:clamp(1.5rem,4vw,2.2rem);font-weight:800;color:var(--text);letter-spacing:-.02em;margin-bottom:.5rem;line-height:1.15;}
+.sec-title .gold{color:var(--gold-light);}
+.sec-desc{font-size:.88rem;color:var(--text-muted);line-height:1.6;max-width:560px;}
+
+/* STATS OVERVIEW */
+.stats-overview{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:2rem;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1rem;position:relative;overflow:hidden;transition:all .25s;}
+.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:0;transition:opacity .25s;}
+.stat-card.c-gold::after{background:linear-gradient(90deg,var(--gold-dark),var(--gold-light));}
+.stat-card.c-green::after{background:linear-gradient(90deg,#1a7a3c,var(--green));}
+.stat-card.c-blue::after{background:linear-gradient(90deg,#1a5a8c,var(--blue));}
+.stat-card.c-red::after{background:linear-gradient(90deg,#7a1a1a,var(--red));}
+.stat-card.c-orange::after{background:linear-gradient(90deg,#7a3a1a,var(--orange));}
+.stat-card:hover{border-color:var(--border-hover);transform:translateY(-3px);}
+.stat-card:hover::after{opacity:1;}
+.stat-icon{font-size:1.3rem;margin-bottom:.65rem;}
+.stat-val{font-family:'Playfair Display',serif;font-size:1.55rem;font-weight:800;color:var(--gold-light);line-height:1;margin-bottom:.3rem;}
+.stat-label{font-size:.72rem;color:var(--text-muted);font-weight:500;}
+.stat-change{font-size:.68rem;margin-top:.3rem;font-weight:700;}
+.stat-change.up{color:var(--green);}
+.stat-change.down{color:var(--red);}
+
+/* ACTIVITY */
+.activity-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:2rem;}
+.activity-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.activity-card-header{padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.activity-card-title{font-size:.82rem;font-weight:700;color:var(--text);}
+.activity-badge{font-size:.62rem;font-weight:800;padding:2px 8px;border-radius:50px;letter-spacing:.06em;}
+.badge-gold{background:rgba(201,168,76,.15);color:var(--gold-light);border:1px solid rgba(201,168,76,.25);}
+.badge-green{background:rgba(46,204,113,.12);color:var(--green);border:1px solid rgba(46,204,113,.2);}
+.activity-list{padding:.5rem 0;}
+.activity-item{display:flex;align-items:center;gap:.75rem;padding:.65rem 1.25rem;border-bottom:1px solid rgba(255,255,255,.03);transition:background .2s;}
+.activity-item:last-child{border-bottom:none;}
+.activity-item:hover{background:rgba(255,255,255,.02);}
+.activity-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.dot-gold{background:var(--gold);}
+.dot-green{background:var(--green);}
+.dot-red{background:var(--red);}
+.dot-blue{background:var(--blue);}
+.activity-text{flex:1;font-size:.77rem;color:var(--text-muted);line-height:1.4;}
+.activity-text strong{color:var(--text);font-weight:600;}
+.activity-time{font-size:.67rem;color:var(--text-dim);white-space:nowrap;}
+
+/* ACTION GRID */
+.action-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;}
+.action-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.4rem 1.25rem;cursor:pointer;text-decoration:none;display:flex;align-items:flex-start;gap:1rem;transition:all .28s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent;}
+.action-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold-dark),var(--gold-light));transform:scaleX(0);transform-origin:left;transition:transform .35s ease;}
+.action-card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(201,168,76,.05),transparent 60%);opacity:0;transition:opacity .28s;}
+.action-card:hover{border-color:var(--border-hover);transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.35),0 0 0 1px rgba(201,168,76,.1);}
+.action-card:hover::before{transform:scaleX(1);}
+.action-card:hover::after{opacity:1;}
+.card-icon{width:42px;height:42px;border-radius:11px;flex-shrink:0;background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.04));border:1px solid rgba(201,168,76,.18);display:flex;align-items:center;justify-content:center;font-size:1.15rem;transition:all .28s;position:relative;z-index:1;}
+.action-card:hover .card-icon{background:linear-gradient(135deg,rgba(201,168,76,.28),rgba(201,168,76,.1));border-color:rgba(201,168,76,.4);box-shadow:0 4px 14px rgba(201,168,76,.2);transform:scale(1.06);}
+.card-body{flex:1;min-width:0;position:relative;z-index:1;}
+.card-title{font-size:.88rem;font-weight:700;color:var(--text);margin-bottom:.2rem;}
+.card-hint{font-size:.72rem;color:var(--text-dim);line-height:1.4;}
+.card-arrow{font-size:.72rem;color:var(--text-dim);align-self:center;flex-shrink:0;transition:all .22s;position:relative;z-index:1;}
+.action-card:hover .card-arrow{color:var(--gold-light);transform:translateX(3px);}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  :root{--sidebar-w:270px;}
+  .hamburger{display:flex;}
+  .sidebar{position:fixed;top:var(--header-h);left:0;height:calc(100dvh - var(--header-h));z-index:200;transform:translateX(-100%);box-shadow:8px 0 40px rgba(0,0,0,.5);}
+  .sidebar.open{transform:translateX(0);}
+  .welcome-chip .welcome-text{display:none;}
+  .welcome-chip{padding:.2rem;}
+  .main{padding:1.5rem 1rem 4rem;}
+  .activity-row{grid-template-columns:1fr;}
+}
+@media(max-width:480px){
+  .header{padding:0 1rem;}
+  .logout-btn span:last-child{display:none;}
+  .logout-btn{padding:.45rem .6rem;}
+  .action-grid{grid-template-columns:1fr;}
+  .stats-overview{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:360px){.stats-overview{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div class="ambient a1"></div>
+<div class="ambient a2"></div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-left">
+    <div class="hamburger" id="hamburger" onclick="toggleSidebar()">
+      <span></span><span></span><span></span>
+    </div>
+    <a href="/" class="logo">Creditium</a>
+    <div class="admin-badge">⚡ ADMIN</div>
+  </div>
+  <div class="header-right">
+    <div class="welcome-chip">
+      <div class="welcome-avatar">A</div>
+      <div class="welcome-text">Welcome, <span class="welcome-name">{{ admin_name or 'Admin' }}</span></div>
+    </div>
+    <a href="{{ url_for('admin_logout') }}" class="logout-btn">
+      <span>↩</span> <span>Logout</span>
+    </a>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-section-label">Navigation</div>
+
+    <button class="nav-item active" onclick="showSection('overview',this)">
+      <div class="nav-icon">🏠</div>
+      <div class="nav-text"><div class="nav-title">Overview</div><div class="nav-desc">Platform summary</div></div>
+      <div class="nav-arrow">›</div>
+    </button>
+    <button class="nav-item" onclick="showSection('user-management',this)">
+      <div class="nav-icon">👥</div>
+      <div class="nav-text"><div class="nav-title">User Management</div><div class="nav-desc">Users, KYC, managers</div></div>
+      <div class="nav-arrow">›</div>
+    </button>
+    <button class="nav-item" onclick="showSection('loan-oversight',this)">
+      <div class="nav-icon">📋</div>
+      <div class="nav-text"><div class="nav-title">Loan Oversight</div><div class="nav-desc">Applications, approvals</div></div>
+      <div class="nav-arrow">›</div>
+    </button>
+    <button class="nav-item" onclick="showSection('payment-collection',this)">
+      <div class="nav-icon">💳</div>
+      <div class="nav-text"><div class="nav-title">Payment & Collection</div><div class="nav-desc">EMIs, reminders</div></div>
+      <div class="nav-arrow">›</div>
+    </button>
+    <button class="nav-item" onclick="showSection('reporting',this)">
+      <div class="nav-icon">📊</div>
+      <div class="nav-text"><div class="nav-title">Reporting & Analytics</div><div class="nav-desc">Insights, exports</div></div>
+      <div class="nav-arrow">›</div>
+    </button>
+    <button class="nav-item" onclick="showSection('communication',this)">
+      <div class="nav-icon">💬</div>
+      <div class="nav-text"><div class="nav-title">Communication</div><div class="nav-desc">Support, notifications</div></div>
+      <div class="nav-arrow">›</div>
+    </button>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-footer-text">Creditium Admin v2.0<br>© 2025 All Rights Reserved</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- ── OVERVIEW ── -->
+    <div id="overview" class="content-section active">
+      <div class="sec-header">
+        <div class="sec-eyebrow">Dashboard</div>
+        <div class="sec-title">Platform <span class="gold">Overview</span></div>
+        <div class="sec-desc">Real-time snapshot of Creditium's activity, loans, and user metrics.</div>
+      </div>
+
+      <div class="stats-overview">
+        <div class="stat-card c-gold">
+          <div class="stat-icon">👥</div>
+          <div class="stat-val">{{ total_users | default(0) }}</div>
+          <div class="stat-label">Total Users</div>
+        </div>
+        <div class="stat-card c-green">
+          <div class="stat-icon">✅</div>
+          <div class="stat-val">{{ active_loans | default(0) }}</div>
+          <div class="stat-label">Active Loans</div>
+        </div>
+        <div class="stat-card c-blue">
+          <div class="stat-icon">⏳</div>
+          <div class="stat-val">{{ pending_kyc | default(0) }}</div>
+          <div class="stat-label">Pending KYC</div>
+        </div>
+        <div class="stat-card c-orange">
+          <div class="stat-icon">💸</div>
+          <div class="stat-val">₹{{ "{:,.0f}".format(disbursed_today | default(0)) }}</div>
+          <div class="stat-label">Disbursed Today</div>
+        </div>
+        <div class="stat-card c-red">
+          <div class="stat-icon">⚠️</div>
+          <div class="stat-val">{{ overdue_emis | default(0) }}</div>
+          <div class="stat-label">Overdue EMIs</div>
+        </div>
+      </div>
+
+      <div class="activity-row">
+        <!-- Recent Loan Applications -->
+        <div class="activity-card">
+          <div class="activity-card-header">
+            <div class="activity-card-title">Recent Loan Applications</div>
+            <div class="activity-badge badge-gold">LIVE</div>
+          </div>
+          <div class="activity-list">
+            {% for loan in recent_loans %}
+            <div class="activity-item">
+              <div class="activity-dot
+                {% if loan.status == 'Disbursed' %}dot-green
+                {% elif loan.status == 'Approved' %}dot-gold
+                {% elif loan.status == 'Rejected' %}dot-red
+                {% else %}dot-blue{% endif %}">
+              </div>
+              <div class="activity-text">
+                <strong>{{ loan.user.username if loan.user else 'Unknown' }}</strong>
+                — {{ loan.loanname }} ₹{{ "{:,.0f}".format(loan.amount) }}
+                <span style="font-size:.68rem;opacity:.7;">{{ loan.status }}</span>
+              </div>
+              <div class="activity-time">{{ loan.timestamp.strftime('%d %b') }}</div>
+            </div>
+            {% else %}
+            <div class="activity-item">
+              <div class="activity-text" style="text-align:center;padding:.5rem 0;">No recent applications</div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- EMI Collection Status -->
+        <div class="activity-card">
+          <div class="activity-card-header">
+            <div class="activity-card-title">EMI Collection Status</div>
+            <div class="activity-badge badge-green">TODAY</div>
+          </div>
+          <div class="activity-list">
+            <div class="activity-item">
+              <div class="activity-dot dot-green"></div>
+              <div class="activity-text"><strong>₹{{ "{:,.0f}".format(collected_today | default(0)) }}</strong> collected today</div>
+              <div class="activity-time">On time</div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-dot dot-red"></div>
+              <div class="activity-text"><strong>₹{{ "{:,.0f}".format(overdue_amount | default(0)) }}</strong> overdue amount</div>
+              <div class="activity-time">Overdue</div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-dot dot-gold"></div>
+              <div class="activity-text"><strong>₹{{ "{:,.0f}".format(due_today_amount | default(0)) }}</strong> due today</div>
+              <div class="activity-time">Due</div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-dot dot-blue"></div>
+              <div class="activity-text"><strong>{{ pending_kyc | default(0) }}</strong> KYC docs awaiting verification</div>
+              <div class="activity-time">Pending</div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-dot dot-green"></div>
+              <div class="activity-text"><strong>{{ pending_tickets | default(0) }}</strong> support tickets open</div>
+              <div class="activity-time">Open</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── USER MANAGEMENT ── -->
+    <div id="user-management" class="content-section">
+      <div class="sec-header">
+        <div class="sec-eyebrow">Users</div>
+        <div class="sec-title">User <span class="gold">Management</span></div>
+        <div class="sec-desc">View, search, and filter users. Verify KYC documents and monitor manager performance.</div>
+      </div>
+      <div class="action-grid">
+        <a class="action-card" href="/admin/users">
+          <div class="card-icon">👥</div>
+          <div class="card-body"><div class="card-title">View All Users</div><div class="card-hint">Browse and manage every registered account</div></div>
+          <div class="card-arrow">›</div>
+        </a>
+        <a class="action-card" href="/admin/users/kyc_list">
+          <div class="card-icon">🪪</div>
+          <div class="card-body"><div class="card-title">Verify KYC Documents</div><div class="card-hint">Review and approve identity submissions</div></div>
+          <div class="card-arrow">›</div>
+        </a>
+        <a class="action-card" href="/admin/users/deactivate">
+          <div class="card-icon">🚫</div>
+          <div class="card-body"><div class="card-title">Deactivate Users</div><div class="card-hint">Suspend or deactivate user accounts</div></div>
+          <div class="card-arrow">›</div>
+        </a>
+        <a class="action-card" href="/admin/managers">
+          <div class="card-icon">🏢</div>
+          <div class="card-body"><div class="card-title">Manager Management</div><div class="card-hint">Oversee loan officers and managers</div></div>
+          <div class="card-arrow">›</div>
+        </a>
+        <a class="action-card" href="/admin/users/search">
+          <div class="card-icon">🔍</div>
+          <div class="card-body"><div class="card-title">Advanced Search</div><div class="card-hint">Find users by filters, name, or ID</div></div>
+          <div class="card-arrow">›</div>
+        </a>
+        <a class="action-card" href="/admin/users/export_full">
+          <div class="card-icon">📥</div>
+          <div class="card-body"><div class="card-title">Export User Data</div><div class="card-hint">Download user records as CSV</div></div>
+          <div class="card-arrow">›</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- ── LOAN OVERSIGHT ── -->
+    <div id="loan-oversight" class="content-section">
+      <div class="sec-header">
+        <div class="sec-eyebrow">Loans</div>
+        <div class="sec-title">Loan Application <span class="gold">Oversight</span></div>
+        <div class="sec-desc">Monitor loan applications, approve or reject requests, and assign loan officers.</div>
+      </div>
+      <div class="action-grid">
+        <a class="action-card" href="/admin/admin_user_bank_details">
+          <div class="card-icon">🏦</div>
+          <div class="card-body"><div class="card-title">User Bank Details</div><div class="card-hint">View verified bank account information</div></div>
+          <div class="card-arrow">›</div>
+        </a>
+        <a class="action-card" href="/admin/loans/approve">
+          <div class="card-icon">✅</div>
+          <div class="card-body"><div class="card-title">Approve / Reject Loans</div><div class="card-hint">Action pending loan applications</div></div>
+          <div class="card-arrow">›</div>
+        </a>
+        <a class="action-card" href="/admin/loans/status">
+          <div class="card-icon">📡</div>
+          <div class="card-body"><div class="card-title">Track Application Status</div><div class="card-hint">Live view of all loan pipelines</div></div>
+          <div class="card-arrow">›</div>
+        </a>
+        <a class="action-card" href="/admin/loans/history">
+          <div class="card-icon">🗂️</div>
+          <div class="card-body"><div class="card-title">Loan History</div><div class="card-hint">Complete records of past loans</div></div>
+          <div class="card-arrow">›</div>
+        </a>
+        <a class="action-card" href="/admin/loans/analytics">
+          <div class="card-icon">📈</div>
+          <div class="card-body"><div class="card-title">Loan Analytics</div><div class="card-hint">Performance by type, region, and officer</div></div>
+          <div class="card-arrow">›</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- ── PAYMENT & COLLECTION ── -->
+    <div id="payment-collection" class="content-section">
+      <div class="sec-header">
+        <div class="sec-eyebrow">Payments</div>
+        <div class="sec-title">Payment & <span class="gold">Collection</span></div>
+        <div class="sec-desc">Monitor EMI payments, send reminders, and manage collection activities.</div>
+      </div>
+      <div class="action-grid">
+        <a class="action-card" href="/admin/payments">
+          <div class="card-icon">💰</div>
+          <div class="card-body"><div class="card-title">View EMI Payments</div><div class="card-hint">All incoming and scheduled payments</div></div>
+          <div class="card-arrow">›</div>
+        </a>
+        <a class="action-card" href="/admin/payments/reminders">
+          <div class="card-icon">🔔</div>
+          <div class="card-body"><div class="card-title">Send Payment Reminders</div><div class="card-hint">Notify users of upcoming due dates</div></div>
+          <div class="card-arrow">›</div>
+        </a>
+        <a class="action-card" href="/admin/payments/reconcile">
+          <div class="card-icon">🔁</div>
+          <div class="card-body"><div class="card-title">Reconcile Payments</div><div class="card-hint">Match transactions with bank records</div></div>
+          <div class="card-arrow">›</div>
+        </a>
+        <a class="action-card" href="/admin/payments/overdue">
+          <div class="card-icon">⚠️</div>
+          <div class="card-body"><div class="card-title">Overdue Payments</div><div class="card-hint">Track and action late EMI accounts</div></div>
+          <div class="card-arrow">›</div>
+        </a>
+        <a class="action-card" href="/admin/payments/collections">
+          <div class="card-icon">📦</div>
+          <div class="card-body"><div class="card-title">Collection Management</div><div class="card-hint">Manage recovery and collection agents</div></div>
+          <div class="card-arrow">›</div>
+        </a>
+        <a class="action-card" href="/admin/payments/reports">
+          <div class="card-icon">📄</div>
+          <div class="card-body"><div class="card-title">Payment Reports</div><div class="card-hint">Detailed financial summaries by period</div></div>
+          <div class="card-arrow">›</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- ── REPORTING & ANALYTICS ── -->
+    <div id="reporting" class="content-section">
+      <div class="sec-header">
+        <div class="sec-eyebrow">Analytics</div>
+        <div class="sec-title">Reporting & <span class="gold">Analytics</span></div>
+        <div class="sec-desc">Analyze business performance, generate reports, and track key performance indicators.</div>
+      </div>
+      <div class="action-grid">
+        <a class="action-card" href="/admin/reports/dashboard">
+          <div class="card-icon">📊</div>
+          <div class="card-body"><div class="card-title">Analytics Dashboard</div><div class="card-hint">Visual KPIs and performance metrics</div></div>
+          <div class="card-arrow">›</div>
+        </a>
+        <a class="action-card" href="/admin/reports/export">
+          <div class="card-icon">💾</div>
+          <div class="card-body"><div class="card-title">Export Reports</div><div class="card-hint">Download data in CSV, Excel, or PDF</div></div>
+          <div class="card-arrow">›</div>
+        </a>
+        <a class="action-card" href="/admin/reports/performance">
+          <div class="card-icon">🏆</div>
+          <div class="card-body"><div class="card-title">Loan Type Performance</div><div class="card-hint">Compare home, personal, and car loans</div></div>
+          <div class="card-arrow">›</div>
+        </a>
+        <a class="action-card" href="/admin/reports/regional">
+          <div class="card-icon">🗺️</div>
+          <div class="card-body"><div class="card-title">Regional Analytics</div><div class="card-hint">Breakdown by geography and city</div></div>
+          <div class="card-arrow">›</div>
+        </a>
+        <a class="action-card" href="/admin/reports/trends">
+          <div class="card-icon">📉</div>
+          <div class="card-body"><div class="card-title">Trend Analysis</div><div class="card-hint">Historical trends and forecasting</div></div>
+          <div class="card-arrow">›</div>
+        </a>
+        <a class="action-card" href="/admin/reports/custom">
+          <div class="card-icon">🛠️</div>
+          <div class="card-body"><div class="card-title">Custom Reports</div><div class="card-hint">Build reports with custom filters</div></div>
+          <div class="card-arrow">›</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- ── COMMUNICATION & SUPPORT ── -->
+    <div id="communication" class="content-section">
+      <div class="sec-header">
+        <div class="sec-eyebrow">Support</div>
+        <div class="sec-title">Communication & <span class="gold">Support</span></div>
+        <div class="sec-desc">Resolve user issues, send announcements, and manage support tickets.</div>
+      </div>
+      <div class="action-grid">
+        <a class="action-card" href="/admin/support/tickets">
+          <div class="card-icon">🎫</div>
+          <div class="card-body"><div class="card-title">View Support Tickets</div><div class="card-hint">Manage and resolve open user issues</div></div>
+          <div class="card-arrow">›</div>
+        </a>
+        <a class="action-card" href="/admin/send_notifications">
+          <div class="card-icon">📣</div>
+          <div class="card-body"><div class="card-title">Send Notifications</div><div class="card-hint">Push alerts and messages to users</div></div>
+          <div class="card-arrow">›</div>
+        </a>
+        <a class="action-card" href="/admin/feedback">
+          <div class="card-icon">⭐</div>
+          <div class="card-body"><div class="card-title">User Feedback</div><div class="card-hint">Review ratings and user suggestions</div></div>
+          <div class="card-arrow">›</div>
+        </a>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+function showSection(sectionId, btn) {
+  if (window.innerWidth < 900) closeSidebar();
+  localStorage.setItem('activeSection', sectionId);
+  document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const sec = document.getElementById(sectionId);
+  if (sec) sec.classList.add('active');
+  if (btn) {
+    btn.classList.add('active');
+  } else {
+    document.querySelectorAll('.nav-item').forEach(n => {
+      if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + sectionId + "'")) {
+        n.classList.add('active');
+      }
+    });
+  }
+}
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const ham = document.getElementById('hamburger');
+  const isOpen = sidebar.classList.contains('open');
+  if (isOpen) { closeSidebar(); }
+  else { sidebar.classList.add('open'); overlay.classList.add('open'); ham.classList.add('open'); }
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+  document.getElementById('hamburger').classList.remove('open');
+}
+window.addEventListener('DOMContentLoaded', () => {
+  const last = localStorage.getItem('activeSection') || 'overview';
+  showSection(last);
+});
+window.addEventListener('resize', () => { if (window.innerWidth >= 900) closeSidebar(); });
+</script>
+</body>
+</html>

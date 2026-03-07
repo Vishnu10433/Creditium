@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings — Creditium</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #C9A84C; --gold-light: #E2C06B; --gold-dark: #A8862E;
+  --gold-glow: rgba(201,168,76,0.18);
+  --bg: #0C0C0F; --surface: #141418; --surface2: #1A1A20; --surface3: #22222A;
+  --border: rgba(201,168,76,0.15); --border-hover: rgba(201,168,76,0.45);
+  --text: #F5F0E8; --text-muted: #8A8490; --text-dim: #5A5560;
+  --green: #2ECC71; --red: #E74C3C;
+  --radius: 16px; --radius-sm: 10px; --nav-h: 64px; --sidebar-w: 240px;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+body::before {
+  content:''; position:fixed; inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none; z-index:9999; opacity:0.4;
+}
+.ambient { position:fixed; border-radius:50%; filter:blur(120px); pointer-events:none; z-index:0; }
+.ambient-1 { width:500px; height:500px; background:radial-gradient(circle,rgba(201,168,76,0.08) 0%,transparent 70%); top:-100px; right:-100px; }
+.ambient-2 { width:400px; height:400px; background:radial-gradient(circle,rgba(201,168,76,0.05) 0%,transparent 70%); bottom:100px; left:-80px; }
+
+/* NAVBAR */
+.navbar { position:fixed; top:0; left:0; right:0; height:var(--nav-h); z-index:500; background:rgba(12,12,15,0.92); backdrop-filter:blur(24px); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 1.5rem; }
+.nav-left { display:flex; align-items:center; gap:0.75rem; }
+.hamburger { display:none; flex-direction:column; gap:4px; cursor:pointer; padding:6px; border-radius:8px; transition:background 0.2s; }
+.hamburger:hover { background:var(--surface3); }
+.hamburger span { display:block; width:20px; height:2px; background:var(--text-muted); border-radius:2px; }
+.logo { font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:800; background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:-0.02em; }
+.premium-pill { display:flex; align-items:center; gap:5px; background:linear-gradient(135deg,var(--gold),var(--gold-dark)); color:#0C0C0F; padding:3px 10px; border-radius:50px; font-size:0.7rem; font-weight:700; letter-spacing:0.05em; }
+.nav-right { display:flex; align-items:center; gap:0.5rem; }
+.nav-icon-btn { width:38px; height:38px; border-radius:10px; border:none; background:var(--surface2); color:var(--text-muted); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1rem; transition:all 0.2s; text-decoration:none; position:relative; }
+.nav-icon-btn:hover { background:var(--surface3); color:var(--text); }
+.notif-dot { position:absolute; top:7px; right:7px; width:7px; height:7px; background:var(--gold); border-radius:50%; border:2px solid var(--bg); }
+.nav-avatar { width:38px; height:38px; border-radius:10px; border:2px solid var(--gold); overflow:hidden; cursor:pointer; transition:all 0.25s; flex-shrink:0; }
+.nav-avatar img { width:100%; height:100%; object-fit:cover; }
+.nav-avatar:hover { transform:scale(1.05); box-shadow:0 0 16px var(--gold-glow); }
+
+/* SIDEBAR */
+.sidebar { position:fixed; top:var(--nav-h); left:0; bottom:0; width:var(--sidebar-w); background:var(--surface); border-right:1px solid var(--border); z-index:400; display:flex; flex-direction:column; padding:1.5rem 0.75rem; overflow-y:auto; transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); }
+.sidebar-section-label { font-size:0.65rem; font-weight:700; letter-spacing:0.12em; color:var(--text-dim); text-transform:uppercase; padding:0 0.75rem; margin:1.25rem 0 0.5rem; }
+.sidebar-section-label:first-child { margin-top:0; }
+.nav-item { display:flex; align-items:center; gap:0.75rem; padding:0.65rem 0.75rem; border-radius:var(--radius-sm); text-decoration:none; color:var(--text-muted); font-size:0.875rem; font-weight:500; transition:all 0.2s; cursor:pointer; border:none; background:none; width:100%; text-align:left; }
+.nav-item:hover { background:var(--surface3); color:var(--text); }
+.nav-item.active { background:linear-gradient(135deg,rgba(201,168,76,0.15),rgba(201,168,76,0.05)); color:var(--gold-light); border:1px solid rgba(201,168,76,0.2); }
+.nav-item .icon { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:0.9rem; flex-shrink:0; background:var(--surface2); }
+.nav-item.active .icon { background:linear-gradient(135deg,var(--gold),var(--gold-dark)); filter:drop-shadow(0 2px 8px rgba(201,168,76,0.4)); }
+.sidebar-bottom { margin-top:auto; padding-top:1rem; border-top:1px solid var(--border); }
+.sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:395; }
+
+/* LAYOUT */
+.layout { display:flex; margin-top:var(--nav-h); }
+.main { flex:1; margin-left:var(--sidebar-w); min-height:calc(100vh - var(--nav-h)); display:flex; flex-direction:column; }
+
+/* PAGE HEADER */
+.page-header { background:var(--surface); border-bottom:1px solid var(--border); padding:1.5rem 2rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+.page-title { font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:800; color:var(--text); }
+.page-subtitle { font-size:0.82rem; color:var(--text-muted); margin-top:0.2rem; }
+
+.btn { display:inline-flex; align-items:center; gap:0.4rem; padding:0.55rem 1.1rem; border-radius:var(--radius-sm); border:none; font-family:inherit; font-size:0.82rem; font-weight:600; cursor:pointer; transition:all 0.25s; text-decoration:none; white-space:nowrap; }
+.btn-gold { background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark)); color:#0C0C0F; box-shadow:0 4px 16px rgba(201,168,76,0.3); }
+.btn-gold:hover { transform:translateY(-1px); box-shadow:0 8px 24px rgba(201,168,76,0.45); }
+.btn-ghost { background:var(--surface2); color:var(--text-muted); border:1px solid var(--border); }
+.btn-ghost:hover { background:var(--surface3); color:var(--text); }
+.btn-danger { background:rgba(231,76,60,0.12); color:#E74C3C; border:1px solid rgba(231,76,60,0.25); }
+.btn-danger:hover { background:rgba(231,76,60,0.22); }
+
+/* CONTENT */
+.content { padding:2rem; flex:1; position:relative; z-index:1; }
+
+/* SETTINGS LAYOUT */
+.settings-layout { display:grid; grid-template-columns:220px 1fr; gap:1.5rem; align-items:start; }
+
+/* SETTINGS NAV */
+.settings-nav { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:0.75rem; position:sticky; top:calc(var(--nav-h) + 1.5rem); }
+.settings-nav-item { display:flex; align-items:center; gap:0.7rem; padding:0.65rem 0.75rem; border-radius:var(--radius-sm); font-size:0.85rem; font-weight:500; color:var(--text-muted); cursor:pointer; transition:all 0.2s; border:none; background:none; width:100%; text-align:left; font-family:inherit; }
+.settings-nav-item:hover { background:var(--surface3); color:var(--text); }
+.settings-nav-item.active { background:linear-gradient(135deg,rgba(201,168,76,0.15),rgba(201,168,76,0.05)); color:var(--gold-light); border:1px solid rgba(201,168,76,0.2); }
+.settings-nav-item .s-icon { font-size:1rem; width:24px; text-align:center; flex-shrink:0; }
+
+/* SETTINGS PANELS */
+.settings-panel { display:none; }
+.settings-panel.active { display:block; }
+
+.settings-section { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:2rem; margin-bottom:1.25rem; }
+.settings-section-title { font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; color:var(--text); margin-bottom:0.25rem; }
+.settings-section-sub { font-size:0.8rem; color:var(--text-muted); margin-bottom:1.75rem; padding-bottom:1.25rem; border-bottom:1px solid var(--border); }
+
+/* FORM */
+.form-group { margin-bottom:1.25rem; }
+.form-group label { display:block; font-size:0.78rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.5rem; }
+.form-group input, .form-group select, .form-group textarea {
+  width:100%; padding:0.85rem 1rem;
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:var(--radius-sm); color:var(--text);
+  font-family:inherit; font-size:0.9rem; transition:all 0.25s; outline:none;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(201,168,76,0.12); }
+.form-group select { appearance:none; cursor:pointer; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 8L1 3h10z' fill='%238A8490'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 1rem center; }
+.form-group textarea { resize:vertical; min-height:90px; }
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.form-hint { font-size:0.75rem; color:var(--text-dim); margin-top:0.35rem; }
+
+/* TOGGLE SWITCH */
+.toggle-row { display:flex; align-items:center; justify-content:space-between; padding:1rem 0; border-bottom:1px solid rgba(255,255,255,0.04); gap:1rem; }
+.toggle-row:last-child { border-bottom:none; padding-bottom:0; }
+.toggle-row:first-child { padding-top:0; }
+.toggle-info { flex:1; }
+.toggle-label { font-size:0.88rem; font-weight:600; color:var(--text); margin-bottom:0.15rem; }
+.toggle-desc { font-size:0.77rem; color:var(--text-muted); }
+.toggle-switch { position:relative; width:46px; height:26px; flex-shrink:0; }
+.toggle-switch input { opacity:0; width:0; height:0; }
+.toggle-slider { position:absolute; inset:0; cursor:pointer; background:var(--surface3); border-radius:50px; transition:all 0.3s; border:1px solid var(--border); }
+.toggle-slider::before { content:''; position:absolute; height:18px; width:18px; left:3px; bottom:3px; background:var(--text-dim); border-radius:50%; transition:all 0.3s; }
+.toggle-switch input:checked + .toggle-slider { background:linear-gradient(135deg,var(--gold),var(--gold-dark)); border-color:var(--gold-dark); }
+.toggle-switch input:checked + .toggle-slider::before { transform:translateX(20px); background:#fff; box-shadow:0 2px 6px rgba(0,0,0,0.3); }
+
+/* AVATAR UPLOAD */
+.avatar-upload-row { display:flex; align-items:center; gap:1.5rem; margin-bottom:1.5rem; }
+.avatar-preview { width:72px; height:72px; border-radius:16px; border:2px solid var(--gold); overflow:hidden; background:linear-gradient(135deg,var(--gold),var(--gold-dark)); display:flex; align-items:center; justify-content:center; font-size:1.8rem; flex-shrink:0; }
+.avatar-preview img { width:100%; height:100%; object-fit:cover; }
+.avatar-upload-actions { display:flex; flex-direction:column; gap:0.5rem; }
+.avatar-upload-actions span { font-size:0.77rem; color:var(--text-dim); }
+
+/* DANGER ZONE */
+.danger-zone { border-color:rgba(231,76,60,0.25); }
+.danger-zone .settings-section-title { color:#E74C3C; }
+.danger-item { display:flex; align-items:center; justify-content:space-between; padding:1rem 0; border-bottom:1px solid rgba(255,255,255,0.04); gap:1rem; flex-wrap:wrap; }
+.danger-item:last-child { border-bottom:none; }
+.danger-item-info { flex:1; }
+.danger-item-title { font-size:0.88rem; font-weight:600; color:var(--text); }
+.danger-item-desc { font-size:0.77rem; color:var(--text-muted); margin-top:0.15rem; }
+
+/* PLAN CARD */
+.plan-card { background:linear-gradient(135deg,rgba(201,168,76,0.08),rgba(201,168,76,0.02)); border:1px solid rgba(201,168,76,0.3); border-radius:var(--radius); padding:1.5rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; margin-bottom:1.25rem; }
+.plan-badge { display:inline-flex; align-items:center; gap:5px; background:linear-gradient(135deg,var(--gold),var(--gold-dark)); color:#0C0C0F; padding:3px 12px; border-radius:50px; font-size:0.75rem; font-weight:800; letter-spacing:0.05em; margin-bottom:0.5rem; }
+.plan-name { font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:800; color:var(--text); }
+.plan-perks { font-size:0.8rem; color:var(--text-muted); margin-top:0.3rem; }
+
+/* FOOTER */
+.footer { background:var(--surface); border-top:1px solid var(--border); padding:1.25rem 2rem; text-align:center; font-size:0.78rem; color:var(--text-dim); }
+.footer span { color:var(--gold); }
+
+/* TOAST */
+.toast { position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%); background:var(--surface2); border:1px solid rgba(201,168,76,0.4); color:var(--gold-light); padding:0.75rem 1.5rem; border-radius:12px; font-size:0.875rem; font-weight:600; z-index:9999; box-shadow:0 8px 24px rgba(0,0,0,0.4); animation:slideUp 0.3s ease; white-space:nowrap; }
+@keyframes slideUp { from{opacity:0;transform:translateX(-50%) translateY(12px);}to{opacity:1;transform:translateX(-50%) translateY(0);} }
+
+/* CONFIRM MODAL */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); z-index:800; align-items:center; justify-content:center; padding:1.5rem; }
+.modal-overlay.open { display:flex; }
+.modal { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:2rem; width:100%; max-width:420px; position:relative; animation:slideUp2 0.3s ease; }
+@keyframes slideUp2 { from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);} }
+.modal-close { position:absolute; top:1rem; right:1rem; width:32px; height:32px; border-radius:8px; border:none; background:var(--surface2); color:var(--text-muted); cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center; transition:all 0.2s; }
+.modal-close:hover { background:var(--surface3); color:var(--text); }
+.modal-title { font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:800; color:var(--text); margin-bottom:0.5rem; }
+.modal-body { font-size:0.85rem; color:var(--text-muted); line-height:1.6; margin-bottom:1.5rem; }
+.modal-actions { display:flex; gap:0.75rem; justify-content:flex-end; }
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  :root { --sidebar-w:0px; }
+  .sidebar { width:240px; transform:translateX(-100%); z-index:396; }
+  .sidebar.open { transform:translateX(0); }
+  .sidebar-overlay.open { display:block; }
+  .hamburger { display:flex; }
+  .content { padding:1.25rem; }
+  .page-header { padding:1rem 1.25rem; }
+  .settings-layout { grid-template-columns:1fr; }
+  .settings-nav { position:static; display:flex; flex-wrap:wrap; gap:0.35rem; padding:0.5rem; }
+  .settings-nav-item { width:auto; flex:0 0 auto; padding:0.5rem 0.9rem; font-size:0.78rem; }
+}
+@media(max-width:600px){
+  .form-grid { grid-template-columns:1fr; }
+  .navbar { padding:0 1rem; }
+  .danger-item { flex-direction:column; align-items:flex-start; }
+  .plan-card { flex-direction:column; }
+}
+</style>
+</head>
+<body>
+<div class="ambient ambient-1"></div>
+<div class="ambient ambient-2"></div>
+
+<nav class="navbar">
+  <div class="nav-left">
+    <div class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></div>
+    <div class="logo">Creditium</div>
+    <div class="premium-pill">⭐ PREMIUM</div>
+  </div>
+  <div class="nav-right">
+    <a href="/notifications" class="nav-icon-btn" title="Notifications">🔔<span class="notif-dot"></span></a>
+    <a href="/support" class="nav-icon-btn" title="Support">🎧</a>
+    <div class="nav-avatar" title="Profile">
+      <img src="{{ user.profile_image }}" alt="Profile" onerror="this.parentElement.style.background='linear-gradient(135deg,#C9A84C,#A8862E)';this.style.display='none'">
+    </div>
+  </div>
+</nav>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<aside class="sidebar" id="sidebar">
+  <span class="sidebar-section-label">Navigation</span>
+  <a href="/dashboard" class="nav-item"><span class="icon">🏠</span> Dashboard</a>
+  <a href="/loan-discovery" class="nav-item"><span class="icon">🔍</span> Loan Discovery</a>
+  <a href="/loan-status" class="nav-item"><span class="icon">📊</span> Loan Status</a>
+  <a href="/emi_schedule" class="nav-item"><span class="icon">💳</span> EMI Schedule</a>
+  <a href="/wallet" class="nav-item"><span class="icon">💰</span> Wallet</a>
+  <a href="/credit_rewards" class="nav-item"><span class="icon">⭐</span> Credit Rewards</a>
+  <span class="sidebar-section-label">Account</span>
+  <a href="/settings" class="nav-item active"><span class="icon">⚙️</span> Settings</a>
+  <a href="/notifications" class="nav-item"><span class="icon">🔔</span> Notifications</a>
+  <a href="/support" class="nav-item"><span class="icon">🎧</span> Support</a>
+  <div class="sidebar-bottom">
+    <a href="/logout" class="nav-item" style="color:#E74C3C"><span class="icon">🚪</span> Logout</a>
+  </div>
+</aside>
+
+<div class="layout">
+  <main class="main">
+    <div class="page-header">
+      <div>
+        <div class="page-title">⚙️ Settings</div>
+        <div class="page-subtitle">Manage your account preferences and security</div>
+      </div>
+      <a href="/dashboard" class="btn btn-ghost">← Dashboard</a>
+    </div>
+
+    <div class="content">
+      <div class="settings-layout">
+
+        <!-- Settings Nav -->
+        <nav class="settings-nav">
+          <button class="settings-nav-item active" onclick="showPanel('profile',this)"><span class="s-icon">👤</span> Profile</button>
+          <button class="settings-nav-item" onclick="showPanel('security',this)"><span class="s-icon">🔒</span> Security</button>
+          <button class="settings-nav-item" onclick="showPanel('notifications',this)"><span class="s-icon">🔔</span> Notifications</button>
+          <button class="settings-nav-item" onclick="showPanel('preferences',this)"><span class="s-icon">🎨</span> Preferences</button>
+          <button class="settings-nav-item" onclick="showPanel('billing',this)"><span class="s-icon">💳</span> Billing</button>
+          <button class="settings-nav-item" onclick="showPanel('danger',this)" style="color:#E74C3C; margin-top:auto;"><span class="s-icon">⚠️</span> Danger Zone</button>
+        </nav>
+
+        <!-- Panels -->
+        <div id="panelWrapper">
+
+          <!-- PROFILE -->
+          <div class="settings-panel active" id="panel-profile">
+            <div class="settings-section">
+              <div class="settings-section-title">Profile Information</div>
+              <div class="settings-section-sub">Update your personal details and profile photo</div>
+              <div class="avatar-upload-row">
+                <div class="avatar-preview">
+                  <img src="{{ user.profile_image }}" alt="Avatar" id="avatarPreview" onerror="this.style.display='none'">
+                </div>
+                <div class="avatar-upload-actions">
+                  <label class="btn btn-ghost" style="cursor:pointer;">📷 Upload Photo <input type="file" accept="image/*" style="display:none" onchange="previewAvatar(this)"></label>
+                  <span>JPG, PNG or WebP · Max 2MB</span>
+                </div>
+              </div>
+              <form onsubmit="saveForm(event,'Profile updated successfully ✅')">
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" value="{{ user.first_name | default(username) }}" placeholder="First name">
+                  </div>
+                  <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" value="{{ user.last_name | default('') }}" placeholder="Last name">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Email Address</label>
+                  <input type="email" value="{{ email }}" placeholder="you@example.com">
+                </div>
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label>Mobile Number</label>
+                    <input type="tel" value="{{ mobile }}" placeholder="+91 XXXXX XXXXX">
+                  </div>
+                  <div class="form-group">
+                    <label>Date of Birth</label>
+                    <input type="date" value="{{ user.dob | default('') }}">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Address</label>
+                  <textarea placeholder="Your address">{{ user.address | default('') }}</textarea>
+                </div>
+                <button type="submit" class="btn btn-gold">💾 Save Changes</button>
+              </form>
+            </div>
+          </div>
+
+          <!-- SECURITY -->
+          <div class="settings-panel" id="panel-security">
+            <div class="settings-section">
+              <div class="settings-section-title">Change Password</div>
+              <div class="settings-section-sub">Keep your account safe with a strong password</div>
+              <form onsubmit="saveForm(event,'Password changed successfully 🔒')">
+                <div class="form-group">
+                  <label>Current Password</label>
+                  <input type="password" placeholder="••••••••">
+                </div>
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label>New Password</label>
+                    <input type="password" placeholder="Min 8 characters" id="newPass" oninput="checkStrength(this.value)">
+                    <div class="form-hint" id="passStrength"></div>
+                  </div>
+                  <div class="form-group">
+                    <label>Confirm Password</label>
+                    <input type="password" placeholder="Repeat new password">
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-gold">🔒 Update Password</button>
+              </form>
+            </div>
+            <div class="settings-section">
+              <div class="settings-section-title">Two-Factor Authentication</div>
+              <div class="settings-section-sub">Add an extra layer of security to your account</div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">SMS Authentication</div>
+                  <div class="toggle-desc">Receive a code via SMS on login</div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" {% if user.sms_2fa %}checked{% endif %} onchange="showToast('SMS 2FA '+(this.checked?'enabled':'disabled'))">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info">
+                  <div class="toggle-label">Authenticator App</div>
+                  <div class="toggle-desc">Use Google Authenticator or similar</div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" {% if user.app_2fa %}checked{% endif %} onchange="showToast('App 2FA '+(this.checked?'enabled':'disabled'))">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- NOTIFICATIONS -->
+          <div class="settings-panel" id="panel-notifications">
+            <div class="settings-section">
+              <div class="settings-section-title">Notification Preferences</div>
+              <div class="settings-section-sub">Choose how and when you want to be notified</div>
+              <div class="toggle-row">
+                <div class="toggle-info"><div class="toggle-label">EMI Payment Reminders</div><div class="toggle-desc">Get reminded before upcoming EMIs</div></div>
+                <label class="toggle-switch"><input type="checkbox" checked onchange="showToast('Preference saved')"><span class="toggle-slider"></span></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info"><div class="toggle-label">Loan Status Updates</div><div class="toggle-desc">Real-time loan application notifications</div></div>
+                <label class="toggle-switch"><input type="checkbox" checked onchange="showToast('Preference saved')"><span class="toggle-slider"></span></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info"><div class="toggle-label">Credit Score Changes</div><div class="toggle-desc">Alerts when your score changes significantly</div></div>
+                <label class="toggle-switch"><input type="checkbox" checked onchange="showToast('Preference saved')"><span class="toggle-slider"></span></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info"><div class="toggle-label">Cashback & Rewards</div><div class="toggle-desc">Be notified when you earn rewards</div></div>
+                <label class="toggle-switch"><input type="checkbox" checked onchange="showToast('Preference saved')"><span class="toggle-slider"></span></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info"><div class="toggle-label">Promotional Offers</div><div class="toggle-desc">Special offers and new product announcements</div></div>
+                <label class="toggle-switch"><input type="checkbox" onchange="showToast('Preference saved')"><span class="toggle-slider"></span></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info"><div class="toggle-label">Email Notifications</div><div class="toggle-desc">Send all alerts to your registered email</div></div>
+                <label class="toggle-switch"><input type="checkbox" checked onchange="showToast('Preference saved')"><span class="toggle-slider"></span></label>
+              </div>
+            </div>
+          </div>
+
+          <!-- PREFERENCES -->
+          <div class="settings-panel" id="panel-preferences">
+            <div class="settings-section">
+              <div class="settings-section-title">Display Preferences</div>
+              <div class="settings-section-sub">Customise your dashboard experience</div>
+              <div class="form-group">
+  <label>Language</label>
+  <select id="settingsLanguage" onchange="updateLanguage(this.value)">
+    <option value="en">English (India)</option>
+    <!-- <option value="hi">हिंदी</option>
+    <option value="ta">தமிழ்</option>
+    <option value="te">తెలుగు</option>
+    <option value="ml">മലയാളം</option> -->
+  </select>
+</div>
+              <div class="form-group">
+                <label>Currency Display</label>
+                <select>
+                  <option>₹ Indian Rupee (INR)</option>
+                  <option>$ US Dollar (USD)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Date Format</label>
+                <select>
+                  <option>DD MMM YYYY</option>
+                  <option>MM/DD/YYYY</option>
+                  <option>YYYY-MM-DD</option>
+                </select>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info"><div class="toggle-label">Compact Dashboard</div><div class="toggle-desc">Show more info with less spacing</div></div>
+                <label class="toggle-switch"><input type="checkbox" onchange="showToast('Preference saved')"><span class="toggle-slider"></span></label>
+              </div>
+              <div class="toggle-row">
+                <div class="toggle-info"><div class="toggle-label">Show Balance on Dashboard</div><div class="toggle-desc">Hide wallet balance for privacy</div></div>
+                <label class="toggle-switch"><input type="checkbox" checked onchange="showToast('Preference saved')"><span class="toggle-slider"></span></label>
+              </div>
+              <br>
+              <button class="btn btn-gold" onclick="showToast('Preferences saved ✅')">💾 Save Preferences</button>
+            </div>
+          </div>
+
+          <!-- BILLING -->
+          <div class="settings-panel" id="panel-billing">
+            <div class="settings-section">
+              <div class="settings-section-title">Current Plan</div>
+              <div class="settings-section-sub">Your subscription and billing details</div>
+              <div class="plan-card">
+                <div>
+                  <div class="plan-badge">⭐ PREMIUM</div>
+                  <div class="plan-name">Premium Plan</div>
+                  <div class="plan-perks">Priority access · AI loan matching · Dedicated support · Exclusive rewards</div>
+                </div>
+                <button class="btn btn-ghost" onclick="showToast('Redirecting to billing portal…')">Manage Plan →</button>
+              </div>
+              <div class="form-group">
+                <label>Billing Email</label>
+                <input type="email" value="{{ email }}" placeholder="billing@example.com">
+              </div>
+              <div class="form-group">
+                <label>Next Billing Date</label>
+                <input type="text" value="{{ user.next_billing | default('—') }}" readonly style="opacity:0.6;cursor:default;">
+              </div>
+              <button class="btn btn-gold" onclick="showToast('Billing updated ✅')">💾 Update Billing</button>
+            </div>
+          </div>
+
+          <!-- DANGER ZONE -->
+          <div class="settings-panel" id="panel-danger">
+            <div class="settings-section danger-zone">
+              <div class="settings-section-title">⚠️ Danger Zone</div>
+              <div class="settings-section-sub">These actions are permanent and cannot be undone</div>
+              <div class="danger-item">
+                <div class="danger-item-info">
+                  <div class="danger-item-title">Deactivate Account</div>
+                  <div class="danger-item-desc">Temporarily disable your account. You can reactivate anytime.</div>
+                </div>
+                <button class="btn btn-danger" onclick="openConfirm('deactivate')">Deactivate</button>
+              </div>
+              <div class="danger-item">
+                <div class="danger-item-info">
+                  <div class="danger-item-title">Clear All Notifications</div>
+                  <div class="danger-item-desc">Permanently delete all your notification history.</div>
+                </div>
+                <button class="btn btn-danger" onclick="openConfirm('clearNotifs')">Clear All</button>
+              </div>
+              <div class="danger-item">
+                <div class="danger-item-info">
+                  <div class="danger-item-title">Delete Account</div>
+                  <div class="danger-item-desc">Permanently delete your account and all associated data. This cannot be undone.</div>
+                </div>
+                <button class="btn btn-danger" onclick="openConfirm('delete')">Delete Account</button>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /panelWrapper -->
+      </div>
+    </div>
+
+    <footer class="footer">© 2025 <span>Creditium</span>. All Rights Reserved. · Premium Financial Experience ✨</footer>
+  </main>
+</div>
+
+<!-- Confirm Modal -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeConfirm()">✕</button>
+    <div class="modal-title" id="confirmTitle">Are you sure?</div>
+    <div class="modal-body" id="confirmBody">This action cannot be undone.</div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-danger" id="confirmBtn" onclick="confirmAction()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+
+function showPanel(id, btn){
+  document.querySelectorAll('.settings-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.settings-nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function saveForm(e, msg){
+  e.preventDefault();
+  showToast(msg);
+}
+
+function showToast(msg){
+  document.querySelectorAll('.toast').forEach(t=>t.remove());
+  const t=document.createElement('div'); t.className='toast'; t.textContent=msg;
+  document.body.appendChild(t); setTimeout(()=>t.remove(),3000);
+}
+
+function previewAvatar(input){
+  if(input.files&&input.files[0]){
+    const r=new FileReader();
+    r.onload=e=>{
+      const img=document.getElementById('avatarPreview');
+      img.src=e.target.result; img.style.display='block';
+    };
+    r.readAsDataURL(input.files[0]);
+  }
+}
+
+function checkStrength(val){
+  const el=document.getElementById('passStrength');
+  if(!val){el.textContent='';return;}
+  if(val.length<6){el.textContent='Weak — too short'; el.style.color='#E74C3C';}
+  else if(val.length<10||!/[A-Z]/.test(val)||!/[0-9]/.test(val)){el.textContent='Medium — add uppercase & numbers'; el.style.color='#F39C12';}
+  else{el.textContent='Strong ✓'; el.style.color='#2ECC71';}
+}
+function updateLanguage(lang) {
+  localStorage.setItem('creditium_lang', lang);
+  showToast('Language updated ✅');
+  setTimeout(() => {
+    window.location.href = '/dashboard';
+  }, 500);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  const savedLang = localStorage.getItem('creditium_lang') || 'en';
+  const langSelect = document.getElementById('settingsLanguage');
+  if (langSelect) {
+    langSelect.value = savedLang;
+  }
+});
+let currentAction='';
+function openConfirm(action){
+  currentAction=action;
+  const titles={deactivate:'Deactivate Account?',clearNotifs:'Clear All Notifications?',delete:'Delete Account?'};
+  const bodies={deactivate:'Your account will be temporarily disabled. You can reactivate anytime by logging in.',clearNotifs:'All notification history will be permanently deleted.',delete:'Your account and all data will be permanently deleted. This action cannot be undone.'};
+  document.getElementById('confirmTitle').textContent=titles[action]||'Confirm';
+  document.getElementById('confirmBody').textContent=bodies[action]||'';
+  document.getElementById('confirmModal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeConfirm(){
+  document.getElementById('confirmModal').classList.remove('open');
+  document.body.style.overflow='';
+}
+function confirmAction(){
+  closeConfirm();
+  const msgs={deactivate:'Account deactivated.',clearNotifs:'Notifications cleared.',delete:'Account deletion requested.'};
+  showToast((msgs[currentAction]||'Done')+' ✅');
+}
+document.getElementById('confirmModal').addEventListener('click',function(e){if(e.target===this)closeConfirm();});
+</script>
+</body>
+</html>

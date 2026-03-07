@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>Collections Management — Creditium Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:wght@600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{
+  --gold:#C9A84C;--gold-lt:#E2C06B;--gold-dk:#9A7528;
+  --bg:#080809;--surface:#121217;--surface2:#18181F;--surface3:#202028;
+  --border:rgba(201,168,76,0.11);--border-md:rgba(201,168,76,0.22);
+  --text:#F0EBE0;--text-muted:#8A8490;--text-dim:#4E4A55;
+  --green:#27AE6B;--blue:#3B82F6;--red:#D94040;
+  --r:12px;--r-sm:8px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;}
+body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");opacity:.5;}
+.orb{position:fixed;border-radius:50%;filter:blur(130px);pointer-events:none;z-index:0;}
+.o1{width:500px;height:500px;background:radial-gradient(circle,rgba(201,168,76,.065) 0%,transparent 70%);top:-180px;right:-120px;animation:dA 26s ease-in-out infinite;}
+.o2{width:380px;height:380px;background:radial-gradient(circle,rgba(39,174,107,.035) 0%,transparent 70%);bottom:-100px;left:-80px;animation:dB 30s ease-in-out infinite;}
+@keyframes dA{0%,100%{transform:translate(0,0)}50%{transform:translate(-45px,65px)}}
+@keyframes dB{0%,100%{transform:translate(0,0)}50%{transform:translate(55px,-45px)}}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--gold-dk);border-radius:4px;}
+
+/* HEADER */
+.header{flex-shrink:0;z-index:100;position:relative;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;background:rgba(8,8,9,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+.hl{display:flex;align-items:center;gap:.7rem;}
+.logo{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:800;text-decoration:none;background:linear-gradient(130deg,var(--gold-lt),var(--gold),var(--gold-dk));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% auto;animation:ls 5s ease-in-out infinite;}
+@keyframes ls{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.admin-badge{padding:2px 7px;border-radius:50px;background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.25);color:var(--gold-lt);font-size:.56rem;font-weight:800;letter-spacing:.1em;}
+.breadcrumb{font-size:.7rem;color:var(--text-dim);}
+.breadcrumb .cur{color:var(--gold-lt);font-weight:600;}
+.hr{display:flex;align-items:center;gap:.75rem;}
+.clock{font-size:.7rem;color:var(--text-dim);font-variant-numeric:tabular-nums;}
+.back-btn{display:inline-flex;align-items:center;gap:.35rem;padding:.35rem .85rem;border-radius:50px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);text-decoration:none;font-size:.75rem;font-weight:600;transition:all .2s;}
+.back-btn:hover{border-color:var(--border-md);color:var(--gold-lt);}
+
+/* KPI STRIP */
+.kpi-strip{flex-shrink:0;z-index:50;position:relative;display:grid;grid-template-columns:200px repeat(4,1fr);gap:0;border-bottom:1px solid var(--border);}
+.kpi-title-cell{background:var(--surface);padding:.65rem 1.2rem;display:flex;flex-direction:column;justify-content:center;border-right:1px solid var(--border);}
+.eyebrow{font-size:.56rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:.2rem;display:flex;align-items:center;gap:.3rem;}
+.eyebrow::before{content:'';width:12px;height:1px;background:var(--gold);}
+.pg-title{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:800;line-height:1.15;}
+.pg-title .g{color:var(--gold-lt);}
+.kpi-cell{background:var(--surface);padding:.65rem 1.1rem;border-right:1px solid var(--border);transition:background .18s;}
+.kpi-cell:last-child{border-right:none;}
+.kpi-cell:hover{background:var(--surface2);}
+.kl{font-size:.54rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.18rem;}
+.kv{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:800;line-height:1;}
+.v-gold{color:var(--gold-lt);}
+.v-green{color:var(--green);}
+.v-blue{color:var(--blue);}
+.ks{font-size:.58rem;color:var(--text-dim);margin-top:.1rem;}
+
+/* BODY */
+.body{flex:1;overflow:hidden;display:flex;position:relative;z-index:1;}
+.main-col{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--border);}
+
+/* Chart */
+.chart-pane{flex-shrink:0;border-bottom:1px solid var(--border);}
+.pane-head{display:flex;align-items:center;justify-content:space-between;padding:.5rem 1rem;border-bottom:1px solid var(--border);background:var(--surface2);}
+.pane-title{font-size:.72rem;font-weight:700;color:var(--text);}
+.pane-badge{font-size:.58rem;font-weight:800;padding:2px 7px;border-radius:20px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);color:var(--gold-lt);}
+.chart-inner{padding:.65rem 1rem;height:185px;position:relative;}
+.chart-inner canvas{position:absolute;inset:.65rem 1rem;}
+
+/* Table */
+.table-pane{flex:1;overflow:hidden;display:flex;flex-direction:column;}
+.tbl-toolbar{flex-shrink:0;display:flex;align-items:center;gap:.6rem;padding:.48rem 1rem;border-bottom:1px solid var(--border);background:var(--surface2);}
+.sw{position:relative;flex:1;max-width:250px;}
+.sico{position:absolute;left:.68rem;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:.74rem;pointer-events:none;}
+.sinp{width:100%;padding:.37rem 1.75rem .37rem 1.9rem;background:var(--surface3);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:.75rem;outline:none;transition:all .18s;}
+.sinp::placeholder{color:var(--text-dim);}
+.sinp:focus{border-color:var(--border-md);box-shadow:0 0 0 2px rgba(201,168,76,.07);}
+.sclr{position:absolute;right:.5rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:.74rem;display:none;line-height:1;padding:.15rem;transition:color .18s;}
+.sclr:hover{color:var(--red);}
+.sclr.show{display:block;}
+.tinfo{font-size:.65rem;color:var(--text-dim);margin-left:auto;white-space:nowrap;}
+.tinfo strong{color:var(--gold-lt);}
+
+.tscroll{flex:1;overflow-y:auto;overflow-x:auto;}
+.tscroll::-webkit-scrollbar{width:4px;height:4px;}
+.tscroll::-webkit-scrollbar-track{background:var(--surface);}
+.tscroll::-webkit-scrollbar-thumb{background:var(--gold-dk);border-radius:4px;}
+
+table{width:100%;border-collapse:collapse;min-width:500px;}
+thead{position:sticky;top:0;z-index:5;}
+thead th{background:var(--surface2);color:var(--gold-lt);padding:.5rem .9rem;text-align:left;font-size:.59rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;border-bottom:1px solid var(--border-md);white-space:nowrap;cursor:pointer;user-select:none;transition:color .16s;}
+thead th:hover{color:var(--text);}
+thead th .si{margin-left:.2rem;opacity:.3;font-size:.54rem;}
+thead th.sorted .si{opacity:1;}
+tbody tr{border-bottom:1px solid rgba(255,255,255,.025);transition:background .12s;}
+tbody tr:last-child{border:none;}
+tbody tr:hover{background:rgba(201,168,76,.028);}
+tbody tr.rh{display:none!important;}
+tbody td{padding:.48rem .9rem;font-size:.75rem;color:var(--text-muted);white-space:nowrap;vertical-align:middle;}
+.tdp{color:var(--text)!important;font-weight:600;}
+.tda{color:var(--gold-lt)!important;font-weight:700;}
+.tdd{font-size:.71rem;font-variant-numeric:tabular-nums;}
+.empty-row td,.no-res-row td{text-align:center;padding:2rem!important;color:var(--text-dim);font-size:.78rem;}
+.no-res-row{display:none;}
+mark{background:rgba(201,168,76,.2);color:var(--gold-lt);border-radius:2px;padding:0 1px;}
+
+/* Sidebar */
+.side-col{width:230px;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden;}
+.side-head{flex-shrink:0;padding:.5rem 1rem;border-bottom:1px solid var(--border);background:var(--surface2);}
+.side-title{font-size:.72rem;font-weight:700;color:var(--text);}
+.side-scroll{flex:1;overflow-y:auto;padding:.6rem .7rem;display:flex;flex-direction:column;gap:.4rem;}
+.side-scroll::-webkit-scrollbar{width:3px;}
+.side-scroll::-webkit-scrollbar-thumb{background:var(--gold-dk);border-radius:3px;}
+.ti{display:flex;align-items:center;gap:.5rem;padding:.48rem .6rem;border-radius:var(--r-sm);background:var(--surface2);border:1px solid var(--border);transition:border-color .18s;}
+.ti:hover{border-color:var(--border-md);}
+.rnk{width:17px;height:17px;border-radius:50%;background:linear-gradient(135deg,var(--gold-lt),var(--gold-dk));color:#080809;display:flex;align-items:center;justify-content:center;font-size:.54rem;font-weight:800;flex-shrink:0;}
+.tnm{flex:1;font-size:.71rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tv{font-size:.69rem;font-weight:700;color:var(--gold-lt);white-space:nowrap;}
+.side-foot{flex-shrink:0;border-top:1px solid var(--border);padding:.55rem .85rem;display:flex;flex-direction:column;gap:.3rem;}
+.sfr{display:flex;justify-content:space-between;}
+.sfl{font-size:.56rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);}
+.sfv{font-size:.7rem;font-weight:700;color:var(--text-muted);}
+
+/* Bottom bar */
+.bottombar{flex-shrink:0;height:33px;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;background:var(--surface);border-top:1px solid var(--border);z-index:50;position:relative;}
+.bbl,.bbr{font-size:.63rem;color:var(--text-dim);display:flex;align-items:center;gap:.75rem;}
+.bbl strong{color:var(--text-muted);}
+kbd{display:inline-flex;align-items:center;padding:1px 5px;border-radius:3px;background:var(--surface3);border:1px solid var(--border);font-size:.57rem;color:var(--text-muted);font-family:inherit;}
+
+@media(max-width:900px){
+  html,body{overflow:auto;height:auto;}
+  .body{flex-direction:column;}
+  .side-col{width:100%;border-top:1px solid var(--border);max-height:200px;}
+  .main-col{border-right:none;}
+  .kpi-strip{grid-template-columns:1fr 1fr;}
+  .kpi-title-cell{grid-column:span 2;}
+  .bottombar{display:none;}
+}
+</style>
+</head>
+<body>
+<div class="orb o1"></div><div class="orb o2"></div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="hl">
+    <a href="/" class="logo">Creditium</a>
+    <span class="admin-badge">⚡ ADMIN</span>
+    <span class="breadcrumb">/ <span class="cur">Collections</span></span>
+  </div>
+  <div class="hr">
+    <span class="clock" id="clk"></span>
+    <a href="{{ url_for('admin_dashboard') }}" class="back-btn">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Dashboard
+    </a>
+  </div>
+</header>
+
+<!-- KPI STRIP -->
+<div class="kpi-strip">
+  <div class="kpi-title-cell">
+    <div class="eyebrow">Payments</div>
+    <div class="pg-title">Collections <span class="g">Mgmt</span></div>
+  </div>
+  <div class="kpi-cell">
+    <div class="kl">Total Collected</div>
+    <div class="kv v-gold">₹ {{ "{:,.0f}".format(total_collected) }}</div>
+    <div class="ks">All-time</div>
+  </div>
+  <div class="kpi-cell">
+    <div class="kl">Paid EMIs</div>
+    <div class="kv v-green">{{ total_paid_count }}</div>
+    <div class="ks">Installments</div>
+  </div>
+  <div class="kpi-cell">
+    <div class="kl">Average EMI</div>
+    <div class="kv v-blue">₹ {% if total_paid_count > 0 %}{{ "{:,.0f}".format(total_collected / total_paid_count) }}{% else %}0{% endif %}</div>
+    <div class="ks">Per payment</div>
+  </div>
+  <div class="kpi-cell">
+    <div class="kl">Period</div>
+    <div class="kv" style="font-size:.9rem;color:var(--text-muted)">Last 12 mo</div>
+    <div class="ks">Chart window</div>
+  </div>
+</div>
+
+<!-- BODY -->
+<div class="body">
+
+  <div class="main-col">
+    <!-- Chart -->
+    <div class="chart-pane">
+      <div class="pane-head">
+        <span class="pane-title">📈 Monthly Collections</span>
+        <span class="pane-badge">Last 12 Months</span>
+      </div>
+      <div class="chart-inner">
+        <canvas id="colChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-pane">
+      <div class="tbl-toolbar">
+        <span class="pane-title">📄 Paid EMI Records</span>
+        <div class="sw">
+          <span class="sico">🔍</span>
+          <input type="text" class="sinp" id="sInp" placeholder="Search user, loan…" autocomplete="off" spellcheck="false">
+          <button class="sclr" id="sClr" type="button" onclick="clearS()">✕</button>
+        </div>
+        <span class="tinfo" id="tInfo"></span>
+      </div>
+      <div class="tscroll">
+        <table id="emiTbl">
+          <thead>
+            <tr>
+              <th onclick="srt(0)">User <span class="si">↕</span></th>
+              <th onclick="srt(1)">Loan Name <span class="si">↕</span></th>
+              <th onclick="srt(2)">Amount <span class="si">↕</span></th>
+              <th onclick="srt(3)">Due Date <span class="si">↕</span></th>
+              <th onclick="srt(4)">Paid On <span class="si">↕</span></th>
+            </tr>
+          </thead>
+          <tbody id="tBody">
+            {% for p in paid_emis %}
+            <tr data-search="{{ [p.username, p.loanname] | join(' ') | lower }}">
+              <td class="tdp" data-label="User">{{ p.username }}</td>
+              <td data-label="Loan">{{ p.loanname }}</td>
+              <td class="tda" data-label="Amount">₹ {{ "{:,.2f}".format(p.emi_amount) }}</td>
+              <td class="tdd" data-label="Due">{{ p.due_date.strftime('%d %b %Y') }}</td>
+              <td class="tdd" data-label="Paid On">{{ p.paid_on.strftime('%d %b %Y') if p.paid_on else '—' }}</td>
+            </tr>
+            {% else %}
+            <tr class="empty-row"><td colspan="5">No paid EMIs yet</td></tr>
+            {% endfor %}
+            <tr class="no-res-row" id="noResRow"><td colspan="5">🔎 No records match.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="side-col">
+    <div class="side-head"><div class="side-title">🏆 Top Collections</div></div>
+    <div class="side-scroll">
+      {% if top_labels and top_values %}
+        {% for i in range(top_labels|length) %}
+        <div class="ti">
+          <div class="rnk">{{ i+1 }}</div>
+          <div class="tnm" title="{{ top_labels[i] }}">{{ top_labels[i] }}</div>
+          <div class="tv">₹{{ "{:,.0f}".format(top_values[i]) }}</div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div style="color:var(--text-dim);font-size:.74rem;padding:.4rem;">No data yet.</div>
+      {% endif %}
+    </div>
+    <div class="side-foot">
+      <div class="sfr"><span class="sfl">Records</span><span class="sfv">{{ total_paid_count }}</span></div>
+      <div class="sfr"><span class="sfl">Window</span><span class="sfv">12 months</span></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottombar">
+  <div class="bbl"><span>Showing <strong id="bbCount">—</strong> records</span></div>
+  <div class="bbr"><span><kbd>/</kbd> search &nbsp;<kbd>Esc</kbd> clear &nbsp; click headers to sort</span></div>
+</div>
+
+<script>
+// Clock
+(function(){
+  const e=document.getElementById('clk');
+  const t=()=>e.textContent=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false})+' IST';
+  t();setInterval(t,1000);
+})();
+
+// Chart
+const labels={{ month_labels|tojson }};
+const values={{ month_values|tojson }};
+new Chart(document.getElementById('colChart').getContext('2d'),{
+  type:'line',
+  data:{labels,datasets:[{
+    label:'₹ Collected',data:values,
+    borderColor:'#C9A84C',backgroundColor:'rgba(201,168,76,0.07)',
+    fill:true,tension:.4,pointRadius:3,pointHoverRadius:5,
+    pointBackgroundColor:'#E2C06B',pointBorderColor:'#9A7528',pointBorderWidth:1.5,borderWidth:2
+  }]},
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{
+      legend:{display:false},
+      tooltip:{backgroundColor:'#121217',borderColor:'rgba(201,168,76,0.22)',borderWidth:1,
+        titleColor:'#E2C06B',bodyColor:'#F0EBE0',padding:8,
+        callbacks:{label:c=>' ₹'+c.parsed.y.toLocaleString('en-IN')}}
+    },
+    scales:{
+      x:{ticks:{color:'#4E4A55',font:{family:'DM Sans',size:9}},grid:{color:'rgba(255,255,255,0.025)'}},
+      y:{ticks:{color:'#4E4A55',font:{family:'DM Sans',size:9},callback:v=>'₹'+Number(v).toLocaleString('en-IN')},grid:{color:'rgba(255,255,255,0.025)'}}
+    }
+  }
+});
+
+// Table
+const origHTML=new WeakMap();
+window.addEventListener('DOMContentLoaded',()=>{
+  const rows=document.querySelectorAll('#tBody tr[data-search]');
+  rows.forEach(r=>r.querySelectorAll('td').forEach(td=>origHTML.set(td,td.innerHTML)));
+  const n=rows.length;
+  document.getElementById('tInfo').innerHTML=`<strong>${n}</strong> records`;
+  document.getElementById('bbCount').textContent=n;
+  document.getElementById('sInp').addEventListener('input',function(){runS(this.value);});
+});
+
+function runS(q){
+  const qu=q.trim().toLowerCase();
+  const rows=document.querySelectorAll('#tBody tr[data-search]');
+  const noRow=document.getElementById('noResRow');
+  document.getElementById('sClr').classList.toggle('show',qu.length>0);
+  let vis=0,total=rows.length;
+  rows.forEach(r=>{
+    const ok=qu===''||(r.dataset.search||'').includes(qu);
+    r.classList.toggle('rh',!ok);
+    if(ok)vis++;
+    r.querySelectorAll('td').forEach(td=>{
+      const orig=origHTML.get(td);if(orig===undefined)return;
+      td.innerHTML=orig;
+      if(ok&&qu){const esc=qu.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');hlWalk(td,new RegExp('('+esc+')','gi'));}
+    });
+  });
+  noRow.style.display=(vis===0&&qu)?'':'none';
+  document.getElementById('tInfo').innerHTML=qu?`<strong>${vis}</strong> of ${total}`:`<strong>${total}</strong> records`;
+  document.getElementById('bbCount').textContent=qu?vis:total;
+}
+
+function hlWalk(node,rx){
+  if(node.nodeType===Node.TEXT_NODE){
+    if(!rx.test(node.textContent))return;rx.lastIndex=0;
+    const f=document.createDocumentFragment();
+    node.textContent.split(rx).forEach(p=>{
+      rx.lastIndex=0;
+      if(rx.test(p)){rx.lastIndex=0;const m=document.createElement('mark');m.textContent=p;f.appendChild(m);}
+      else f.appendChild(document.createTextNode(p));
+    });
+    node.parentNode.replaceChild(f,node);
+  } else if(node.nodeType===Node.ELEMENT_NODE&&node.tagName!=='MARK')
+    Array.from(node.childNodes).forEach(c=>hlWalk(c,rx));
+}
+
+function clearS(){
+  document.getElementById('sInp').value='';runS('');
+  document.getElementById('sInp').focus();
+}
+
+let sDir={};
+function srt(col){
+  const tbody=document.getElementById('tBody');
+  const rows=Array.from(tbody.querySelectorAll('tr[data-search]'));
+  const dir=(sDir[col]=-(sDir[col]||1));
+  rows.sort((a,b)=>{
+    const at=a.querySelectorAll('td')[col]?.textContent.trim()||'';
+    const bt=b.querySelectorAll('td')[col]?.textContent.trim()||'';
+    const an=parseFloat(at.replace(/[₹, ]/g,''));
+    const bn=parseFloat(bt.replace(/[₹, ]/g,''));
+    if(!isNaN(an)&&!isNaN(bn))return dir*(an-bn);
+    const ad=new Date(at),bd=new Date(bt);
+    if(!isNaN(ad)&&!isNaN(bd))return dir*(ad-bd);
+    return dir*at.localeCompare(bt);
+  });
+  rows.forEach(r=>tbody.insertBefore(r,document.getElementById('noResRow')));
+  document.querySelectorAll('thead th').forEach((th,i)=>{
+    th.classList.toggle('sorted',i===col);
+    const s=th.querySelector('.si');if(s)s.textContent=i===col?(dir===1?'↑':'↓'):'↕';
+  });
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='/'&&document.activeElement.tagName!=='INPUT'){e.preventDefault();document.getElementById('sInp').focus();}
+  if(e.key==='Escape'){clearS();document.getElementById('sInp').blur();}
+});
+</script>
+</body>
+</html>

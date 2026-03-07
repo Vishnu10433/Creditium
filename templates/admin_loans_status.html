@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Loan Applications History — Creditium Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold:#C9A84C; --gold-lt:#E2C06B; --gold-dk:#9A7528;
+  --bg:#080809;
+  --surface:#121217; --surface2:#18181F; --surface3:#202028;
+  --border:rgba(201,168,76,0.11); --border-md:rgba(201,168,76,0.22); --border-hi:rgba(201,168,76,0.45);
+  --text:#F0EBE0; --text-muted:#8A8490; --text-dim:#4E4A55;
+  --green:#27AE6B; --green-dim:rgba(39,174,107,0.12);
+  --red:#D94040; --red-dim:rgba(217,64,64,0.1);
+  --orange:#D4742A; --blue:#2E87C8;
+  --header-h:62px; --r:14px; --r-sm:9px; --r-xs:6px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");opacity:.6;}
+.orb{position:fixed;border-radius:50%;filter:blur(130px);pointer-events:none;z-index:0;}
+.o1{width:600px;height:600px;background:radial-gradient(circle,rgba(201,168,76,0.06) 0%,transparent 70%);top:-200px;right:-150px;animation:d1 26s ease-in-out infinite;}
+.o2{width:400px;height:400px;background:radial-gradient(circle,rgba(201,168,76,0.04) 0%,transparent 70%);bottom:-150px;left:-100px;animation:d2 32s ease-in-out infinite;}
+@keyframes d1{0%,100%{transform:translate(0,0)}50%{transform:translate(-50px,70px)}}
+@keyframes d2{0%,100%{transform:translate(0,0)}50%{transform:translate(60px,-50px)}}
+::-webkit-scrollbar{width:4px;height:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--gold),var(--gold-dk));border-radius:4px;}
+
+.header{position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:var(--header-h);background:rgba(8,8,9,0.92);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border-bottom:1px solid var(--border);}
+.hl{display:flex;align-items:center;gap:.85rem;}
+.logo{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:800;text-decoration:none;background:linear-gradient(130deg,var(--gold-lt),var(--gold),var(--gold-dk));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% auto;animation:ls 5s ease-in-out infinite;}
+@keyframes ls{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.admin-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:50px;background:linear-gradient(135deg,rgba(201,168,76,.16),rgba(201,168,76,.05));border:1px solid rgba(201,168,76,.28);color:var(--gold-lt);font-size:.58rem;font-weight:800;letter-spacing:.1em;}
+.header-right{display:flex;align-items:center;gap:1rem;}
+.header-clock{font-size:.72rem;color:var(--text-dim);font-variant-numeric:tabular-nums;letter-spacing:.03em;}
+.back-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:50px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);text-decoration:none;font-size:.78rem;font-weight:700;transition:all .22s;}
+.back-btn:hover{border-color:var(--border-md);color:var(--gold-lt);background:rgba(201,168,76,.07);}
+
+.page{position:relative;z-index:1;max-width:1500px;margin:0 auto;padding:2rem 2rem 5rem;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+.page-head{margin-bottom:1.75rem;animation:fadeUp .5s ease both;}
+.sec-eye{display:inline-flex;align-items:center;gap:.45rem;color:var(--gold);font-size:.62rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase;margin-bottom:.4rem;}
+.sec-eye::before{content:'';width:18px;height:1px;background:var(--gold);}
+.sec-title{font-family:'Cormorant Garamond',serif;font-size:clamp(1.5rem,3.5vw,2.2rem);font-weight:800;letter-spacing:-.01em;line-height:1.1;}
+.sec-title .g{color:var(--gold-lt);}
+
+/* Stat strip */
+.stat-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:1.5rem;animation:fadeUp .5s .07s ease both;}
+.stat-cell{background:var(--surface);padding:.9rem 1.25rem;transition:background .2s;}
+.stat-cell:hover{background:var(--surface2);}
+.stat-cell-label{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:.3rem;}
+.stat-cell-val{font-family:'Cormorant Garamond',serif;font-size:1.55rem;font-weight:800;line-height:1;}
+.v-gold{color:var(--gold-lt);} .v-green{color:var(--green);} .v-red{color:var(--red);} .v-orange{color:var(--orange);} .v-blue{color:var(--blue);}
+.stat-cell-sub{font-size:.65rem;color:var(--text-dim);margin-top:.2rem;}
+
+/* Filter box */
+.filter-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.1rem 1.4rem;margin-bottom:1rem;animation:fadeUp .5s .1s ease both;}
+.filter-row{display:flex;gap:.65rem;flex-wrap:wrap;align-items:flex-end;}
+.fi{display:flex;flex-direction:column;gap:.3rem;flex:1;min-width:160px;}
+.fi label{font-size:.62rem;font-weight:800;color:var(--text-dim);letter-spacing:.08em;text-transform:uppercase;}
+.fi select{padding:.62rem .9rem;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:.82rem;transition:all .2s;outline:none;-webkit-appearance:none;appearance:none;}
+.fi select:focus{border-color:var(--border-md);background:var(--surface3);box-shadow:0 0 0 3px rgba(201,168,76,.08);}
+.fi select option{background:var(--surface3);}
+.fi-btns{display:flex;gap:.5rem;align-self:flex-end;}
+.filter-btn{padding:.62rem 1.3rem;border-radius:var(--r-sm);border:none;background:linear-gradient(135deg,var(--gold-lt),var(--gold-dk));color:#0a0a0a;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:800;cursor:pointer;transition:all .22s;white-space:nowrap;}
+.filter-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(201,168,76,.3);}
+.reset-btn{padding:.62rem 1rem;border-radius:var(--r-sm);border:1px solid var(--border);background:transparent;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center;}
+.reset-btn:hover{border-color:var(--border-md);color:var(--text);}
+
+/* Live search */
+.live-search-wrap{position:relative;margin-bottom:1.1rem;animation:fadeUp .5s .12s ease both;}
+.lsi{position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:var(--text-dim);pointer-events:none;font-size:.85rem;}
+.live-search-input{width:100%;padding:.72rem 2.6rem .72rem 2.4rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:.84rem;outline:none;transition:border-color .2s,box-shadow .2s;}
+.live-search-input::placeholder{color:var(--text-dim);}
+.live-search-input:focus{border-color:var(--border-md);box-shadow:0 0 0 3px rgba(201,168,76,.08);}
+.lsc{position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-dim);font-size:.9rem;cursor:pointer;display:none;line-height:1;padding:.2rem;transition:color .2s;}
+.lsc:hover{color:var(--red);}
+.lsc.show{display:block;}
+
+/* Table */
+.table-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;animation:fadeUp .5s .14s ease both;}
+.table-top-bar{height:2px;background:linear-gradient(90deg,transparent,var(--gold-dk),var(--gold-lt),var(--gold-dk),transparent);}
+.table-meta{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.25rem;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:.5rem;}
+.table-meta-left{font-size:.72rem;color:var(--text-dim);}
+.table-meta-left strong{color:var(--gold-lt);}
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;min-width:750px;}
+thead th{background:var(--surface2);color:var(--gold-lt);padding:.8rem 1rem;text-align:left;font-size:.65rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;border-bottom:1px solid var(--border-md);white-space:nowrap;cursor:pointer;user-select:none;transition:color .18s;}
+thead th:hover{color:var(--text);}
+thead th:last-child{cursor:default;}
+thead th:last-child:hover{color:var(--gold-lt);}
+thead th .si{margin-left:.3rem;opacity:.35;font-size:.6rem;}
+thead th.sorted .si{opacity:1;color:var(--gold-lt);}
+tbody tr{border-bottom:1px solid rgba(255,255,255,.03);transition:background .15s;}
+tbody tr:last-child{border:none;}
+tbody tr:hover{background:rgba(201,168,76,.028);}
+tbody tr.row-hidden{display:none!important;}
+tbody td{padding:.8rem 1rem;font-size:.8rem;color:var(--text-muted);vertical-align:middle;white-space:nowrap;}
+.td-id{color:var(--text-dim)!important;font-size:.72rem;font-weight:700;font-family:monospace;}
+.td-name{color:var(--text)!important;font-weight:600;}
+.td-amount{color:var(--gold-lt)!important;font-weight:700;font-variant-numeric:tabular-nums;}
+.td-date{font-variant-numeric:tabular-nums;}
+
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:50px;font-size:.65rem;font-weight:800;letter-spacing:.04em;white-space:nowrap;}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.b-approved{background:var(--green-dim);color:var(--green);border:1px solid rgba(39,174,107,.22);}
+.b-approved::before{background:var(--green);}
+.b-pending{background:rgba(201,168,76,.12);color:var(--gold-lt);border:1px solid rgba(201,168,76,.22);}
+.b-pending::before{background:var(--gold-lt);}
+.b-rejected{background:var(--red-dim);color:var(--red);border:1px solid rgba(217,64,64,.2);}
+.b-rejected::before{background:var(--red);}
+.b-sent{background:var(--green-dim);color:var(--green);border:1px solid rgba(39,174,107,.22);}
+.b-sent::before{background:var(--green);}
+.b-notsent{background:var(--red-dim);color:var(--red);border:1px solid rgba(217,64,64,.2);}
+.b-notsent::before{background:var(--red);}
+
+.btn-view{display:inline-flex;align-items:center;gap:.3rem;padding:.35rem .85rem;border-radius:var(--r-xs);border:1px solid var(--border-md);background:linear-gradient(135deg,rgba(201,168,76,.14),rgba(201,168,76,.04));color:var(--gold-lt);font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .22s;white-space:nowrap;}
+.btn-view:hover{background:linear-gradient(135deg,rgba(201,168,76,.26),rgba(201,168,76,.1));border-color:var(--border-hi);box-shadow:0 3px 10px rgba(201,168,76,.18);transform:translateY(-1px);}
+
+mark{background:rgba(201,168,76,.22);color:var(--gold-lt);border-radius:2px;padding:0 2px;}
+
+.no-results-row{display:none;}
+.no-results-row td,.empty-row td{text-align:center;padding:3.5rem 1rem!important;color:var(--text-dim);font-size:.84rem;}
+.nri{font-size:1.8rem;display:block;margin-bottom:.5rem;}
+
+.pagination{display:flex;justify-content:center;align-items:center;gap:.5rem;margin-top:1.75rem;flex-wrap:wrap;}
+.pg-btn{display:inline-flex;align-items:center;gap:.35rem;padding:.45rem 1.1rem;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);text-decoration:none;font-size:.78rem;font-weight:700;transition:all .2s;}
+.pg-btn:hover{border-color:var(--border-md);color:var(--gold-lt);}
+.pg-current{padding:.45rem 1rem;border-radius:var(--r-sm);background:linear-gradient(135deg,var(--gold-lt),var(--gold-dk));color:#0a0a0a;font-size:.78rem;font-weight:800;}
+
+@media(max-width:960px){.stat-strip{grid-template-columns:1fr 1fr 1fr;}.stat-cell:nth-child(n+4){display:none;}}
+@media(max-width:600px){
+  .page{padding:1.25rem .9rem 5rem;}
+  .header{padding:0 1rem;}
+  .stat-strip{grid-template-columns:1fr 1fr;}
+  .stat-cell:nth-child(n+3){display:none;}
+  .filter-row{flex-direction:column;}
+  .fi{min-width:100%;}
+  .fi-btns{width:100%;}
+  .filter-btn,.reset-btn{flex:1;justify-content:center;}
+  table,thead,tbody,tr,th,td{display:block;}
+  thead{display:none;}
+  tbody tr{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:.75rem;padding:.75rem 1rem;position:relative;}
+  tbody tr::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold-dk),var(--gold-lt));}
+  tbody td{padding:.35rem 0 .35rem 46%;position:relative;border:none;border-bottom:1px solid rgba(255,255,255,.03);font-size:.78rem;min-height:28px;display:flex;align-items:center;white-space:normal;}
+  tbody td:last-child{border:none;}
+  tbody td::before{content:attr(data-label);position:absolute;left:0;width:44%;font-size:.62rem;font-weight:800;color:var(--text-dim);letter-spacing:.06em;text-transform:uppercase;}
+}
+</style>
+</head>
+<body>
+<div class="orb o1"></div>
+<div class="orb o2"></div>
+
+<header class="header">
+  <div class="hl">
+    <a href="/" class="logo">Creditium</a>
+    <div class="admin-badge">⚡ ADMIN</div>
+  </div>
+  <div class="header-right">
+    <span class="header-clock" id="hClock"></span>
+    <a href="{{ url_for('admin_dashboard') }}" class="back-btn">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Dashboard
+    </a>
+  </div>
+</header>
+
+<div class="page">
+
+  <div class="page-head">
+    <div class="sec-eye">Admin · Loans</div>
+    <div class="sec-title">Application <span class="g">History</span></div>
+  </div>
+
+  <!-- Stat strip -->
+  <div class="stat-strip">
+    <div class="stat-cell">
+      <div class="stat-cell-label">Total</div>
+      <div class="stat-cell-val v-gold">{{ loans | length }}</div>
+      <div class="stat-cell-sub">this page</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-cell-label">Approved</div>
+      <div class="stat-cell-val v-green">{{ loans | selectattr('status','equalto','Approved') | list | length }}</div>
+      <div class="stat-cell-sub">sanctioned</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-cell-label">Pending</div>
+      <div class="stat-cell-val v-orange">{{ loans | selectattr('status','equalto','Pending') | list | length }}</div>
+      <div class="stat-cell-sub">awaiting</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-cell-label">Rejected</div>
+      <div class="stat-cell-val v-red">{{ loans | rejectattr('status','equalto','Approved') | rejectattr('status','equalto','Pending') | list | length }}</div>
+      <div class="stat-cell-sub">declined</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-cell-label">Money Sent</div>
+      <div class="stat-cell-val v-blue">{{ loans | selectattr('money_sent') | list | length }}</div>
+      <div class="stat-cell-sub">disbursed</div>
+    </div>
+  </div>
+
+  <!-- Server-side filters (Status + Money Sent — submitted via GET) -->
+  <form method="GET" class="filter-box">
+    <div class="filter-row">
+      <div class="fi">
+        <label>Status</label>
+        <select name="status">
+          <option value="">All Statuses</option>
+          <option value="Pending"  {% if request.args.get('status')=='Pending'  %}selected{% endif %}>⏳ Pending</option>
+          <option value="Approved" {% if request.args.get('status')=='Approved' %}selected{% endif %}>✔ Approved</option>
+          <option value="Rejected" {% if request.args.get('status')=='Rejected' %}selected{% endif %}>✕ Rejected</option>
+        </select>
+      </div>
+      <div class="fi">
+        <label>Money Sent</label>
+        <select name="money_sent">
+          <option value="">All</option>
+          <option value="1" {% if request.args.get('money_sent')=='1' %}selected{% endif %}>💸 Sent</option>
+          <option value="0" {% if request.args.get('money_sent')=='0' %}selected{% endif %}>⏳ Not Sent</option>
+        </select>
+      </div>
+      <div class="fi-btns">
+        <a href="{{ url_for('admin_loans_history') }}" class="reset-btn">✕ Reset</a>
+        <button type="submit" class="filter-btn">Apply →</button>
+      </div>
+    </div>
+  </form>
+
+  <!-- Live client-side search bar -->
+  <div class="live-search-wrap">
+    <span class="lsi">🔍</span>
+    <input type="text" class="live-search-input" id="liveSearch"
+      placeholder="Live search: name, loan, amount, ID, date, status…"
+      autocomplete="off" spellcheck="false">
+    <button class="lsc" id="lsc" onclick="clearSearch()" type="button">✕</button>
+  </div>
+
+  <!-- Table -->
+  <div class="table-card">
+    <div class="table-top-bar"></div>
+    <div class="table-meta">
+      <span class="table-meta-left">Showing <strong id="visibleCount">{{ loans | length }}</strong> of {{ loans | length }} loans</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortTable(0)">ID <span class="si">↕</span></th>
+            <th onclick="sortTable(1)">User <span class="si">↕</span></th>
+            <th onclick="sortTable(2)">Loan Name <span class="si">↕</span></th>
+            <th onclick="sortTable(3)">Amount <span class="si">↕</span></th>
+            <th onclick="sortTable(4)">Status <span class="si">↕</span></th>
+            <th onclick="sortTable(5)">Date <span class="si">↕</span></th>
+            <th onclick="sortTable(6)">Money Sent <span class="si">↕</span></th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="tBody">
+
+          {% for loan in loans %}
+          <tr data-search="{{ [
+              loan.id | string,
+              loan.user.username if loan.user else '',
+              loan.loanname or '',
+              loan.amount | string if loan.amount else '',
+              loan.status or '',
+              loan.timestamp.strftime('%d %b %Y') if loan.timestamp else '',
+              'sent' if loan.money_sent else 'not sent'
+            ] | join(' ') | lower }}">
+            <td class="td-id" data-label="ID">#{{ loan.id }}</td>
+            <td class="td-name" data-label="User">{{ loan.user.username if loan.user else '—' }}</td>
+            <td data-label="Loan">{{ loan.loanname or '—' }}</td>
+            <td class="td-amount" data-label="Amount">₹{{ "{:,.2f}".format(loan.amount) if loan.amount else '—' }}</td>
+            <td data-label="Status">
+              {% if loan.status == "Approved" %}
+                <span class="badge b-approved">Approved</span>
+              {% elif loan.status == "Pending" %}
+                <span class="badge b-pending">Pending</span>
+              {% else %}
+                <span class="badge b-rejected">{{ loan.status }}</span>
+              {% endif %}
+            </td>
+            <td class="td-date" data-label="Date">
+              {% if loan.timestamp %}{{ loan.timestamp.strftime("%d %b %Y") }}{% else %}—{% endif %}
+            </td>
+            <td data-label="Money Sent">
+              {% if loan.money_sent %}
+                <span class="badge b-sent">Sent</span>
+              {% else %}
+                <span class="badge b-notsent">Not Sent</span>
+              {% endif %}
+            </td>
+            <td data-label="Action">
+              <form method="GET" action="{{ url_for('admin_review_loan', loan_id=loan.id) }}" style="margin:0">
+                <button class="btn-view">View →</button>
+              </form>
+            </td>
+          </tr>
+          {% else %}
+          <tr class="empty-row">
+            <td colspan="8"><span class="nri">📋</span>No loan applications found.</td>
+          </tr>
+          {% endfor %}
+
+          <tr class="no-results-row" id="noResultsRow">
+            <td colspan="8"><span class="nri">🔎</span>No loans match your search.</td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pagination — correct endpoint: admin_loans_history -->
+  <div class="pagination">
+    {% if prev_page %}
+      <a class="pg-btn" href="{{ url_for('admin_loans_history', page=prev_page, status=request.args.get('status',''), money_sent=request.args.get('money_sent','')) }}">← Prev</a>
+    {% endif %}
+    <span class="pg-current">Page {{ page }}</span>
+    {% if next_page %}
+      <a class="pg-btn" href="{{ url_for('admin_loans_history', page=next_page, status=request.args.get('status',''), money_sent=request.args.get('money_sent','')) }}">Next →</a>
+    {% endif %}
+  </div>
+
+</div>
+
+<script>
+// Clock
+(function(){
+  const el = document.getElementById('hClock');
+  const tick = () => el.textContent = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false})+' IST';
+  tick(); setInterval(tick, 1000);
+})();
+
+// ── Store original cell HTML on load so highlights are always reversible
+const origHTML = new WeakMap();
+
+window.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('#tBody tr[data-search]').forEach(row => {
+    row.querySelectorAll('td').forEach(td => origHTML.set(td, td.innerHTML));
+  });
+
+  // Wire up search input
+  document.getElementById('liveSearch').addEventListener('input', function() {
+    runSearch(this.value);
+  });
+});
+
+// ── Core search function
+function runSearch(query) {
+  const q = query.trim().toLowerCase();
+  const rows = document.querySelectorAll('#tBody tr[data-search]');
+  const noRow = document.getElementById('noResultsRow');
+  const lsc = document.getElementById('lsc');
+
+  lsc.classList.toggle('show', q.length > 0);
+
+  let visible = 0;
+
+  rows.forEach(row => {
+    const haystack = row.getAttribute('data-search') || '';
+    const isMatch = q === '' || haystack.includes(q);
+
+    row.classList.toggle('row-hidden', !isMatch);
+    if (isMatch) visible++;
+
+    // Restore original HTML first, then apply highlight if needed
+    row.querySelectorAll('td').forEach(td => {
+      const orig = origHTML.get(td);
+      if (orig === undefined) return;
+      td.innerHTML = orig; // always restore first
+      if (isMatch && q.length > 0) {
+        applyHighlight(td, q);
+      }
+    });
+  });
+
+  noRow.style.display = (visible === 0 && q.length > 0) ? '' : 'none';
+  document.getElementById('visibleCount').textContent = visible;
+}
+
+// Highlight only inside text nodes (not HTML attributes/tags)
+function applyHighlight(td, q) {
+  const esc = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp('(' + esc + ')', 'gi');
+  walkTextNodes(td, regex);
+}
+
+function walkTextNodes(node, regex) {
+  if (node.nodeType === Node.TEXT_NODE) {
+    if (regex.test(node.textContent)) {
+      const frag = document.createDocumentFragment();
+      node.textContent.split(regex).forEach(part => {
+        if (regex.test(part)) {
+          const m = document.createElement('mark');
+          m.textContent = part;
+          frag.appendChild(m);
+        } else {
+          frag.appendChild(document.createTextNode(part));
+        }
+        regex.lastIndex = 0;
+      });
+      node.parentNode.replaceChild(frag, node);
+    }
+  } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName !== 'MARK' && node.tagName !== 'BUTTON' && node.tagName !== 'FORM') {
+    Array.from(node.childNodes).forEach(child => walkTextNodes(child, regex));
+  }
+}
+
+function clearSearch() {
+  const inp = document.getElementById('liveSearch');
+  inp.value = '';
+  runSearch('');
+  inp.focus();
+}
+
+// ── Sort
+let sortDir = {};
+function sortTable(col) {
+  const tbody = document.getElementById('tBody');
+  const rows  = Array.from(tbody.querySelectorAll('tr[data-search]'));
+  const dir   = (sortDir[col] = -(sortDir[col] || 1));
+
+  rows.sort((a, b) => {
+    const at = a.querySelectorAll('td')[col]?.textContent.trim() || '';
+    const bt = b.querySelectorAll('td')[col]?.textContent.trim() || '';
+    const an = parseFloat(at.replace(/[₹,# ]/g, ''));
+    const bn = parseFloat(bt.replace(/[₹,# ]/g, ''));
+    if (!isNaN(an) && !isNaN(bn)) return dir * (an - bn);
+    const ad = new Date(at), bd = new Date(bt);
+    if (!isNaN(ad) && !isNaN(bd)) return dir * (ad - bd);
+    return dir * at.localeCompare(bt);
+  });
+
+  const noRow = document.getElementById('noResultsRow');
+  rows.forEach(r => tbody.insertBefore(r, noRow));
+
+  document.querySelectorAll('thead th').forEach((th, i) => {
+    th.classList.toggle('sorted', i === col);
+    const si = th.querySelector('.si');
+    if (si) si.textContent = i === col ? (dir === 1 ? '↑' : '↓') : '↕';
+  });
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
+    e.preventDefault();
+    document.getElementById('liveSearch').focus();
+  }
+  if (e.key === 'Escape') {
+    clearSearch();
+    document.getElementById('liveSearch').blur();
+  }
+});
+</script>
+</body>
+</html>

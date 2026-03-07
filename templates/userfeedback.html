@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Feedback - Creditium</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+body { background: #0a0a0a; color: #fff; min-height: 100vh; }
+nav {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:20px 40px;
+    background: rgba(20,20,20,0.95);
+    backdrop-filter: blur(20px);
+    box-shadow:0 8px 32px rgba(0,0,0,0.4);
+    border-bottom:2px solid rgba(255,193,7,0.2);
+}
+nav .logo {
+    font-size:2rem;
+    font-weight:900;
+    background: linear-gradient(135deg,#ffc107,#ff9800);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+nav a {
+    color:#fff;
+    margin-left:25px;
+    text-decoration:none;
+    font-weight:600;
+    transition:0.3s;
+}
+nav a:hover { color:#ffc107; text-shadow:0 0 10px rgba(255,193,7,0.5); }
+
+.container { max-width:600px; margin:50px auto; padding:0 20px; }
+h2 { color:#ffc107; margin-bottom:20px; text-align:center; }
+
+.feedback-card {
+    background: rgba(30,30,30,0.95);
+    backdrop-filter: blur(20px);
+    border-radius:20px;
+    padding:35px 30px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.5);
+}
+.feedback-card p { color:#ddd; margin-bottom:20px; }
+
+.feedback-card input, 
+.feedback-card textarea {
+    width:100%;
+    padding:15px 20px;
+    margin-bottom:20px;
+    border-radius:12px;
+    border:2px solid rgba(255,193,7,0.3);
+    background: rgba(40,40,40,0.85);
+    color:#fff;
+    font-size:1rem;
+    transition: all 0.3s;
+}
+
+.feedback-card input:focus, 
+.feedback-card textarea:focus {
+    outline:none;
+    border-color:#ffc107;
+    box-shadow:0 0 20px rgba(255,193,7,0.3);
+    background: rgba(50,50,50,0.9);
+}
+
+.submit-btn {
+    background: linear-gradient(135deg, #ffc107, #ff9800);
+    color:#000;
+    border:none;
+    padding:15px 35px;
+    border-radius:25px;
+    font-weight:700;
+    cursor:pointer;
+    font-size:1rem;
+    transition: all 0.3s;
+    box-shadow:0 5px 20px rgba(255,193,7,0.4);
+    display:block;
+    margin:0 auto;
+}
+
+.submit-btn:hover {
+    transform: translateY(-3px);
+    box-shadow:0 8px 30px rgba(255,193,7,0.6);
+}
+
+footer {
+    text-align:center;
+    padding:30px;
+    margin-top:50px;
+    background: rgba(20,20,20,0.95);
+    border-top:2px solid rgba(255,193,7,0.2);
+    color:#e0e0e0;
+}
+
+@media(max-width:768px){
+    nav { flex-wrap: wrap; padding:15px 20px; }
+    nav .logo { font-size:1.5rem; }
+    nav a { margin-left:15px; margin-top:10px; display:inline-block; }
+    .container { margin:30px auto; padding:0 15px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+    <div class="logo">Creditium</div>
+    <div>
+        <a href="/dashboard">🏠 Dashboard</a>
+        <a href="/logout">🚪 Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="feedback-card">
+        <h2>Send Feedback to Admin</h2>
+        <p>Your feedback helps us improve your experience. Please fill the form below:</p>
+        <form method="POST" action="/submit-feedback">
+            <input type="text" name="name" placeholder="Your Name" required>
+            <input type="email" name="email" placeholder="Your Email" required>
+            <input type="tel" name="mobile" placeholder="Mobile Number (Optional)">
+            <textarea name="message" rows="6" placeholder="Your Message" required></textarea>
+            <button type="submit" class="submit-btn">Send Feedback</button>
+        </form>
+    </div>
+</div>
+
+<footer>
+    &copy; 2025 Creditium. All Rights Reserved.
+</footer>
+
+</body>
+</html>

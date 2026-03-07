@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Support — Creditium</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #C9A84C;
+  --gold-light: #E2C06B;
+  --gold-dark: #A8862E;
+  --bg: #0C0C0F;
+  --surface: #141418;
+  --surface2: #1A1A20;
+  --surface3: #22222A;
+  --border: rgba(201,168,76,0.15);
+  --border-hover: rgba(201,168,76,0.45);
+  --text: #F5F0E8;
+  --text-muted: #8A8490;
+  --text-dim: #5A5560;
+  --green: #2ECC71;
+  --nav-h: 64px;
+  --sidebar-w: 240px;
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg); color:var(--text);
+  min-height:100vh; overflow-x:hidden;
+}
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none; z-index:9999; opacity:0.35;
+}
+.amb { position:fixed; border-radius:50%; filter:blur(130px); pointer-events:none; z-index:0; }
+.amb-1 { width:500px;height:500px; background:radial-gradient(circle,rgba(201,168,76,0.07) 0%,transparent 70%); top:-120px;right:-80px; }
+.amb-2 { width:380px;height:380px; background:radial-gradient(circle,rgba(201,168,76,0.05) 0%,transparent 70%); bottom:80px;left:-60px; }
+
+/* ══ NAVBAR ══ */
+.navbar {
+  position:fixed; top:0;left:0;right:0;
+  height:var(--nav-h); z-index:500;
+  background:rgba(12,12,15,0.94); backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 1.5rem;
+}
+.nav-left { display:flex; align-items:center; gap:0.75rem; }
+.hamburger {
+  display:none; flex-direction:column; gap:4px;
+  cursor:pointer; padding:6px; border-radius:8px; transition:background 0.2s;
+}
+.hamburger:hover { background:var(--surface3); }
+.hamburger span { display:block; width:20px;height:2px; background:var(--text-muted); border-radius:2px; }
+.logo {
+  font-family:'Playfair Display',serif;
+  font-size:1.5rem; font-weight:800;
+  background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  letter-spacing:-0.02em;
+}
+.premium-pill {
+  display:flex; align-items:center; gap:5px;
+  background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+  color:#0C0C0F; padding:3px 10px; border-radius:50px;
+  font-size:0.7rem; font-weight:700; letter-spacing:0.05em;
+}
+.nav-right { display:flex; align-items:center; gap:0.5rem; }
+.nav-icon-btn {
+  width:38px;height:38px; border-radius:10px; border:none;
+  background:var(--surface2); color:var(--text-muted);
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  font-size:1rem; transition:all 0.2s; text-decoration:none; position:relative;
+}
+.nav-icon-btn:hover { background:var(--surface3); color:var(--text); }
+
+/* ══ SIDEBAR ══ */
+.sidebar-overlay { display:none; position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:395; }
+.sidebar {
+  position:fixed; top:var(--nav-h);left:0;bottom:0;
+  width:var(--sidebar-w); background:var(--surface);
+  border-right:1px solid var(--border); z-index:400;
+  display:flex; flex-direction:column;
+  padding:1.5rem 0.75rem; overflow-y:auto;
+  transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.sidebar-section-label {
+  font-size:0.65rem; font-weight:700; letter-spacing:0.12em;
+  color:var(--text-dim); text-transform:uppercase;
+  padding:0 0.75rem; margin:1.25rem 0 0.5rem;
+}
+.sidebar-section-label:first-child { margin-top:0; }
+.nav-item {
+  display:flex; align-items:center; gap:0.75rem;
+  padding:0.65rem 0.75rem; border-radius:var(--radius-sm);
+  text-decoration:none; color:var(--text-muted);
+  font-size:0.875rem; font-weight:500; transition:all 0.2s;
+  cursor:pointer; border:none; background:none; width:100%; text-align:left;
+}
+.nav-item:hover { background:var(--surface3); color:var(--text); }
+.nav-item.active {
+  background:linear-gradient(135deg,rgba(201,168,76,0.15),rgba(201,168,76,0.05));
+  color:var(--gold-light); border:1px solid rgba(201,168,76,0.2);
+}
+.nav-item .icon {
+  width:32px;height:32px; border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.9rem; flex-shrink:0; background:var(--surface2);
+}
+.nav-item.active .icon {
+  background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+  filter:drop-shadow(0 2px 8px rgba(201,168,76,0.4));
+}
+.sidebar-bottom { margin-top:auto; padding-top:1rem; border-top:1px solid var(--border); }
+
+/* ══ LAYOUT ══ */
+.layout { display:flex; margin-top:var(--nav-h); }
+.main { flex:1; margin-left:var(--sidebar-w); min-height:calc(100vh - var(--nav-h)); display:flex; flex-direction:column; }
+
+/* ══ PAGE HERO ══ */
+.page-hero {
+  background:var(--surface); border-bottom:1px solid var(--border);
+  padding:2rem 2rem 1.75rem; position:relative; overflow:hidden;
+}
+.page-hero::before {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg,rgba(201,168,76,0.06) 0%,transparent 60%);
+  pointer-events:none;
+}
+.hero-eyebrow {
+  display:inline-flex; align-items:center; gap:0.4rem;
+  font-size:0.72rem; font-weight:700; letter-spacing:0.1em;
+  color:var(--gold); text-transform:uppercase; margin-bottom:0.6rem; position:relative;
+}
+.hero-eyebrow::before { content:''; display:block; width:16px;height:2px;background:var(--gold);border-radius:2px; }
+.page-hero h1 {
+  font-family:'Playfair Display',serif;
+  font-size:1.85rem; font-weight:800; color:var(--text);
+  line-height:1.2; margin-bottom:0.35rem; position:relative;
+}
+.page-hero p { font-size:0.85rem; color:var(--text-muted); position:relative; }
+
+/* ══ CONTENT ══ */
+.content {
+  padding:2rem; flex:1; position:relative; z-index:1;
+  display:flex; justify-content:center;
+}
+.support-wrap { width:100%; max-width:680px; display:flex; flex-direction:column; gap:1.25rem; }
+
+/* ══ CONTACT CARDS ROW ══ */
+.contact-row {
+  display:grid; grid-template-columns:1fr 1fr; gap:1rem;
+}
+.contact-chip {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:1.25rem 1.5rem;
+  display:flex; align-items:center; gap:0.85rem;
+  text-decoration:none; transition:all 0.25s;
+  position:relative; overflow:hidden;
+}
+.contact-chip::after {
+  content:''; position:absolute; top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--gold-dark),var(--gold-light));
+  opacity:0; transition:opacity 0.25s;
+}
+.contact-chip:hover { border-color:var(--border-hover); transform:translateY(-2px); }
+.contact-chip:hover::after { opacity:1; }
+.chip-icon {
+  width:40px;height:40px; border-radius:10px; flex-shrink:0;
+  background:linear-gradient(135deg,rgba(201,168,76,0.18),rgba(201,168,76,0.05));
+  border:1px solid rgba(201,168,76,0.2);
+  display:flex;align-items:center;justify-content:center; font-size:1.1rem;
+}
+.chip-label { font-size:0.68rem; color:var(--text-dim); font-weight:700; text-transform:uppercase; letter-spacing:0.07em; }
+.chip-val { font-size:0.82rem; color:var(--gold-light); font-weight:600; margin-top:0.15rem; }
+
+/* ══ FORM CARD ══ */
+.form-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); overflow:hidden;
+}
+.form-section { padding:1.5rem 1.75rem; }
+.section-title {
+  font-size:0.7rem; font-weight:700; letter-spacing:0.1em;
+  color:var(--gold); text-transform:uppercase; margin-bottom:1.25rem;
+  display:flex; align-items:center; gap:0.5rem;
+}
+.section-title::after { content:''; flex:1; height:1px; background:var(--border); }
+
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+
+.form-group { margin-bottom:1rem; }
+.form-group.span2 { grid-column:1/-1; }
+.form-group label {
+  display:block; font-size:0.7rem; font-weight:700;
+  letter-spacing:0.07em; color:var(--text-muted);
+  text-transform:uppercase; margin-bottom:0.45rem;
+}
+.form-group input,
+.form-group textarea {
+  width:100%; padding:0.8rem 1rem;
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:var(--radius-sm); color:var(--text);
+  font-family:inherit; font-size:0.875rem; outline:none;
+  transition:border-color 0.25s, box-shadow 0.25s;
+}
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color:var(--gold);
+  box-shadow:0 0 0 3px rgba(201,168,76,0.12);
+}
+.form-group textarea { resize:vertical; min-height:100px; }
+
+.form-footer {
+  padding:1.25rem 1.75rem;
+  border-top:1px solid var(--border);
+}
+.submit-btn {
+  display:flex; align-items:center; justify-content:center; gap:0.5rem;
+  width:100%; padding:0.9rem;
+  background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));
+  color:#0C0C0F; border:none; border-radius:var(--radius-sm);
+  font-family:inherit; font-size:0.9rem; font-weight:700;
+  cursor:pointer; transition:all 0.25s;
+  box-shadow:0 4px 18px rgba(201,168,76,0.3);
+}
+.submit-btn:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(201,168,76,0.45); }
+.submit-btn:active { transform:translateY(0); }
+
+/* ══ FAQ ══ */
+.faq-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); overflow:hidden;
+}
+.faq-head {
+  padding:1.25rem 1.75rem; border-bottom:1px solid var(--border);
+}
+.faq-item {
+  border-bottom:1px solid rgba(255,255,255,0.04);
+}
+.faq-item:last-child { border-bottom:none; }
+.faq-q {
+  width:100%; display:flex; align-items:center; justify-content:space-between; gap:1rem;
+  padding:1rem 1.75rem; background:none; border:none;
+  color:var(--text); font-family:inherit; font-size:0.875rem; font-weight:600;
+  cursor:pointer; text-align:left; transition:background 0.2s;
+}
+.faq-q:hover { background:rgba(201,168,76,0.03); }
+.faq-chevron {
+  width:20px;height:20px; border-radius:5px; flex-shrink:0;
+  background:var(--surface2); border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.6rem; color:var(--text-dim);
+  transition:transform 0.25s, background 0.2s;
+}
+.faq-item.open .faq-chevron {
+  transform:rotate(180deg);
+  background:rgba(201,168,76,0.1); color:var(--gold);
+}
+.faq-a {
+  max-height:0; overflow:hidden;
+  transition:max-height 0.35s cubic-bezier(0.4,0,0.2,1), padding 0.25s;
+  font-size:0.82rem; color:var(--text-muted); line-height:1.7;
+  padding:0 1.75rem;
+}
+.faq-item.open .faq-a { max-height:200px; padding:0 1.75rem 1.1rem; }
+
+/* Footer */
+.footer {
+  background:var(--surface); border-top:1px solid var(--border);
+  padding:1.25rem 2rem; text-align:center;
+  font-size:0.78rem; color:var(--text-dim);
+}
+.footer span { color:var(--gold); }
+
+/* Toast */
+.toast {
+  position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%) translateY(20px);
+  background:var(--surface2); border:1px solid rgba(46,204,113,0.35);
+  color:var(--green); padding:0.7rem 1.5rem;
+  border-radius:12px; font-size:0.85rem; font-weight:700;
+  z-index:9998; opacity:0; pointer-events:none;
+  transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+  box-shadow:0 8px 24px rgba(0,0,0,0.4);
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:900px) {
+  :root { --sidebar-w:0px; }
+  .sidebar { width:240px; transform:translateX(-100%); z-index:396; }
+  .sidebar.open { transform:translateX(0); }
+  .sidebar-overlay.open { display:block; }
+  .hamburger { display:flex; }
+  .content { padding:1.25rem; }
+  .page-hero { padding:1.5rem 1.25rem 1.25rem; }
+  .form-section { padding:1.25rem; }
+  .form-footer { padding:1rem 1.25rem; }
+  .faq-q { padding:1rem 1.25rem; }
+  .faq-a { padding:0 1.25rem; }
+  .faq-item.open .faq-a { padding:0 1.25rem 1rem; }
+  .faq-head { padding:1.25rem; }
+}
+@media(max-width:600px) {
+  .navbar { padding:0 1rem; }
+  .contact-row { grid-template-columns:1fr; }
+  .form-grid { grid-template-columns:1fr; }
+  .form-group.span2 { grid-column:1; }
+}
+</style>
+</head>
+<body>
+
+<div class="amb amb-1"></div>
+<div class="amb amb-2"></div>
+
+<!-- ══ NAVBAR ══ -->
+<nav class="navbar">
+  <div class="nav-left">
+    <div class="hamburger" onclick="toggleSidebar()">
+      <span></span><span></span><span></span>
+    </div>
+    <div class="logo">Creditium</div>
+    <div class="premium-pill">⭐ PREMIUM</div>
+  </div>
+  <div class="nav-right">
+    <a href="/notifications" class="nav-icon-btn" title="Notifications">🔔</a>
+    <a href="/dashboard" class="nav-icon-btn" title="Dashboard">🏠</a>
+    <a href="/logout" class="nav-icon-btn" title="Logout">🚪</a>
+  </div>
+</nav>
+
+<!-- ══ SIDEBAR ══ -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<aside class="sidebar" id="sidebar">
+  <span class="sidebar-section-label">Navigation</span>
+  <a href="/dashboard" class="nav-item"><span class="icon">🏠</span> Dashboard</a>
+  <a href="/loan-discovery" class="nav-item"><span class="icon">🔍</span> Loan Discovery</a>
+  <a href="/loan-status" class="nav-item"><span class="icon">📊</span> Loan Status</a>
+  <a href="/emi_schedule" class="nav-item"><span class="icon">💳</span> EMI Schedule</a>
+  <a href="/wallet" class="nav-item"><span class="icon">💰</span> Wallet</a>
+  <a href="/credit_rewards" class="nav-item"><span class="icon">⭐</span> Credit Rewards</a>
+  <span class="sidebar-section-label">Account</span>
+  <a href="/settings" class="nav-item"><span class="icon">⚙️</span> Settings</a>
+  <a href="/support" class="nav-item active"><span class="icon">🎧</span> Support</a>
+  <div class="sidebar-bottom">
+    <a href="/logout" class="nav-item" style="color:#E74C3C"><span class="icon">🚪</span> Logout</a>
+  </div>
+</aside>
+
+<!-- ══ LAYOUT ══ -->
+<div class="layout">
+  <main class="main">
+
+    <!-- Hero -->
+    <div class="page-hero">
+      <div class="hero-eyebrow">VIP Support</div>
+      <h1>How Can We Help?</h1>
+      <p>Our support team is available 24/7 for any queries about loans, EMIs, credit scores, or rewards.</p>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+      <div class="support-wrap">
+
+        <!-- Contact chips -->
+        <div class="contact-row">
+          <a href="mailto:support@creditium.com" class="contact-chip">
+            <div class="chip-icon">📧</div>
+            <div>
+              <div class="chip-label">Email</div>
+              <div class="chip-val">support@creditium.com</div>
+            </div>
+          </a>
+          <a href="tel:+919876543210" class="contact-chip">
+            <div class="chip-icon">📞</div>
+            <div>
+              <div class="chip-label">Phone</div>
+              <div class="chip-val">+91 98765 43210</div>
+            </div>
+          </a>
+        </div>
+
+        <!-- Contact Form -->
+        <div class="form-card">
+          <form method="POST" action="/support-submit">
+            <div class="form-section">
+              <div class="section-title">Send a Message</div>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Your Name</label>
+                  <input type="text" name="name" placeholder="Full name" required>
+                </div>
+                <div class="form-group">
+                  <label>Email Address</label>
+                  <input type="email" name="email" placeholder="you@example.com" required>
+                </div>
+                <div class="form-group span2">
+                  <label>Message</label>
+                  <textarea name="message" rows="4" placeholder="Describe your issue or question..." required></textarea>
+                </div>
+              </div>
+            </div>
+            <div class="form-footer">
+              <button type="submit" class="submit-btn">📨 Send Message</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- FAQ -->
+        <div class="faq-card">
+          <div class="faq-head">
+            <div class="section-title" style="margin-bottom:0">Frequently Asked Questions</div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">
+              How do I apply for a loan?
+              <span class="faq-chevron">▼</span>
+            </button>
+            <div class="faq-a">Navigate to Loan Discovery from your dashboard, browse available products, and click Apply Now. You'll need an approved KYC before your application is processed.</div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">
+              How long does KYC verification take?
+              <span class="faq-chevron">▼</span>
+            </button>
+            <div class="faq-a">KYC verification typically takes 24–48 hours after all required documents are submitted. You'll receive a notification once your status is updated.</div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">
+              How do I pay my EMIs?
+              <span class="faq-chevron">▼</span>
+            </button>
+            <div class="faq-a">Go to EMI Schedule from your dashboard. Click "Pay from Wallet" on any pending EMI. Ensure your wallet has sufficient balance before proceeding.</div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">
+              How do I improve my credit score?
+              <span class="faq-chevron">▼</span>
+            </button>
+            <div class="faq-a">Pay your EMIs on time, keep credit utilization below 30%, and avoid multiple loan applications in a short period. Check your Credit Rewards page for personalized tips.</div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-q" onclick="toggleFaq(this)">
+              How do I withdraw funds from my wallet?
+              <span class="faq-chevron">▼</span>
+            </button>
+            <div class="faq-a">Go to Wallet, click Withdraw, and enter your bank details (bank name, account number, IFSC code) along with the amount. Withdrawals are processed within 1–2 business days.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <footer class="footer">
+      © 2025 <span>Creditium</span>. All Rights Reserved. · Premium Financial Experience ✨
+    </footer>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+
+function toggleFaq(btn) {
+  const item = btn.closest('.faq-item');
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+
+/* Intercept form for toast demo — keep original POST logic intact */
+document.querySelector('form').addEventListener('submit', function(e) {
+  /* Remove this block if your backend handles redirects after POST */
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KYC Verification — Creditium</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #C9A84C;
+  --gold-light: #E2C06B;
+  --gold-dark: #A8862E;
+  --gold-glow: rgba(201,168,76,0.18);
+  --bg: #0C0C0F;
+  --surface: #141418;
+  --surface2: #1A1A20;
+  --surface3: #22222A;
+  --border: rgba(201,168,76,0.15);
+  --border-hover: rgba(201,168,76,0.45);
+  --text: #F5F0E8;
+  --text-muted: #8A8490;
+  --text-dim: #5A5560;
+  --green: #2ECC71;
+  --nav-h: 64px;
+  --sidebar-w: 240px;
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg); color:var(--text);
+  min-height:100vh; overflow-x:hidden;
+}
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none; z-index:9999; opacity:0.35;
+}
+.amb { position:fixed; border-radius:50%; filter:blur(130px); pointer-events:none; z-index:0; }
+.amb-1 { width:500px;height:500px; background:radial-gradient(circle,rgba(201,168,76,0.07) 0%,transparent 70%); top:-120px;right:-80px; }
+.amb-2 { width:380px;height:380px; background:radial-gradient(circle,rgba(201,168,76,0.05) 0%,transparent 70%); bottom:80px;left:-60px; }
+
+/* ══ NAVBAR ══ */
+.navbar {
+  position:fixed; top:0;left:0;right:0;
+  height:var(--nav-h); z-index:500;
+  background:rgba(12,12,15,0.94); backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 1.5rem;
+}
+.nav-left { display:flex; align-items:center; gap:0.75rem; }
+.hamburger {
+  display:none; flex-direction:column; gap:4px;
+  cursor:pointer; padding:6px; border-radius:8px; transition:background 0.2s;
+}
+.hamburger:hover { background:var(--surface3); }
+.hamburger span { display:block; width:20px;height:2px; background:var(--text-muted); border-radius:2px; }
+.logo {
+  font-family:'Playfair Display',serif;
+  font-size:1.5rem; font-weight:800;
+  background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  letter-spacing:-0.02em;
+}
+.premium-pill {
+  display:flex; align-items:center; gap:5px;
+  background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+  color:#0C0C0F; padding:3px 10px; border-radius:50px;
+  font-size:0.7rem; font-weight:700; letter-spacing:0.05em;
+}
+.nav-right { display:flex; align-items:center; gap:0.5rem; }
+.nav-icon-btn {
+  width:38px;height:38px; border-radius:10px; border:none;
+  background:var(--surface2); color:var(--text-muted);
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  font-size:1rem; transition:all 0.2s; text-decoration:none; position:relative;
+}
+.nav-icon-btn:hover { background:var(--surface3); color:var(--text); }
+.notif-dot { position:absolute; top:7px;right:7px; width:7px;height:7px; background:var(--gold); border-radius:50%; border:2px solid var(--bg); }
+
+/* ══ SIDEBAR ══ */
+.sidebar-overlay { display:none; position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:395; }
+.sidebar {
+  position:fixed; top:var(--nav-h);left:0;bottom:0;
+  width:var(--sidebar-w); background:var(--surface);
+  border-right:1px solid var(--border); z-index:400;
+  display:flex; flex-direction:column;
+  padding:1.5rem 0.75rem; overflow-y:auto;
+  transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.sidebar-section-label {
+  font-size:0.65rem; font-weight:700; letter-spacing:0.12em;
+  color:var(--text-dim); text-transform:uppercase;
+  padding:0 0.75rem; margin:1.25rem 0 0.5rem;
+}
+.sidebar-section-label:first-child { margin-top:0; }
+.nav-item {
+  display:flex; align-items:center; gap:0.75rem;
+  padding:0.65rem 0.75rem; border-radius:var(--radius-sm);
+  text-decoration:none; color:var(--text-muted);
+  font-size:0.875rem; font-weight:500; transition:all 0.2s;
+  cursor:pointer; border:none; background:none; width:100%; text-align:left;
+}
+.nav-item:hover { background:var(--surface3); color:var(--text); }
+.nav-item.active {
+  background:linear-gradient(135deg,rgba(201,168,76,0.15),rgba(201,168,76,0.05));
+  color:var(--gold-light); border:1px solid rgba(201,168,76,0.2);
+}
+.nav-item .icon {
+  width:32px;height:32px; border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.9rem; flex-shrink:0; background:var(--surface2);
+}
+.nav-item.active .icon {
+  background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+  filter:drop-shadow(0 2px 8px rgba(201,168,76,0.4));
+}
+.sidebar-bottom { margin-top:auto; padding-top:1rem; border-top:1px solid var(--border); }
+
+/* ══ LAYOUT ══ */
+.layout { display:flex; margin-top:var(--nav-h); }
+.main { flex:1; margin-left:var(--sidebar-w); min-height:calc(100vh - var(--nav-h)); display:flex; flex-direction:column; }
+
+/* ══ PAGE HERO ══ */
+.page-hero {
+  background:var(--surface); border-bottom:1px solid var(--border);
+  padding:2rem 2rem 1.75rem; position:relative; overflow:hidden;
+}
+.page-hero::before {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg,rgba(201,168,76,0.06) 0%,transparent 60%);
+  pointer-events:none;
+}
+.hero-eyebrow {
+  display:inline-flex; align-items:center; gap:0.4rem;
+  font-size:0.72rem; font-weight:700; letter-spacing:0.1em;
+  color:var(--gold); text-transform:uppercase; margin-bottom:0.6rem;
+  position:relative;
+}
+.hero-eyebrow::before { content:''; display:block; width:16px;height:2px;background:var(--gold);border-radius:2px; }
+.page-hero h1 {
+  font-family:'Playfair Display',serif;
+  font-size:1.85rem; font-weight:800; color:var(--text);
+  line-height:1.2; margin-bottom:0.35rem; position:relative;
+}
+.page-hero p { font-size:0.85rem; color:var(--text-muted); position:relative; }
+
+/* KYC status banner */
+.kyc-banner {
+  display:flex; align-items:center; gap:0.75rem;
+  padding:0.9rem 1.25rem; border-radius:var(--radius-sm);
+  margin-top:1rem; font-size:0.85rem; font-weight:600;
+  position:relative;
+}
+.kyc-banner-approved {
+  background:rgba(46,204,113,0.1); border:1px solid rgba(46,204,113,0.25); color:var(--green);
+}
+.kyc-banner-pending {
+  background:rgba(201,168,76,0.1); border:1px solid rgba(201,168,76,0.25); color:var(--gold-light);
+}
+.kyc-banner-icon { font-size:1.1rem; }
+
+/* ══ CONTENT ══ */
+.content { padding:2rem; flex:1; position:relative; z-index:1; }
+
+/* Progress steps */
+.steps {
+  display:flex; align-items:center; gap:0; margin-bottom:2rem;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:1.25rem 1.5rem;
+  overflow-x:auto;
+}
+.step {
+  display:flex; align-items:center; gap:0.6rem; flex-shrink:0;
+}
+.step-num {
+  width:28px; height:28px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:0.72rem; font-weight:700;
+  background:var(--surface2); border:1px solid var(--border);
+  color:var(--text-dim); transition:all 0.3s;
+}
+.step.active .step-num {
+  background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+  border-color:transparent; color:#0C0C0F;
+}
+.step-label { font-size:0.75rem; font-weight:600; color:var(--text-dim); white-space:nowrap; }
+.step.active .step-label { color:var(--gold-light); }
+.step-divider {
+  flex:1; min-width:24px; height:1px;
+  background:var(--border); margin:0 0.75rem;
+}
+
+/* Form card */
+.form-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); overflow:hidden;
+}
+.form-section {
+  padding:1.5rem 1.75rem;
+  border-bottom:1px solid var(--border);
+}
+.form-section:last-of-type { border-bottom:none; }
+.section-title {
+  font-size:0.72rem; font-weight:700; letter-spacing:0.1em;
+  color:var(--gold); text-transform:uppercase; margin-bottom:1.25rem;
+  display:flex; align-items:center; gap:0.5rem;
+}
+.section-title::after { content:''; flex:1; height:1px; background:var(--border); }
+
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.form-grid.full { grid-template-columns:1fr; }
+
+.form-group { display:flex; flex-direction:column; gap:0.45rem; }
+.form-group.span2 { grid-column:1/-1; }
+.form-group label {
+  font-size:0.72rem; font-weight:700; letter-spacing:0.06em;
+  color:var(--text-muted); text-transform:uppercase;
+}
+.form-group input,
+.form-group textarea,
+.form-group select {
+  padding:0.8rem 1rem;
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:var(--radius-sm); color:var(--text);
+  font-family:inherit; font-size:0.875rem; outline:none;
+  transition:border-color 0.25s, box-shadow 0.25s;
+  width:100%;
+}
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color:var(--gold);
+  box-shadow:0 0 0 3px rgba(201,168,76,0.12);
+}
+.form-group textarea { resize:vertical; min-height:80px; }
+.form-group input[type="date"]::-webkit-calendar-picker-indicator { filter:invert(0.6); cursor:pointer; }
+
+/* File upload */
+.file-upload-wrap { display:flex; flex-direction:column; gap:0.5rem; }
+.file-drop {
+  border:1.5px dashed var(--border); border-radius:var(--radius-sm);
+  padding:1.25rem; text-align:center; cursor:pointer;
+  transition:all 0.25s; position:relative; background:var(--surface2);
+}
+.file-drop:hover { border-color:var(--gold); background:rgba(201,168,76,0.04); }
+.file-drop input[type="file"] {
+  position:absolute; inset:0; opacity:0; cursor:pointer;
+  width:100%; height:100%; padding:0; border:none; background:none;
+}
+.file-drop-icon { font-size:1.4rem; margin-bottom:0.35rem; }
+.file-drop-text { font-size:0.78rem; color:var(--text-muted); }
+.file-drop-text span { color:var(--gold); font-weight:600; }
+.file-drop-hint { font-size:0.68rem; color:var(--text-dim); margin-top:0.2rem; }
+
+/* Preview */
+.file-preview-wrap { display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap; }
+.preview-img {
+  width:80px; height:56px; object-fit:cover;
+  border-radius:8px; border:1px solid var(--border);
+}
+.existing-file {
+  display:inline-flex; align-items:center; gap:0.4rem;
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:8px; padding:0.4rem 0.75rem;
+  font-size:0.75rem; color:var(--text-muted);
+}
+.existing-file .file-icon { color:var(--gold); }
+
+/* Form footer */
+.form-footer {
+  padding:1.5rem 1.75rem;
+  border-top:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+  gap:1rem; flex-wrap:wrap;
+}
+.form-note { font-size:0.75rem; color:var(--text-dim); max-width:360px; }
+.submit-btn {
+  display:inline-flex; align-items:center; gap:0.5rem;
+  background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));
+  color:#0C0C0F; font-family:inherit; font-size:0.875rem; font-weight:700;
+  padding:0.85rem 2rem; border-radius:var(--radius-sm); border:none;
+  cursor:pointer; transition:all 0.25s;
+  box-shadow:0 4px 18px rgba(201,168,76,0.3);
+  white-space:nowrap;
+}
+.submit-btn:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(201,168,76,0.45); }
+.submit-btn:active { transform:translateY(0); }
+
+/* Back link */
+.back-link {
+  display:inline-flex; align-items:center; gap:0.4rem;
+  color:var(--gold); text-decoration:none; font-size:0.82rem; font-weight:600;
+  margin-top:1.5rem; transition:color 0.2s;
+}
+.back-link:hover { color:var(--gold-light); }
+
+/* Footer */
+.footer {
+  background:var(--surface); border-top:1px solid var(--border);
+  padding:1.25rem 2rem; text-align:center;
+  font-size:0.78rem; color:var(--text-dim);
+}
+.footer span { color:var(--gold); }
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:900px) {
+  :root { --sidebar-w:0px; }
+  .sidebar { width:240px; transform:translateX(-100%); z-index:396; }
+  .sidebar.open { transform:translateX(0); }
+  .sidebar-overlay.open { display:block; }
+  .hamburger { display:flex; }
+  .content { padding:1.25rem; }
+  .page-hero { padding:1.5rem 1.25rem 1.25rem; }
+  .form-grid { grid-template-columns:1fr; }
+  .form-section { padding:1.25rem; }
+  .form-footer { flex-direction:column; align-items:stretch; }
+  .submit-btn { justify-content:center; }
+}
+@media(max-width:600px) {
+  .navbar { padding:0 1rem; }
+  .steps { padding:1rem; }
+  .step-label { display:none; }
+}
+</style>
+</head>
+<body>
+
+<div class="amb amb-1"></div>
+<div class="amb amb-2"></div>
+
+<!-- ══ NAVBAR ══ -->
+<nav class="navbar">
+  <div class="nav-left">
+    <div class="hamburger" onclick="toggleSidebar()">
+      <span></span><span></span><span></span>
+    </div>
+    <div class="logo">Creditium</div>
+    <div class="premium-pill">⭐ PREMIUM</div>
+  </div>
+  <div class="nav-right">
+    <a href="/notifications" class="nav-icon-btn" title="Notifications">🔔<span class="notif-dot"></span></a>
+    <a href="/support" class="nav-icon-btn" title="Support">🎧</a>
+    <a href="/dashboard" class="nav-icon-btn" title="Dashboard">🏠</a>
+  </div>
+</nav>
+
+<!-- ══ SIDEBAR ══ -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<aside class="sidebar" id="sidebar">
+  <span class="sidebar-section-label">Navigation</span>
+  <a href="/dashboard" class="nav-item"><span class="icon">🏠</span> Dashboard</a>
+  <a href="/loan-discovery" class="nav-item"><span class="icon">🔍</span> Loan Discovery</a>
+  <a href="/loan-status" class="nav-item"><span class="icon">📊</span> Loan Status</a>
+  <a href="/emi_schedule" class="nav-item"><span class="icon">💳</span> EMI Schedule</a>
+  <a href="/wallet" class="nav-item"><span class="icon">💰</span> Wallet</a>
+  <a href="/credit_rewards" class="nav-item"><span class="icon">⭐</span> Credit Rewards</a>
+  <span class="sidebar-section-label">Account</span>
+  <a href="/settings" class="nav-item"><span class="icon">⚙️</span> Settings</a>
+  <a href="/support" class="nav-item"><span class="icon">🎧</span> Support</a>
+  <div class="sidebar-bottom">
+    <a href="/logout" class="nav-item" style="color:#E74C3C"><span class="icon">🚪</span> Logout</a>
+  </div>
+</aside>
+
+<!-- ══ LAYOUT ══ -->
+<div class="layout">
+  <main class="main">
+
+    <!-- Page Hero -->
+    <div class="page-hero">
+      <div class="hero-eyebrow">Identity Verification</div>
+      <h1>KYC Verification</h1>
+      <p>Complete your Know Your Customer verification to unlock all loan features.</p>
+
+      {% if kyc and kyc.status == 'Approved' %}
+      <div class="kyc-banner kyc-banner-approved">
+        <span class="kyc-banner-icon">✅</span>
+        Your KYC is verified and approved. All features are unlocked.
+      </div>
+      {% elif kyc %}
+      <div class="kyc-banner kyc-banner-pending">
+        <span class="kyc-banner-icon">⏳</span>
+        KYC already submitted. Resubmitting will reset status to Pending for review.
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- Progress steps -->
+      <div class="steps">
+        <div class="step active">
+          <div class="step-num">1</div>
+          <div class="step-label">Personal Info</div>
+        </div>
+        <div class="step-divider"></div>
+        <div class="step active">
+          <div class="step-num">2</div>
+          <div class="step-label">Identity Docs</div>
+        </div>
+        <div class="step-divider"></div>
+        <div class="step active">
+          <div class="step-num">3</div>
+          <div class="step-label">Financial Docs</div>
+        </div>
+        <div class="step-divider"></div>
+        <div class="step {% if kyc and kyc.status == 'Approved' %}active{% endif %}">
+          <div class="step-num">{% if kyc and kyc.status == 'Approved' %}✓{% else %}4{% endif %}</div>
+          <div class="step-label">Verification</div>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <form method="POST" enctype="multipart/form-data">
+        <div class="form-card">
+
+          <!-- Personal Information -->
+          <div class="form-section">
+            <div class="section-title">Personal Information</div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" name="full_name" required value="{{ kyc.full_name if kyc }}" placeholder="As per government ID">
+              </div>
+              <div class="form-group">
+                <label>Date of Birth</label>
+                <input type="date" name="dob" required value="{{ kyc.dob if kyc }}">
+              </div>
+              <div class="form-group span2">
+                <label>Residential Address</label>
+                <textarea name="address" rows="3" required placeholder="Full address with PIN code">{{ kyc.address if kyc }}</textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Identity Details -->
+          <div class="form-section">
+            <div class="section-title">Identity Details</div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Aadhaar Number</label>
+                <input type="text" name="aadhaar" required value="{{ kyc.aadhaar if kyc }}" placeholder="XXXX XXXX XXXX" maxlength="14">
+              </div>
+              <div class="form-group">
+                <label>PAN Number</label>
+                <input type="text" name="pan" required value="{{ kyc.pan if kyc }}" placeholder="ABCDE1234F" maxlength="10" style="text-transform:uppercase">
+              </div>
+            </div>
+          </div>
+
+          <!-- Document Uploads -->
+          <div class="form-section">
+            <div class="section-title">Document Uploads</div>
+            <div class="form-grid">
+
+              <!-- Live Photo -->
+              <div class="form-group">
+                <label>Live Photo (Selfie)</label>
+                <div class="file-upload-wrap">
+                  <div class="file-drop" id="livePhotoDrop">
+                    <input type="file" name="live_photo" accept="image/*" onchange="previewFile(this,'livePhotoPreview')">
+                    <div class="file-drop-icon">📸</div>
+                    <div class="file-drop-text"><span>Click to upload</span> or drag & drop</div>
+                    <div class="file-drop-hint">JPG, PNG · Max 5MB</div>
+                  </div>
+                  <div class="file-preview-wrap">
+                    {% if kyc and kyc.live_photo %}
+                    <img src="/{{ kyc.live_photo }}" class="preview-img" id="livePhotoPreview">
+                    {% else %}
+                    <img class="preview-img" id="livePhotoPreview" style="display:none">
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+
+              <!-- ID Front -->
+              <div class="form-group">
+                <label>ID Proof — Front</label>
+                <div class="file-upload-wrap">
+                  <div class="file-drop">
+                    <input type="file" name="id_front" accept="image/*" onchange="previewFile(this,'idFrontPreview')">
+                    <div class="file-drop-icon">🪪</div>
+                    <div class="file-drop-text"><span>Click to upload</span> or drag & drop</div>
+                    <div class="file-drop-hint">JPG, PNG · Max 5MB</div>
+                  </div>
+                  <div class="file-preview-wrap">
+                    {% if kyc and kyc.id_front %}
+                    <img src="/{{ kyc.id_front }}" class="preview-img" id="idFrontPreview">
+                    {% else %}
+                    <img class="preview-img" id="idFrontPreview" style="display:none">
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+
+              <!-- ID Back -->
+              <div class="form-group">
+                <label>ID Proof — Back</label>
+                <div class="file-upload-wrap">
+                  <div class="file-drop">
+                    <input type="file" name="id_back" accept="image/*" onchange="previewFile(this,'idBackPreview')">
+                    <div class="file-drop-icon">🪪</div>
+                    <div class="file-drop-text"><span>Click to upload</span> or drag & drop</div>
+                    <div class="file-drop-hint">JPG, PNG · Max 5MB</div>
+                  </div>
+                  <div class="file-preview-wrap">
+                    {% if kyc and kyc.id_back %}
+                    <img src="/{{ kyc.id_back }}" class="preview-img" id="idBackPreview">
+                    {% else %}
+                    <img class="preview-img" id="idBackPreview" style="display:none">
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Salary Slip -->
+              <div class="form-group">
+                <label>Salary Slip</label>
+                <div class="file-upload-wrap">
+                  <div class="file-drop">
+                    <input type="file" name="salary_slip" accept=".pdf,.jpg,.jpeg,.png">
+                    <div class="file-drop-icon">📄</div>
+                    <div class="file-drop-text"><span>Click to upload</span> or drag & drop</div>
+                    <div class="file-drop-hint">PDF, JPG, PNG · Max 10MB</div>
+                  </div>
+                  {% if kyc and kyc.salary_slip %}
+                  <div class="file-preview-wrap">
+                    <div class="existing-file"><span class="file-icon">📎</span>{{ kyc.salary_slip }}</div>
+                  </div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <!-- Bank Statement -->
+              <div class="form-group">
+                <label>Bank Statement</label>
+                <div class="file-upload-wrap">
+                  <div class="file-drop">
+                    <input type="file" name="bank_statement" accept=".pdf,.jpg,.jpeg,.png">
+                    <div class="file-drop-icon">🏦</div>
+                    <div class="file-drop-text"><span>Click to upload</span> or drag & drop</div>
+                    <div class="file-drop-hint">PDF, JPG, PNG · Max 10MB</div>
+                  </div>
+                  {% if kyc and kyc.bank_statement %}
+                  <div class="file-preview-wrap">
+                    <div class="existing-file"><span class="file-icon">📎</span>{{ kyc.bank_statement }}</div>
+                  </div>
+                  {% endif %}
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="form-footer">
+            <div class="form-note">🔒 Your documents are encrypted and stored securely. We never share your data with third parties.</div>
+            <button type="submit" class="submit-btn">
+              <svg viewBox="0 0 20 20" width="16" height="16" fill="none">
+                <path d="M10 2L10 13M10 13L6 9M10 13L14 9" stroke="#0C0C0F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M3 15h14" stroke="#0C0C0F" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              Submit KYC
+            </button>
+          </div>
+
+        </div>
+      </form>
+
+      <a href="/dashboard" class="back-link">← Back to Dashboard</a>
+
+    </div>
+
+    <footer class="footer">
+      © 2025 <span>Creditium</span>. All Rights Reserved. · Premium Financial Experience ✨
+    </footer>
+
+  </main>
+</div>
+
+<script>
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+
+function previewFile(input, previewId) {
+  const preview = document.getElementById(previewId);
+  if (!preview) return;
+  const file = input.files[0];
+  if (file && file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      preview.src = e.target.result;
+      preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+/* Drag-over highlight */
+document.querySelectorAll('.file-drop').forEach(drop => {
+  drop.addEventListener('dragover', () => drop.style.borderColor = 'var(--gold)');
+  drop.addEventListener('dragleave', () => drop.style.borderColor = '');
+  drop.addEventListener('drop', () => drop.style.borderColor = '');
+});
+
+/* PAN auto-uppercase */
+const panInput = document.querySelector('input[name="pan"]');
+if (panInput) panInput.addEventListener('input', () => panInput.value = panInput.value.toUpperCase());
+</script>
+</body>
+</html>

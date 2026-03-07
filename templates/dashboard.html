@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Creditium Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════
+   THEME VARIABLES
+══════════════════════════════════════ */
+:root {
+  --gold:#C9A84C;--gold-lt:#E2C06B;--gold-dk:#9A7528;
+  --transition-theme: background 0.35s ease, color 0.35s ease, border-color 0.35s ease;
+}
+
+[data-theme="dark"] {
+  --bg:#080809;--surface:#121217;--surface2:#18181F;--surface3:#202028;
+  --border:rgba(201,168,76,0.12);--border-md:rgba(201,168,76,0.25);
+  --text:#F0EBE0;--text-muted:#8A8490;--text-dim:#4E4A55;
+  --green:#27AE6B;--red:#D94040;--blue:#3498DB;--orange:#D4742A;
+  --shadow:rgba(0,0,0,0.5);--noise-opacity:0.5;
+}
+
+[data-theme="light"] {
+  --bg:#F7F4EF;--surface:#FFFFFF;--surface2:#F0EDE8;--surface3:#E8E4DC;
+  --border:rgba(201,168,76,0.2);--border-md:rgba(201,168,76,0.4);
+  --text:#1A1508;--text-muted:#5A5040;--text-dim:#9A9080;
+  --green:#1A8A50;--red:#C03030;--blue:#2070B0;--orange:#B05A10;
+  --shadow:rgba(0,0,0,0.12);--noise-opacity:0.25;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { -webkit-text-size-adjust:100%; }
+
+body {
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100dvh;
+  overflow-x:hidden;
+  transition: var(--transition-theme);
+}
+
+body::before {
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  opacity:var(--noise-opacity);
+}
+
+.orb{position:fixed;border-radius:50%;filter:blur(130px);pointer-events:none;z-index:0;}
+.o1{width:600px;height:600px;background:radial-gradient(circle,rgba(201,168,76,.07) 0%,transparent 70%);top:-200px;right:-150px;animation:d1 26s ease-in-out infinite;}
+.o2{width:380px;height:380px;background:radial-gradient(circle,rgba(39,174,107,.04) 0%,transparent 70%);bottom:-120px;left:-100px;animation:d2 30s ease-in-out infinite;}
+@keyframes d1{0%,100%{transform:translate(0,0)}50%{transform:translate(-50px,70px)}}
+@keyframes d2{0%,100%{transform:translate(0,0)}50%{transform:translate(55px,-45px)}}
+
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--gold),var(--gold-dk));border-radius:4px;}
+
+/* ══ NAVBAR ══ */
+.navbar {
+  position:fixed;top:0;left:0;right:0;height:64px;z-index:500;
+  background:var(--bg);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;
+  box-shadow:0 4px 30px var(--shadow);
+  transition: var(--transition-theme);
+}
+.nav-left{display:flex;align-items:center;gap:.75rem;}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:8px;border-radius:8px;transition:background .2s;-webkit-tap-highlight-color:transparent;}
+.hamburger:hover{background:var(--surface2);}
+.hamburger span{display:block;width:20px;height:2px;background:var(--text-muted);border-radius:2px;transition:all .3s;}
+.hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+.hamburger.open span:nth-child(2){opacity:0;}
+.hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+
+.logo{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:800;background:linear-gradient(135deg,var(--gold-lt),var(--gold),var(--gold-dk));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-.01em;}
+.premium-pill{display:flex;align-items:center;gap:4px;background:linear-gradient(135deg,var(--gold),var(--gold-dk));color:#080809;padding:3px 10px;border-radius:50px;font-size:.65rem;font-weight:800;letter-spacing:.06em;}
+
+.nav-right{display:flex;align-items:center;gap:.5rem;}
+
+/* Theme toggle */
+.theme-toggle{width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all .2s;-webkit-tap-highlight-color:transparent;}
+.theme-toggle:hover{background:var(--surface3);border-color:var(--border-md);}
+
+/* Language selector */
+.lang-select{height:38px;padding:0 .6rem;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:600;cursor:pointer;outline:none;transition:all .2s;}
+.lang-select:hover{border-color:var(--border-md);}
+
+.nav-icon-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all .2s;text-decoration:none;position:relative;}
+.nav-icon-btn:hover{background:var(--surface3);color:var(--text);}
+.notif-dot{position:absolute;top:7px;right:7px;width:7px;height:7px;background:var(--gold);border-radius:50%;border:2px solid var(--bg);}
+
+.nav-avatar{width:38px;height:38px;border-radius:10px;border:2px solid var(--gold);overflow:hidden;cursor:pointer;transition:all .25s;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--gold-lt),var(--gold-dk));font-family:'Cormorant Garamond',serif;font-weight:800;font-size:1rem;color:#080809;}
+.nav-avatar img{width:100%;height:100%;object-fit:cover;}
+.nav-avatar:hover{transform:scale(1.05);box-shadow:0 0 16px rgba(201,168,76,.3);}
+
+/* ══ SIDEBAR ══ */
+.sidebar-overlay{display:none;position:fixed;inset:0;top:64px;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:399;}
+.sidebar-overlay.open{display:block;}
+
+.sidebar{
+  position:fixed;top:64px;left:0;bottom:0;width:240px;
+  background:var(--surface);border-right:1px solid var(--border);
+  z-index:400;display:flex;flex-direction:column;padding:1.25rem .75rem;overflow-y:auto;
+  transition:transform .3s cubic-bezier(.4,0,.2,1), var(--transition-theme);
+}
+.sidebar-label{font-size:.62rem;font-weight:700;letter-spacing:.12em;color:var(--text-dim);text-transform:uppercase;padding:0 .75rem;margin:1rem 0 .4rem;}
+.sidebar-label:first-child{margin-top:0;}
+
+.nav-link{display:flex;align-items:center;gap:.75rem;padding:.65rem .75rem;border-radius:10px;text-decoration:none;color:var(--text-muted);font-size:.85rem;font-weight:500;transition:all .2s;border:1px solid transparent;}
+.nav-link:hover{background:var(--surface2);color:var(--text);}
+.nav-link.active{background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.05));color:var(--gold-lt);border-color:rgba(201,168,76,.2);}
+.nav-link .icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.88rem;flex-shrink:0;background:var(--surface3);}
+.nav-link.active .icon{background:linear-gradient(135deg,var(--gold),var(--gold-dk));}
+
+.sidebar-bottom{margin-top:auto;padding-top:1rem;border-top:1px solid var(--border);}
+
+/* ══ LAYOUT ══ */
+.layout{display:flex;margin-top:64px;}
+.main{flex:1;margin-left:240px;min-height:calc(100dvh - 64px);display:flex;flex-direction:column;transition: var(--transition-theme);}
+
+/* ══ PROFILE STRIP ══ */
+.profile-strip{background:var(--surface);border-bottom:1px solid var(--border);padding:1.25rem 2rem;display:flex;align-items:center;gap:1.25rem;transition: var(--transition-theme);}
+.strip-avatar{width:56px;height:56px;border-radius:14px;border:2px solid var(--gold);overflow:hidden;flex-shrink:0;cursor:pointer;transition:all .25s;background:linear-gradient(135deg,var(--gold-lt),var(--gold-dk));display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-weight:800;font-size:1.4rem;color:#080809;}
+.strip-avatar:hover{transform:scale(1.04);box-shadow:0 0 20px rgba(201,168,76,.3);}
+.strip-info{flex:1;min-width:0;}
+.strip-name{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.strip-meta{display:flex;gap:1.25rem;margin-top:.2rem;flex-wrap:wrap;}
+.strip-meta span{font-size:.78rem;color:var(--text-muted);display:flex;align-items:center;gap:.3rem;}
+.strip-actions{display:flex;gap:.6rem;flex-shrink:0;}
+
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1.1rem;border-radius:10px;border:none;font-family:inherit;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .25s;text-decoration:none;white-space:nowrap;}
+.btn-gold{background:linear-gradient(135deg,var(--gold-lt),var(--gold),var(--gold-dk));color:#080809;box-shadow:0 4px 16px rgba(201,168,76,.3);}
+.btn-gold:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(201,168,76,.45);}
+.btn-ghost{background:var(--surface2);color:var(--text-muted);border:1px solid var(--border);}
+.btn-ghost:hover{background:var(--surface3);color:var(--text);}
+.btn-green{background:linear-gradient(135deg,rgba(39,174,107,.2),rgba(39,174,107,.08));color:var(--green);border:1px solid rgba(39,174,107,.25);}
+.btn-green:hover{background:linear-gradient(135deg,rgba(39,174,107,.3),rgba(39,174,107,.12));}
+
+/* ══ CONTENT ══ */
+.content{padding:2rem;flex:1;position:relative;z-index:1;}
+
+/* ══ STATS GRID ══ */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.4rem;position:relative;overflow:hidden;transition:all .3s, var(--transition-theme);}
+.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold-dk),var(--gold-lt));opacity:0;transition:opacity .3s;}
+.stat-card:hover{border-color:var(--border-md);transform:translateY(-3px);box-shadow:0 12px 30px var(--shadow);}
+.stat-card:hover::after{opacity:1;}
+.stat-icon{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,rgba(201,168,76,.18),rgba(201,168,76,.05));border:1px solid rgba(201,168,76,.15);display:flex;align-items:center;justify-content:center;font-size:1rem;margin-bottom:.85rem;}
+.stat-val{font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:800;color:var(--gold-lt);line-height:1;margin-bottom:.3rem;}
+.stat-lbl{font-size:.74rem;color:var(--text-muted);font-weight:500;}
+.stat-trend{position:absolute;top:1.1rem;right:1.1rem;font-size:.67rem;font-weight:700;color:var(--green);background:rgba(39,174,107,.1);padding:2px 8px;border-radius:50px;}
+
+/* ══ SECTION HEADER ══ */
+.sec-hdr{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:1.1rem;}
+.sec-title{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:800;color:var(--text);}
+.sec-link{font-size:.78rem;color:var(--gold);text-decoration:none;font-weight:600;}
+.sec-link:hover{color:var(--gold-lt);}
+
+/* ══ REWARD + REFER BANNER ══ */
+.banner-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2rem;}
+.banner{border-radius:14px;padding:1.5rem;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:.75rem;transition: var(--transition-theme);}
+.banner-reward{background:linear-gradient(135deg,rgba(201,168,76,.18),rgba(201,168,76,.04));border:1px solid rgba(201,168,76,.25);}
+.banner-refer{background:linear-gradient(135deg,rgba(39,174,107,.14),rgba(39,174,107,.03));border:1px solid rgba(39,174,107,.2);}
+.banner::before{content:'';position:absolute;top:-30px;right:-30px;width:100px;height:100px;border-radius:50%;opacity:.08;}
+.banner-reward::before{background:var(--gold);}
+.banner-refer::before{background:var(--green);}
+.banner-label{font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;}
+.banner-reward .banner-label{color:var(--gold);}
+.banner-refer .banner-label{color:var(--green);}
+.banner-title{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:800;color:var(--text);line-height:1.3;}
+.banner-desc{font-size:.78rem;color:var(--text-muted);line-height:1.5;}
+.banner-pts{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:800;color:var(--gold-lt);line-height:1;}
+.banner-pts span{font-size:.9rem;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-weight:500;}
+.banner-actions{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.25rem;}
+
+/* ══ ACTIVE LOANS ══ */
+.loans-list{display:flex;flex-direction:column;gap:.75rem;margin-bottom:2rem;}
+.loan-row{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.2rem 1.4rem;display:flex;align-items:center;gap:1rem;transition:all .25s, var(--transition-theme);}
+.loan-row:hover{border-color:var(--border-md);transform:translateY(-2px);box-shadow:0 8px 24px var(--shadow);}
+.loan-icon{width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,rgba(201,168,76,.18),rgba(201,168,76,.05));border:1px solid rgba(201,168,76,.18);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+.loan-info{flex:1;min-width:0;}
+.loan-name{font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:.2rem;}
+.loan-meta{font-size:.74rem;color:var(--text-muted);}
+.loan-progress-wrap{flex:1;min-width:0;}
+.loan-progress-label{display:flex;justify-content:space-between;font-size:.7rem;color:var(--text-muted);margin-bottom:.35rem;}
+.loan-progress-bar{height:5px;border-radius:3px;background:var(--surface3);overflow:hidden;}
+.loan-progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--gold-dk),var(--gold-lt));}
+.loan-amount{text-align:right;flex-shrink:0;}
+.loan-emi{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:800;color:var(--gold-lt);}
+.loan-emi-lbl{font-size:.67rem;color:var(--text-dim);}
+.loan-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:50px;font-size:.63rem;font-weight:800;background:rgba(39,174,107,.12);color:var(--green);border:1px solid rgba(39,174,107,.2);}
+
+/* ══ FEATURES GRID ══ */
+.card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.1rem;margin-bottom:2rem;}
+.feature-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.6rem;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:.7rem;transition:all .3s, var(--transition-theme);position:relative;overflow:hidden;cursor:pointer;}
+.feature-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(201,168,76,.06),transparent 60%);opacity:0;transition:opacity .3s;}
+.feature-card:hover{border-color:var(--border-md);transform:translateY(-5px);box-shadow:0 20px 40px var(--shadow);}
+.feature-card:hover::before{opacity:1;}
+.card-icon-wrap{width:44px;height:44px;border-radius:11px;background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.04));border:1px solid rgba(201,168,76,.18);display:flex;align-items:center;justify-content:center;font-size:1.2rem;transition:all .3s;}
+.feature-card:hover .card-icon-wrap{background:linear-gradient(135deg,rgba(201,168,76,.28),rgba(201,168,76,.1));box-shadow:0 4px 16px rgba(201,168,76,.2);}
+.card-title{font-size:.9rem;font-weight:700;color:var(--text);}
+.card-desc{font-size:.78rem;color:var(--text-muted);line-height:1.6;flex:1;}
+.card-tag{display:inline-flex;align-items:center;gap:.3rem;background:linear-gradient(135deg,rgba(201,168,76,.14),rgba(201,168,76,.04));border:1px solid rgba(201,168,76,.22);color:var(--gold-lt);padding:3px 10px;border-radius:50px;font-size:.67rem;font-weight:700;align-self:flex-start;}
+.card-arrow{position:absolute;top:1.4rem;right:1.4rem;color:var(--text-dim);font-size:.9rem;transition:all .25s;}
+.feature-card:hover .card-arrow{color:var(--gold);transform:translate(3px,-3px);}
+
+/* ══ BOTTOM ROW ══ */
+.bottom-row{display:grid;grid-template-columns:1fr 300px;gap:1.1rem;}
+.activity-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.4rem;transition: var(--transition-theme);}
+.act-item{display:flex;align-items:center;gap:.9rem;padding:.8rem 0;border-bottom:1px solid var(--border);transition:all .2s;}
+.act-item:last-child{border:none;}
+.act-item:hover{padding-left:.4rem;}
+.act-icon{width:36px;height:36px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:.88rem;flex-shrink:0;}
+.act-info{flex:1;min-width:0;}
+.act-title{font-size:.82rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.act-date{font-size:.7rem;color:var(--text-muted);margin-top:1px;}
+.act-amt{font-size:.85rem;font-weight:700;white-space:nowrap;}
+.act-amt.cr{color:var(--green);}
+.act-amt.dr{color:var(--red);}
+
+/* ══ SCORE CARD ══ */
+.score-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.4rem;display:flex;flex-direction:column;gap:1rem;transition: var(--transition-theme);}
+.score-ring-wrap{display:flex;flex-direction:column;align-items:center;gap:.5rem;}
+.score-ring{position:relative;width:120px;height:120px;}
+.score-ring svg{transform:rotate(-90deg);}
+.score-ring-bg{fill:none;stroke:var(--surface3);stroke-width:9;}
+.score-ring-fill{fill:none;stroke:url(#gG);stroke-width:9;stroke-linecap:round;stroke-dasharray:314;stroke-dashoffset:72;}
+.score-ring-val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.score-num{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:800;color:var(--gold-lt);line-height:1;}
+.score-lbl{font-size:.6rem;color:var(--text-muted);font-weight:600;}
+.score-status{font-size:.75rem;font-weight:700;color:var(--green);background:rgba(39,174,107,.1);padding:3px 12px;border-radius:50px;}
+.factor-row{display:flex;flex-direction:column;gap:.28rem;}
+.factor-top{display:flex;justify-content:space-between;font-size:.72rem;color:var(--text-muted);}
+.factor-top span:last-child{color:var(--text);font-weight:600;}
+.factor-bar{height:4px;border-radius:2px;background:var(--surface3);overflow:hidden;}
+.factor-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--gold-dk),var(--gold-lt));}
+
+/* ══ FOOTER ══ */
+.footer{background:var(--surface);border-top:1px solid var(--border);padding:1.1rem 2rem;text-align:center;font-size:.75rem;color:var(--text-dim);transition: var(--transition-theme);}
+.footer span{color:var(--gold);}
+
+/* ══ MODAL ══ */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);z-index:800;align-items:center;justify-content:center;padding:1.5rem;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2.25rem;width:100%;max-width:440px;position:relative;animation:slideUp .3s cubic-bezier(.4,0,.2,1);transition: var(--transition-theme);}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.modal-close{position:absolute;top:.9rem;right:.9rem;width:30px;height:30px;border-radius:8px;border:none;background:var(--surface2);color:var(--text-muted);cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.modal-close:hover{background:var(--surface3);color:var(--text);}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:800;color:var(--text);margin-bottom:.2rem;}
+.modal-sub{font-size:.8rem;color:var(--text-muted);margin-bottom:1.75rem;}
+.form-group{margin-bottom:1.1rem;}
+.form-group label{display:block;font-size:.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.45rem;}
+.form-group input{width:100%;padding:.8rem 1rem;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:inherit;font-size:.88rem;transition:all .25s;outline:none;}
+.form-group input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.12);}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.85rem;}
+
+/* ══ REFER MODAL ══ */
+.refer-link-box{background:var(--surface2);border:1px solid var(--border-md);border-radius:10px;padding:.85rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:1rem;}
+.refer-link-text{font-size:.8rem;color:var(--text-muted);font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.copy-btn{flex-shrink:0;padding:.4rem .85rem;border-radius:8px;border:none;background:linear-gradient(135deg,var(--gold-lt),var(--gold-dk));color:#080809;font-size:.72rem;font-weight:800;cursor:pointer;transition:all .2s;}
+.copy-btn:hover{opacity:.9;}
+.whatsapp-btn{display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;padding:.85rem;border-radius:10px;border:none;background:#25D366;color:#fff;font-family:inherit;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .25s;text-decoration:none;}
+.whatsapp-btn:hover{background:#1ebe5d;transform:translateY(-1px);box-shadow:0 6px 20px rgba(37,211,102,.35);}
+.wa-icon{font-size:1.1rem;}
+
+/* ══ TOAST ══ */
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid rgba(201,168,76,.4);color:var(--gold-lt);padding:.75rem 1.5rem;border-radius:12px;font-size:.85rem;font-weight:600;z-index:9999;box-shadow:0 8px 24px var(--shadow);animation:toastIn .3s ease;pointer-events:none;}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* ══ EMPTY STATE ══ */
+.empty-state{text-align:center;padding:2rem;color:var(--text-dim);font-size:.84rem;}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:1100px){
+  .card-grid{grid-template-columns:repeat(2,1fr);}
+  .bottom-row{grid-template-columns:1fr;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:900px){
+  .main{margin-left:0;}
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);}
+  .hamburger{display:flex;}
+  .content{padding:1.25rem;}
+  .profile-strip{padding:1rem 1.25rem;}
+  .banner-row{grid-template-columns:1fr;}
+  .lang-select{display:none;}
+}
+@media(max-width:600px){
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .card-grid{grid-template-columns:1fr;}
+  .strip-actions .btn-ghost{display:none;}
+  .navbar{padding:0 1rem;}
+  .form-grid{grid-template-columns:1fr;}
+  .loan-row{flex-wrap:wrap;}
+  .loan-progress-wrap{min-width:100%;}
+}
+</style>
+</head>
+<body>
+<div class="orb o1"></div><div class="orb o2"></div>
+
+<!-- ══ NAVBAR ══ -->
+<nav class="navbar">
+  <div class="nav-left">
+    <div class="hamburger" id="hamburger" onclick="toggleSidebar()">
+      <span></span><span></span><span></span>
+    </div>
+    <div class="logo">Creditium</div>
+    <div class="premium-pill">⭐ PREMIUM</div>
+  </div>
+  <div class="nav-right">
+    <select class="lang-select" id="langSelect" onchange="changeLanguage(this.value)" title="Language">
+      <option value="en">🌐 English</option>
+      <option value="hi">🇮🇳 हिंदी</option>
+      <option value="ta">🇮🇳 தமிழ்</option>
+      <option value="te">🇮🇳 తెలుగు</option>
+      <option value="ml">🇮🇳 മലയാളം</option>
+    </select>
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+    <a href="/notifications" class="nav-icon-btn" title="Notifications">🔔<span class="notif-dot"></span></a>
+    <a href="/support" class="nav-icon-btn" title="Support">🎧</a>
+    <div class="nav-avatar" onclick="openModal('profile')" title="Profile">
+      {{ username[0].upper() if username else 'U' }}
+    </div>
+  </div>
+</nav>
+
+<!-- SIDEBAR OVERLAY -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar" id="sidebar">
+  <span class="sidebar-label" data-i18n="nav">Navigation</span>
+  <a href="/dashboard" class="nav-link active"><span class="icon">🏠</span> <span data-i18n="dashboard">Dashboard</span></a>
+  <a href="/loan-discovery" class="nav-link"><span class="icon">🔍</span> <span data-i18n="loanDiscovery">Loan Discovery</span></a>
+  <a href="/loan-status" class="nav-link"><span class="icon">📊</span> <span data-i18n="loanStatus">Loan Status</span></a>
+  <a href="/emi_schedule" class="nav-link"><span class="icon">💳</span> <span data-i18n="emiSchedule">EMI Schedule</span></a>
+  <a href="/wallet" class="nav-link"><span class="icon">💰</span> <span data-i18n="wallet">Wallet</span></a>
+  <a href="/credit_rewards" class="nav-link"><span class="icon">⭐</span> <span data-i18n="rewards">Credit Rewards</span></a>
+
+  <span class="sidebar-label" data-i18n="account">Account</span>
+  <!-- <a href="/settings" class="nav-link"><span class="icon">⚙️</span> <span data-i18n="settings">Settings</span></a> -->
+  <a href="/support" class="nav-link"><span class="icon">🎧</span> <span data-i18n="support">Support</span></a>
+
+  <div class="sidebar-bottom">
+    <a href="/logout" class="nav-link" style="color:var(--red)"><span class="icon">🚪</span> <span data-i18n="logout">Logout</span></a>
+  </div>
+</aside>
+
+<!-- ══ LAYOUT ══ -->
+<div class="layout">
+<main class="main">
+
+  <!-- Profile Strip -->
+  <div class="profile-strip">
+    <div class="strip-avatar" onclick="openModal('profile')">
+      {{ username[0].upper() if username else 'U' }}
+    </div>
+    <div class="strip-info">
+      <div class="strip-name">{{ username }}</div>
+      <div class="strip-meta">
+        <span>📧 {{ email }}</span>
+        <span>📱 {{ mobile }}</span>
+      </div>
+    </div>
+    <div class="strip-actions">
+      <a href="/settings" class="btn btn-ghost">⚙️ <span data-i18n="settings">Settings</span></a>
+      <button class="btn btn-gold" onclick="openModal('profile')">✏️ <span data-i18n="editProfile">Edit Profile</span></button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">💰</div>
+        <div class="stat-val">₹{{ "{:,.0f}".format(user.wallet.balance if user.wallet else 0) }}</div>
+        <div class="stat-lbl" data-i18n="walletBalance">Wallet Balance</div>
+        <div class="stat-trend">▲ Active</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📈</div>
+        <div class="stat-val">765</div>
+        <div class="stat-lbl" data-i18n="creditScore">Credit Score</div>
+        <div class="stat-trend">▲ Good</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🏦</div>
+        <div class="stat-val">{{ active_loans }}</div>
+        <div class="stat-lbl" data-i18n="activeLoans">Active Loans</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-val">{{ paid_emis }}</div>
+        <div class="stat-lbl" data-i18n="emisPaid">EMIs Paid</div>
+      </div>
+    </div>
+
+    <!-- Reward + Refer Banners -->
+    <div class="banner-row">
+      <div class="banner banner-reward">
+        <div class="banner-label">⭐ <span data-i18n="rewardsLabel">Credit Rewards</span></div>
+        <div class="banner-pts">{{ reward_points | default(0) }} <span data-i18n="pts">pts</span></div>
+        <div class="banner-title" data-i18n="rewardTitle">Claim your reward points!</div>
+        <div class="banner-desc" data-i18n="rewardDesc">Redeem your points for cashback, EMI discounts, and exclusive offers.</div>
+        <div class="banner-actions">
+          <a href="/credit_rewards" class="btn btn-gold">🎁 <span data-i18n="claimReward">Claim Reward</span></a>
+          <a href="/credit_rewards" class="btn btn-ghost">View History</a>
+        </div>
+      </div>
+      <div class="banner banner-refer">
+        <div class="banner-label">🤝 <span data-i18n="referLabel">Refer & Earn</span></div>
+        <div class="banner-pts" style="color:var(--green)">₹500 <span data-i18n="perReferral">per referral</span></div>
+        <div class="banner-title" data-i18n="referTitle">Invite friends, earn together!</div>
+        <div class="banner-desc" data-i18n="referDesc">Share your unique link. Earn ₹500 for every friend who takes a loan.</div>
+        <div class="banner-actions">
+          <button class="btn btn-green" onclick="openModal('refer')">🔗 <span data-i18n="referFriend">Refer a Friend</span></button>
+        </div>
+      </div>
+    </div>
+
+    
+    <!-- Services -->
+    <div class="sec-hdr">
+      <div class="sec-title" data-i18n="services">Services</div>
+      <a href="/loan-discovery" class="sec-link" data-i18n="viewAll">View all →</a>
+    </div>
+    <div class="card-grid">
+      <a href="/loan-discovery" class="feature-card">
+        <div class="card-icon-wrap">🔍</div>
+        <div class="card-title" data-i18n="loanDiscovery">Loan Discovery</div>
+        <div class="card-desc" data-i18n="loanDiscoveryDesc">AI-powered matching with personalized loan offers and priority approval.</div>
+        <div class="card-tag">⭐ PRIORITY ACCESS</div>
+        <div class="card-arrow">↗</div>
+      </a>
+      <a href="/loan-status" class="feature-card">
+        <div class="card-icon-wrap">📊</div>
+        <div class="card-title" data-i18n="loanStatus">Loan Status</div>
+        <div class="card-desc" data-i18n="loanStatusDesc">Real-time tracking with analytics and instant push notifications.</div>
+        <div class="card-tag">⭐ LIVE UPDATES</div>
+        <div class="card-arrow">↗</div>
+      </a>
+      <a href="/wallet" class="feature-card">
+        <div class="card-icon-wrap">💰</div>
+        <div class="card-title" data-i18n="wallet">Wallet</div>
+        <div class="card-desc" data-i18n="walletDesc">Instant disbursements, full transaction history, and cashback rewards.</div>
+        <div class="card-tag">⭐ INSTANT ACCESS</div>
+        <div class="card-arrow">↗</div>
+      </a>
+      <a href="/emi_schedule" class="feature-card">
+        <div class="card-icon-wrap">💳</div>
+        <div class="card-title" data-i18n="emiSchedule">EMI Management</div>
+        <div class="card-desc" data-i18n="emiDesc">Flexible repayment plans with smart reminders and AI schedules.</div>
+        <div class="card-tag">⭐ FLEXIBLE PLANS</div>
+        <div class="card-arrow">↗</div>
+      </a>
+      <a href="/credit_rewards" class="feature-card">
+        <div class="card-icon-wrap">⭐</div>
+        <div class="card-title" data-i18n="rewards">Credit Rewards</div>
+        <div class="card-desc" data-i18n="rewardsDesc">Boost your score with premium tracking and exclusive perks.</div>
+        <div class="card-tag">⭐ EXCLUSIVE REWARDS</div>
+        <div class="card-arrow">↗</div>
+      </a>
+      <a href="/support" class="feature-card">
+        <div class="card-icon-wrap">🎧</div>
+        <div class="card-title" data-i18n="support">Premium Support</div>
+        <div class="card-desc" data-i18n="supportDesc">24/7 dedicated support with priority response and personal manager.</div>
+        <div class="card-tag">⭐ VIP SUPPORT</div>
+        <div class="card-arrow">↗</div>
+      </a>
+    </div>
+
+    <!-- Bottom Row -->
+    <div class="bottom-row">
+      <div class="activity-card">
+  <div class="sec-hdr" style="margin-bottom:.75rem">
+    <div class="sec-title" style="font-size:1rem" data-i18n="recentActivity">Recent Activity</div>
+    <a href="/wallet" class="sec-link">All →</a>
+  </div>
+
+  {% set ns = namespace(has_activity=false) %}
+
+  {% for app in user.loan_applications %}
+    {% if app.status and app.status.strip().lower() == 'disbursed' %}
+      {% set ns.has_activity = true %}
+      <div class="act-item">
+        <div class="act-icon">🏦</div>
+        <div class="act-info">
+          <div class="act-title">Loan Disbursed — {{ app.loanname }}</div>
+          <div class="act-date">
+            {{ app.timestamp.strftime('%b %d, %Y · %I:%M %p') if app.timestamp else 'Loan successfully disbursed' }}
+          </div>
+        </div>
+        <div class="act-amt cr">+₹{{ "{:,.0f}".format(app.amount or 0) }}</div>
+      </div>
+    {% endif %}
+
+    {% for emi in app.emis %}
+      {% if emi.status and emi.status.strip().lower() == 'paid' %}
+        {% set ns.has_activity = true %}
+        <div class="act-item">
+          <div class="act-icon">💸</div>
+          <div class="act-info">
+            <div class="act-title">EMI Payment — {{ app.loanname }}</div>
+            <div class="act-date">
+              {{ emi.paid_on.strftime('%b %d, %Y · %I:%M %p') if emi.paid_on else 'EMI paid successfully' }}
+            </div>
+          </div>
+          <div class="act-amt dr">−₹{{ "{:,.0f}".format(emi.emi_amount or 0) }}</div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  {% endfor %}
+
+  {% if not ns.has_activity %}
+    <div class="empty-state" style="padding:1rem 0;">
+      <div style="font-size:2rem;margin-bottom:.5rem">📋</div>
+      <div>No recent activity found.</div>
+    </div>
+  {% endif %}
+</div>
+
+      <div class="score-card">
+        <div class="sec-title" style="font-size:1rem" data-i18n="creditScore">Credit Score</div>
+        <div class="score-ring-wrap">
+          <div class="score-ring">
+            <svg width="120" height="120" viewBox="0 0 120 120">
+              <defs><linearGradient id="gG" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#9A7528"/><stop offset="100%" stop-color="#E2C06B"/></linearGradient></defs>
+              <circle class="score-ring-bg" cx="60" cy="60" r="50"/>
+              <circle class="score-ring-fill" cx="60" cy="60" r="50"/>
+            </svg>
+            <div class="score-ring-val">
+              <div class="score-num">765</div>
+              <div class="score-lbl">/ 900</div>
+            </div>
+          </div>
+          <div class="score-status">✦ Good Standing</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.65rem">
+          <div class="factor-row"><div class="factor-top"><span data-i18n="paymentHistory">Payment History</span><span>96%</span></div><div class="factor-bar"><div class="factor-fill" style="width:96%"></div></div></div>
+          <div class="factor-row"><div class="factor-top"><span data-i18n="utilization">Credit Utilization</span><span>42%</span></div><div class="factor-bar"><div class="factor-fill" style="width:42%"></div></div></div>
+          <div class="factor-row"><div class="factor-top"><span data-i18n="creditAge">Credit Age</span><span>78%</span></div><div class="factor-bar"><div class="factor-fill" style="width:78%"></div></div></div>
+          <div class="factor-row"><div class="factor-top"><span data-i18n="enquiries">Enquiries</span><span>85%</span></div><div class="factor-bar"><div class="factor-fill" style="width:85%"></div></div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="footer">© 2025 <span>Creditium</span>. All Rights Reserved. · Premium Financial Experience ✨</footer>
+</main>
+</div>
+
+<!-- ══ PROFILE MODAL ══ -->
+<div class="modal-overlay" id="modalProfile">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('profile')">✕</button>
+    <div class="modal-title" data-i18n="editProfile">Edit Profile</div>
+    <p class="modal-sub" data-i18n="editProfileSub">Update your account details below</p>
+    <form action="/update_profile" method="POST" enctype="multipart/form-data">
+      <div class="form-group">
+        <label data-i18n="fullName">Full Name</label>
+        <input type="text" name="username" value="{{ username }}" required>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label data-i18n="email">Email</label>
+          <input type="email" name="email" value="{{ email }}" required>
+        </div>
+        <div class="form-group">
+          <label data-i18n="mobile">Mobile</label>
+          <input type="tel" name="mobile" value="{{ mobile }}" required>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-gold" style="width:100%;justify-content:center;padding:.9rem;font-size:.88rem;">
+        💾 <span data-i18n="saveChanges">Save Changes</span>
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- ══ REFER MODAL ══ -->
+<div class="modal-overlay" id="modalRefer">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('refer')">✕</button>
+    <div class="modal-title" data-i18n="referFriend">Refer a Friend</div>
+    <p class="modal-sub" data-i18n="referModalSub">Share your link and earn ₹500 for every successful referral!</p>
+    <div class="refer-link-box">
+      <div class="refer-link-text" id="referLink">https://creditium.app/join?ref={{ username | lower }}</div>
+      <button class="copy-btn" onclick="copyReferLink()">📋 Copy</button>
+    </div>
+    <a href="https://wa.me/?text=Hey!%20Join%20Creditium%20and%20get%20instant%20loans%20at%20the%20best%20rates!%20Use%20my%20referral%20link%3A%20https%3A%2F%2Fcreditium.app%2Fjoin%3Fref%3D{{ username | lower }}"
+       target="_blank" class="whatsapp-btn">
+      <span class="wa-icon">📱</span> Share on WhatsApp
+    </a>
+    <div style="margin-top:1rem;text-align:center;font-size:.74rem;color:var(--text-dim)">
+      <span data-i18n="referralEarned">You've referred <strong style="color:var(--gold-lt)">0 friends</strong> and earned <strong style="color:var(--green)">₹0</strong> so far.</span>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════
+   TRANSLATIONS
+════════════════════════════ */
+const translations = {
+  en: {
+    nav:"Navigation",dashboard:"Dashboard",loanDiscovery:"Loan Discovery",loanStatus:"Loan Status",
+    emiSchedule:"EMI Schedule",wallet:"Wallet",rewards:"Credit Rewards",account:"Account",
+    settings:"Settings",support:"Support",logout:"Logout",walletBalance:"Wallet Balance",
+    creditScore:"Credit Score",activeLoans:"Active Loans",emisPaid:"EMIs Paid",
+    rewardsLabel:"Credit Rewards",pts:"pts",rewardTitle:"Claim your reward points!",
+    rewardDesc:"Redeem your points for cashback, EMI discounts, and exclusive offers.",
+    claimReward:"Claim Reward",referLabel:"Refer & Earn",perReferral:"per referral",
+    referTitle:"Invite friends, earn together!",
+    referDesc:"Share your unique link. Earn ₹500 for every friend who takes a loan.",
+    referFriend:"Refer a Friend",activeLoansTitle:"Active Loans",viewAll:"View all →",
+    services:"Services",loanDiscoveryDesc:"AI-powered matching with personalized loan offers.",
+    loanStatusDesc:"Real-time tracking with analytics and notifications.",
+    walletDesc:"Instant disbursements, history, and cashback rewards.",
+    emiDesc:"Flexible repayment plans with smart reminders.",
+    rewardsDesc:"Boost your score with premium tracking and perks.",
+    supportDesc:"24/7 dedicated support with priority response.",
+    recentActivity:"Recent Activity",paymentHistory:"Payment History",
+    utilization:"Credit Utilization",creditAge:"Credit Age",enquiries:"Enquiries",
+    editProfile:"Edit Profile",editProfileSub:"Update your account details below",
+    fullName:"Full Name",email:"Email",mobile:"Mobile",saveChanges:"Save Changes",
+    referModalSub:"Share your link and earn ₹500 for every successful referral!",
+    referralEarned:"You've referred 0 friends and earned ₹0 so far.",
+    noLoans:"No active loans. Apply now →",perMonth:"/ month",active:"Active",
+  },
+  hi: {
+    nav:"नेविगेशन",dashboard:"डैशबोर्ड",loanDiscovery:"ऋण खोज",loanStatus:"ऋण स्थिति",
+    emiSchedule:"EMI अनुसूची",wallet:"वॉलेट",rewards:"क्रेडिट पुरस्कार",account:"खाता",
+    settings:"सेटिंग्स",support:"सहायता",logout:"लॉगआउट",walletBalance:"वॉलेट बैलेंस",
+    creditScore:"क्रेडिट स्कोर",activeLoans:"सक्रिय ऋण",emisPaid:"EMI भुगतान",
+    rewardsLabel:"क्रेडिट पुरस्कार",pts:"अंक",rewardTitle:"अपने पुरस्कार अंक दावा करें!",
+    rewardDesc:"कैशबैक, EMI छूट और एक्सक्लूसिव ऑफर के लिए अपने अंक रिडीम करें।",
+    claimReward:"पुरस्कार दावा करें",referLabel:"रेफर करें और कमाएं",perReferral:"प्रति रेफरल",
+    referTitle:"दोस्तों को आमंत्रित करें, साथ में कमाएं!",
+    referDesc:"अपना लिंक शेयर करें। हर दोस्त के लिए ₹500 कमाएं।",
+    referFriend:"दोस्त को रेफर करें",activeLoansTitle:"सक्रिय ऋण",viewAll:"सभी देखें →",
+    services:"सेवाएं",loanDiscoveryDesc:"व्यक्तिगत ऋण ऑफर के साथ AI मिलान।",
+    loanStatusDesc:"रीयल-टाइम ट्रैकिंग और सूचनाएं।",
+    walletDesc:"तत्काल वितरण और कैशबैक।",emiDesc:"लचीली पुनर्भुगतान योजनाएं।",
+    rewardsDesc:"प्रीमियम ट्रैकिंग के साथ स्कोर बढ़ाएं।",
+    supportDesc:"24/7 समर्पित सहायता।",recentActivity:"हालिया गतिविधि",
+    paymentHistory:"भुगतान इतिहास",utilization:"क्रेडिट उपयोग",creditAge:"क्रेडिट आयु",
+    enquiries:"पूछताछ",editProfile:"प्रोफ़ाइल संपादित करें",editProfileSub:"अपना विवरण अपडेट करें",
+    fullName:"पूरा नाम",email:"ईमेल",mobile:"मोबाइल",saveChanges:"परिवर्तन सहेजें",
+    referModalSub:"लिंक शेयर करें और हर सफल रेफरल के लिए ₹500 कमाएं!",
+    referralEarned:"आपने अब तक 0 दोस्तों को रेफर किया और ₹0 कमाए।",
+    noLoans:"कोई सक्रिय ऋण नहीं। अभी आवेदन करें →",perMonth:"/ माह",active:"सक्रिय",
+  },
+  ta: {
+    nav:"வழிசெலுத்தல்",dashboard:"டாஷ்போர்டு",loanDiscovery:"கடன் கண்டுபிடிப்பு",loanStatus:"கடன் நிலை",
+    emiSchedule:"EMI அட்டவணை",wallet:"வாலட்",rewards:"கடன் வெகுமதிகள்",account:"கணக்கு",
+    settings:"அமைப்புகள்",support:"ஆதரவு",logout:"வெளியேறு",walletBalance:"வாலட் இருப்பு",
+    creditScore:"கடன் மதிப்பெண்",activeLoans:"செயலில் உள்ள கடன்கள்",emisPaid:"EMI செலுத்தப்பட்டது",
+    rewardsLabel:"கடன் வெகுமதிகள்",pts:"புள்ளிகள்",rewardTitle:"உங்கள் வெகுமதி புள்ளிகளை கோரவும்!",
+    rewardDesc:"கேஷ்பேக் மற்றும் EMI தள்ளுபடிகளுக்காக புள்ளிகளை மீட்டெடுக்கவும்.",
+    claimReward:"வெகுமதி கோரவும்",referLabel:"பரிந்துரைக்கவும் & சம்பாதிக்கவும்",perReferral:"பரிந்துரைக்கு",
+    referTitle:"நண்பர்களை அழைக்கவும், சேர்ந்து சம்பாதிக்கவும்!",
+    referDesc:"உங்கள் தனிப்பட்ட இணைப்பை பகிரவும். ₹500 சம்பாதிக்கவும்.",
+    referFriend:"நண்பரை பரிந்துரைக்கவும்",activeLoansTitle:"செயலில் உள்ள கடன்கள்",viewAll:"அனைத்தையும் காண →",
+    services:"சேவைகள்",editProfile:"சுயவிவரத்தை திருத்து",fullName:"முழு பெயர்",
+    email:"மின்னஞ்சல்",mobile:"மொபைல்",saveChanges:"மாற்றங்களை சேமிக்கவும்",
+    noLoans:"செயலில் உள்ள கடன்கள் இல்லை.",perMonth:"/ மாதம்",active:"செயலில்",
+    recentActivity:"சமீபத்திய செயல்பாடு",paymentHistory:"கட்டண வரலாறு",
+    utilization:"கடன் பயன்பாடு",creditAge:"கடன் வயது",enquiries:"விசாரணைகள்",
+    referModalSub:"இணைப்பை பகிரவும் மற்றும் ₹500 சம்பாதிக்கவும்!",
+    referralEarned:"நீங்கள் இதுவரை 0 நண்பர்களை பரிந்துரைத்துள்ளீர்கள்.",
+  },
+  te: {
+    nav:"నావిగేషన్",dashboard:"డాష్‌బోర్డ్",loanDiscovery:"రుణ అన్వేషణ",loanStatus:"రుణ స్థితి",
+    emiSchedule:"EMI షెడ్యూల్",wallet:"వాలెట్",rewards:"క్రెడిట్ రివార్డులు",account:"ఖాతా",
+    settings:"సెట్టింగులు",support:"మద్దతు",logout:"లాగ్అవుట్",walletBalance:"వాలెట్ బ్యాలెన్స్",
+    creditScore:"క్రెడిట్ స్కోర్",activeLoans:"యాక్టివ్ లోన్లు",emisPaid:"EMI చెల్లించబడింది",
+    rewardsLabel:"క్రెడిట్ రివార్డులు",pts:"పాయింట్లు",rewardTitle:"మీ రివార్డ్ పాయింట్లు క్లెయిమ్ చేయండి!",
+    rewardDesc:"క్యాష్‌బ్యాక్ మరియు EMI డిస్కౌంట్ల కోసం పాయింట్లు రిడీమ్ చేయండి.",
+    claimReward:"రివార్డ్ క్లెయిమ్ చేయండి",referLabel:"రెఫర్ చేయండి & సంపాదించండి",perReferral:"ప్రతి రెఫరల్‌కు",
+    referTitle:"స్నేహితులను ఆహ్వానించండి, కలిసి సంపాదించండి!",
+    referDesc:"మీ లింక్ షేర్ చేయండి. ప్రతి స్నేహితుడికి ₹500 సంపాదించండి.",
+    referFriend:"స్నేహితుడిని రెఫర్ చేయండి",activeLoansTitle:"యాక్టివ్ లోన్లు",viewAll:"అన్నీ చూడండి →",
+    services:"సేవలు",editProfile:"ప్రొఫైల్ సవరించు",fullName:"పూర్తి పేరు",
+    email:"ఇమెయిల్",mobile:"మొబైల్",saveChanges:"మార్పులు సేవ్ చేయండి",
+    noLoans:"యాక్టివ్ లోన్లు లేవు.",perMonth:"/ నెల",active:"యాక్టివ్",
+    recentActivity:"ఇటీవలి కార్యకలాపాలు",paymentHistory:"చెల్లింపు చరిత్ర",
+    utilization:"క్రెడిట్ వినియోగం",creditAge:"క్రెడిట్ వయస్సు",enquiries:"విచారణలు",
+    referModalSub:"లింక్ షేర్ చేయండి మరియు ₹500 సంపాదించండి!",
+    referralEarned:"మీరు ఇప్పటివరకు 0 స్నేహితులను రెఫర్ చేశారు.",
+  },
+  ml: {
+    nav:"നാവിഗേഷൻ",dashboard:"ഡാഷ്‌ബോർഡ്",loanDiscovery:"ലോൺ ഡിസ്കവറി",loanStatus:"ലോൺ സ്റ്റാറ്റസ്",
+    emiSchedule:"EMI ഷെഡ്യൂൾ",wallet:"വാലറ്റ്",rewards:"ക്രെഡിറ്റ് റിവാർഡ്",account:"അക്കൗണ്ട്",
+    settings:"ക്രമീകരണങ്ങൾ",support:"പിന്തുണ",logout:"ലോഗൗട്ട്",walletBalance:"വാലറ്റ് ബാലൻസ്",
+    creditScore:"ക്രെഡിറ്റ് സ്കോർ",activeLoans:"സജീവ ലോണുകൾ",emisPaid:"EMI അടച്ചു",
+    rewardsLabel:"ക്രെഡിറ്റ് റിവാർഡ്",pts:"പോയിന്റ്",rewardTitle:"നിങ്ങളുടെ റിവാർഡ് പോയിന്റ് ക്ലെയിം ചെയ്യൂ!",
+    rewardDesc:"ക്യാഷ്‌ബാക്ക്, EMI ഡിസ്കൗണ്ട് എന്നിവയ്ക്ക് പോയിന്റ് റിഡീം ചെയ്യൂ.",
+    claimReward:"റിവാർഡ് ക്ലെയിം ചെയ്യൂ",referLabel:"റഫർ ചെയ്ത് സമ്പാദിക്കൂ",perReferral:"ഓരോ റഫറലിനും",
+    referTitle:"സുഹൃത്തുക്കളെ ക്ഷണിക്കൂ, ഒരുമിച്ച് സമ്പാദിക്കൂ!",
+    referDesc:"നിങ്ങളുടെ ലിങ്ക് ഷെയർ ചെയ്യൂ. ₹500 സമ്പാദിക്കൂ.",
+    referFriend:"സുഹൃത്തിനെ റഫർ ചെയ്യൂ",activeLoansTitle:"സജീവ ലോണുകൾ",viewAll:"എല്ലാം കാണൂ →",
+    services:"സേവനങ്ങൾ",editProfile:"പ്രൊഫൈൽ എഡിറ്റ് ചെയ്യൂ",fullName:"പൂർണ്ണ നാമം",
+    email:"ഇമെയിൽ",mobile:"മൊബൈൽ",saveChanges:"മാറ്റങ്ങൾ സേവ് ചെയ്യൂ",
+    noLoans:"സജീവ ലോണുകൾ ഇല്ല.",perMonth:"/ മാസം",active:"സജീവം",
+    recentActivity:"സമീപകാല പ്രവർത്തനം",paymentHistory:"പേയ്‌മെന്റ് ചരിത്രം",
+    utilization:"ക്രെഡിറ്റ് ഉപയോഗം",creditAge:"ക്രെഡിറ്റ് പ്രായം",enquiries:"അന്വേഷണങ്ങൾ",
+    referModalSub:"ലിങ്ക് ഷെയർ ചെയ്ത് ₹500 സമ്പാദിക്കൂ!",
+    referralEarned:"നിങ്ങൾ ഇതുവരെ 0 സുഹൃത്തുക്കളെ റഫർ ചെയ്തു.",
+  }
+};
+
+let currentLang = localStorage.getItem('creditium_lang') || 'en';
+
+function applyTranslations(lang) {
+  const t = translations[lang] || translations.en;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (t[key]) el.innerHTML = t[key];
+  });
+  document.getElementById('langSelect').value = lang;
+  document.documentElement.lang = lang;
+}
+
+function changeLanguage(lang) {
+  currentLang = lang;
+  localStorage.setItem('creditium_lang', lang);
+  applyTranslations(lang);
+  showToast('🌐 Language changed!');
+}
+
+/* ════════════════════════════
+   THEME TOGGLE
+════════════════════════════ */
+let currentTheme = localStorage.getItem('creditium_theme') || 'dark';
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('themeToggle').textContent = theme === 'dark' ? '🌙' : '☀️';
+  currentTheme = theme;
+}
+
+function toggleTheme() {
+  const next = currentTheme === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('creditium_theme', next);
+  applyTheme(next);
+  showToast(next === 'dark' ? '🌙 Dark mode on' : '☀️ Light mode on');
+}
+
+/* ════════════════════════════
+   SIDEBAR
+════════════════════════════ */
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+  document.getElementById('hamburger').classList.toggle('open');
+}
+
+/* ════════════════════════════
+   MODALS
+════════════════════════════ */
+function openModal(id) {
+  document.getElementById('modal' + id.charAt(0).toUpperCase() + id.slice(1)).classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(id) {
+  document.getElementById('modal' + id.charAt(0).toUpperCase() + id.slice(1)).classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) { m.classList.remove('open'); document.body.style.overflow = ''; } });
+});
+
+/* ════════════════════════════
+   REFER LINK COPY
+════════════════════════════ */
+function copyReferLink() {
+  const link = document.getElementById('referLink').textContent.trim();
+  navigator.clipboard.writeText(link).then(() => showToast('✅ Link copied!'));
+}
+
+/* ════════════════════════════
+   TOAST
+════════════════════════════ */
+function showToast(msg) {
+  const old = document.querySelector('.toast');
+  if (old) old.remove();
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2800);
+}
+
+/* ════════════════════════════
+   INIT
+════════════════════════════ */
+window.addEventListener('DOMContentLoaded', () => {
+  applyTheme(currentTheme);
+  applyTranslations(currentLang);
+});
+
+window.addEventListener('resize', () => {
+  if (window.innerWidth >= 900) {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('open');
+    document.getElementById('hamburger').classList.remove('open');
+  }
+});
+</script>
+</body>
+</html>

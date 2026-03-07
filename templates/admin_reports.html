@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Payments Report — Creditium Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#C9A84C;--gold-lt:#E2C06B;--gold-dk:#9A7528;--bg:#080809;--surface:#121217;--surface2:#18181F;--surface3:#202028;--border:rgba(201,168,76,0.11);--border-md:rgba(201,168,76,0.22);--border-hi:rgba(201,168,76,0.45);--text:#F0EBE0;--text-muted:#8A8490;--text-dim:#4E4A55;--green:#27AE6B;--red:#D94040;--orange:#D4742A;--header-h:62px;--r:14px;--r-sm:9px;}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");opacity:.6;}
+.orb{position:fixed;border-radius:50%;filter:blur(130px);pointer-events:none;z-index:0;}
+.o1{width:600px;height:600px;background:radial-gradient(circle,rgba(201,168,76,.065) 0%,transparent 70%);top:-200px;right:-150px;animation:d1 26s ease-in-out infinite;}
+.o2{width:380px;height:380px;background:radial-gradient(circle,rgba(39,174,107,.04) 0%,transparent 70%);bottom:-120px;left:-100px;animation:d2 30s ease-in-out infinite;}
+@keyframes d1{0%,100%{transform:translate(0,0)}50%{transform:translate(-50px,70px)}}
+@keyframes d2{0%,100%{transform:translate(0,0)}50%{transform:translate(55px,-45px)}}
+::-webkit-scrollbar{width:4px;height:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--gold),var(--gold-dk));border-radius:4px;}
+
+.header{position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:var(--header-h);background:rgba(8,8,9,.9);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border-bottom:1px solid var(--border);box-shadow:0 8px 40px rgba(0,0,0,.45);}
+.hl{display:flex;align-items:center;gap:.85rem;}
+.logo{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:800;text-decoration:none;background:linear-gradient(130deg,var(--gold-lt),var(--gold),var(--gold-dk));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% auto;animation:ls 5s ease-in-out infinite;}
+@keyframes ls{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.admin-badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:50px;background:linear-gradient(135deg,rgba(201,168,76,.16),rgba(201,168,76,.05));border:1px solid rgba(201,168,76,.28);color:var(--gold-lt);font-size:.58rem;font-weight:800;letter-spacing:.1em;}
+.back-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:50px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);text-decoration:none;font-size:.78rem;font-weight:700;transition:all .22s;}
+.back-btn:hover{border-color:var(--border-md);color:var(--gold-lt);background:rgba(201,168,76,.07);}
+
+.page{position:relative;z-index:1;max-width:1300px;margin:0 auto;padding:2rem 1.5rem 5rem;}
+.sec-eye{display:inline-flex;align-items:center;gap:.45rem;color:var(--gold);font-size:.62rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase;margin-bottom:.5rem;}
+.sec-eye::before{content:'';width:18px;height:1px;background:var(--gold);}
+.sec-title{font-family:'Cormorant Garamond',serif;font-size:clamp(1.5rem,3.5vw,2.2rem);font-weight:800;color:var(--text);letter-spacing:-.01em;line-height:1.1;margin-bottom:.4rem;}
+.sec-title .g{color:var(--gold-lt);}
+.page-top{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;margin-bottom:1.75rem;flex-wrap:wrap;}
+
+/* Summary stats */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:.85rem;margin-bottom:1.75rem;}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.15rem 1rem;position:relative;overflow:hidden;transition:all .25s;cursor:default;}
+.stat::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:0;transition:opacity .25s;}
+.stat:hover{border-color:var(--border-md);transform:translateY(-2px);}
+.stat:hover::after{opacity:1;}
+.stat.s-gold::after{background:linear-gradient(90deg,var(--gold-dk),var(--gold-lt));}
+.stat.s-green::after{background:linear-gradient(90deg,#134d30,var(--green));}
+.stat.s-red::after{background:linear-gradient(90deg,#5a1a1a,var(--red));}
+.stat-val{font-family:'Cormorant Garamond',serif;font-size:1.55rem;font-weight:800;color:var(--gold-lt);line-height:1;margin-bottom:.25rem;margin-top:.3rem;}
+.stat-label{font-size:.68rem;color:var(--text-muted);font-weight:500;}
+.stat-icon{font-size:1rem;}
+
+/* Top row: export + search */
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:1.25rem;flex-wrap:wrap;}
+.export-btn{display:inline-flex;align-items:center;gap:.45rem;padding:.55rem 1.2rem;border-radius:50px;border:none;background:linear-gradient(135deg,var(--gold-lt),var(--gold-dk));color:#080809;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:800;cursor:pointer;transition:all .25s;text-decoration:none;box-shadow:0 4px 14px rgba(201,168,76,.22);}
+.export-btn:hover{transform:translateY(-2px);box-shadow:0 7px 22px rgba(201,168,76,.35);}
+.si{position:relative;}
+.si svg{position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:var(--text-dim);}
+.si input{width:240px;padding:.55rem .9rem .55rem 2.4rem;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:.8rem;outline:none;transition:all .2s;}
+.si input::placeholder{color:var(--text-dim);}
+.si input:focus{border-color:var(--border-md);background:var(--surface3);box-shadow:0 0 0 3px rgba(201,168,76,.08);}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;min-width:600px;}
+thead th{background:var(--surface2);color:var(--gold-lt);padding:.9rem 1rem;text-align:left;font-size:.67rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;border-bottom:1px solid var(--border-md);white-space:nowrap;}
+tbody tr{border-bottom:1px solid rgba(255,255,255,.03);transition:background .18s;}
+tbody tr:last-child{border:none;}
+tbody tr:hover{background:rgba(201,168,76,.03);}
+tbody td{padding:.82rem 1rem;font-size:.8rem;color:var(--text-muted);vertical-align:middle;}
+tbody td strong{color:var(--text);font-weight:600;}
+td.id-col{color:var(--text-dim);font-size:.72rem;font-weight:600;font-family:monospace;}
+td.amount{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:700;color:var(--gold-lt);}
+td.date-cell{white-space:nowrap;font-size:.75rem;}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:50px;font-size:.63rem;font-weight:800;letter-spacing:.05em;white-space:nowrap;}
+.b-paid{background:rgba(39,174,107,.13);color:var(--green);border:1px solid rgba(39,174,107,.22);}
+.b-pending{background:rgba(212,116,42,.13);color:var(--orange);border:1px solid rgba(212,116,42,.22);}
+.b-other{background:rgba(201,168,76,.12);color:var(--gold);border:1px solid rgba(201,168,76,.2);}
+.empty{padding:3rem;text-align:center;color:var(--text-dim);font-size:.84rem;}
+.empty-icon{font-size:2rem;margin-bottom:.6rem;}
+
+@media(max-width:900px){.page{padding:1.25rem .9rem 5rem;}.header{padding:0 1rem;}.si input{width:100%;}.toolbar{flex-direction:column;align-items:flex-start;}.si{width:100%;}}
+@media(max-width:768px){
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .table-wrap{border:none;}
+  table,thead,tbody,tr,th,td{display:block;}
+  thead{display:none;}
+  tbody tr{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:.75rem;padding:.85rem 1rem;position:relative;overflow:hidden;}
+  tbody tr::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold-dk),var(--gold-lt));}
+  tbody td{padding:.3rem 0 .3rem 46%;position:relative;border:none;border-bottom:1px solid rgba(255,255,255,.025);font-size:.78rem;display:flex;align-items:center;min-height:28px;}
+  tbody td:last-child{border:none;}
+  tbody td::before{content:attr(data-label);position:absolute;left:0;width:44%;font-size:.62rem;font-weight:800;color:var(--text-dim);letter-spacing:.06em;text-transform:uppercase;}
+}
+@media(max-width:400px){.stats-row{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="orb o1"></div><div class="orb o2"></div>
+
+<header class="header">
+  <div class="hl">
+    <a href="/" class="logo">Creditium</a>
+    <div class="admin-badge">⚡ ADMIN</div>
+  </div>
+  <a href="/admin/dashboard" class="back-btn">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Dashboard
+  </a>
+</header>
+
+<div class="page">
+  <div class="page-top">
+    <div>
+      <div class="sec-eye">Analytics</div>
+      <div class="sec-title">Payments <span class="g">Report</span></div>
+    </div>
+  </div>
+
+  <!-- Summary stats (computed from data) -->
+  <div class="stats-row" id="statsRow">
+    <div class="stat s-gold">
+      <div class="stat-icon">📄</div>
+      <div class="stat-val" id="totalRec">—</div>
+      <div class="stat-label">Total Records</div>
+    </div>
+    <div class="stat s-green">
+      <div class="stat-icon">✅</div>
+      <div class="stat-val" id="paidRec">—</div>
+      <div class="stat-label">Paid</div>
+    </div>
+    <div class="stat s-red">
+      <div class="stat-icon">⏳</div>
+      <div class="stat-val" id="pendRec">—</div>
+      <div class="stat-label">Pending / Other</div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <a href="{{ url_for('export_payments_csv') }}" class="export-btn">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export CSV
+    </a>
+    <div class="si">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="searchInput" placeholder="Filter by user, status…" oninput="filterTable(this.value)">
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table id="reportTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>User</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in payments %}
+        <tr>
+          <td class="id-col" data-label="ID">#{{ p.id }}</td>
+          <td data-label="User"><strong>{{ p.user_name if p.user_name else "Unknown" }}</strong></td>
+          <td class="amount" data-label="Amount">₹{{ p.emi_amount | round(2) }}</td>
+          <td data-label="Status">
+            {% if p.status == 'Paid' %}
+              <span class="badge b-paid">● Paid</span>
+            {% elif p.status == 'Pending' %}
+              <span class="badge b-pending">● Pending</span>
+            {% elif p.status == 'Reconciled' %}
+              <span class="badge b-other">● Reconciled</span>
+            {% else %}
+              <span class="badge b-other">● {{ p.status }}</span>
+            {% endif %}
+          </td>
+          <td class="date-cell" data-label="Date">
+            {% if p.date %}{{ p.date.strftime('%d %b %Y, %H:%M') }}{% else %}—{% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5"><div class="empty"><div class="empty-icon">📊</div>No payment records found.</div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+(function(){
+  const rows = document.querySelectorAll('#reportTable tbody tr');
+  let total=0,paid=0,pend=0;
+  rows.forEach(r=>{
+    if(!r.querySelector('td[colspan]')){
+      total++;
+      const b=r.querySelector('.badge');
+      if(b && b.classList.contains('b-paid')) paid++;
+      else pend++;
+    }
+  });
+  document.getElementById('totalRec').textContent=total;
+  document.getElementById('paidRec').textContent=paid;
+  document.getElementById('pendRec').textContent=pend;
+})();
+function filterTable(v){
+  const q=v.toLowerCase();
+  document.querySelectorAll('#reportTable tbody tr').forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(q)?'':'none';});
+}
+</script>
+</body>
+</html>

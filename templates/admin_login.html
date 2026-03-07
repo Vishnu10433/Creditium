@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Login - LoanApp</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #0a0a0a;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+.container {
+    background: rgba(255, 193, 7, 0.05);
+    padding: 40px 30px;
+    border-radius: 20px;
+    border: 2px solid rgba(255, 193, 7, 0.2);
+    width: 350px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(255, 193, 7, 0.2);
+}
+.container h2 {
+    margin-bottom: 20px;
+    font-size: 2em;
+    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.container input {
+    width: 90%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    background: rgba(0,0,0,0.5);
+    color: #fff;
+}
+.container button {
+    width: 95%;
+    padding: 12px;
+    margin-top: 15px;
+    border: none;
+    border-radius: 25px;
+    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 5px 20px rgba(255, 193, 7, 0.4);
+    transition: all 0.3s ease;
+}
+.container button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(255, 193, 7, 0.6);
+}
+.container p {
+    margin-top: 15px;
+    font-size: 0.9em;
+    color: rgba(255,255,255,0.7);
+}
+.container p a {
+    color: #ffc107;
+    text-decoration: none;
+}
+.container p a:hover {
+    text-decoration: underline;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h2>Admin Login</h2>
+
+    <form method="POST" action="{{ url_for('admin_login') }}">
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <button type="submit">Login</button>
+    </form>
+
+    <p>Don't have an admin account?
+        <a href="{{ url_for('admin_register') }}">Register Here</a>
+    </p>
+</div>
+
+</body>
+</html>

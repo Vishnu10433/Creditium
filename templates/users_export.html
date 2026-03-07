@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Export Users - Admin Dashboard</title>
+<style>
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #111;
+    color: #fff;
+    padding: 30px;
+}
+
+h1 {
+    color: #FFD700;
+    margin-bottom: 20px;
+}
+
+button.export-btn, button.back-btn {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    background-color: #FFD700;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: 0.3s;
+}
+
+button.export-btn:hover, button.back-btn:hover {
+    background-color: #FFA500;
+}
+
+</style>
+</head>
+<body>
+
+<h1>Export Users Data</h1>
+
+<p>Click the button below to download all registered users data as a CSV file.</p>
+
+<form action="{{ url_for('admin_users_export') }}" method="get">
+    <button type="submit" class="export-btn">Export Users</button>
+</form>
+
+<form action="{{ url_for('admin_dashboard') }}" method="get">
+    <button type="submit" class="back-btn">Back to Dashboard</button>
+</form>
+
+</body>
+</html>

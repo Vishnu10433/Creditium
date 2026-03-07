@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>User Management — Creditium Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold:#C9A84C;--gold-light:#E2C06B;--gold-dark:#A8862E;
+  --bg:#0C0C0F;--surface:#141418;--surface2:#1A1A20;--surface3:#22222A;
+  --border:rgba(201,168,76,0.15);--border-hover:rgba(201,168,76,0.4);
+  --text:#F5F0E8;--text-muted:#8A8490;--text-dim:#5A5560;
+  --green:#2ECC71;--red:#E74C3C;--blue:#3498DB;--orange:#E67E22;
+  --radius:14px;--radius-sm:10px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:0.5;}
+.ambient{position:fixed;border-radius:50%;filter:blur(130px);pointer-events:none;z-index:0;}
+.a1{width:500px;height:500px;background:radial-gradient(circle,rgba(201,168,76,0.08) 0%,transparent 70%);top:-180px;right:-120px;animation:dA 22s ease-in-out infinite;}
+.a2{width:400px;height:400px;background:radial-gradient(circle,rgba(201,168,76,0.05) 0%,transparent 70%);bottom:-120px;left:-80px;animation:dB 26s ease-in-out infinite;}
+@keyframes dA{0%,100%{transform:translate(0,0)}50%{transform:translate(-45px,65px)}}
+@keyframes dB{0%,100%{transform:translate(0,0)}50%{transform:translate(55px,-45px)}}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--gold),var(--gold-dark));border-radius:4px}
+
+/* Topbar */
+.topbar{position:sticky;top:0;z-index:100;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;background:rgba(12,12,15,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--border);box-shadow:0 4px 24px rgba(0,0,0,0.4);}
+.topbar-logo{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:800;background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% auto;animation:shimmer 4s ease-in-out infinite;}
+@keyframes shimmer{0%,100%{background-position:0% center}50%{background-position:100% center}}
+.topbar-right{display:flex;align-items:center;gap:0.6rem;}
+.back-btn{display:inline-flex;align-items:center;gap:0.4rem;padding:0.45rem 1rem;border-radius:50px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);text-decoration:none;font-size:0.8rem;font-weight:600;transition:all 0.22s;-webkit-tap-highlight-color:transparent;}
+.back-btn:hover,.back-btn:active{border-color:var(--border-hover);color:var(--gold-light);background:var(--surface3);}
+.back-btn.primary{background:linear-gradient(135deg,var(--gold-light),var(--gold-dark));color:#0C0C0F;border-color:transparent;}
+.back-btn.primary:hover{box-shadow:0 4px 16px rgba(201,168,76,0.3);}
+
+/* Container */
+.container{max-width:1300px;margin:0 auto;padding:2rem 1.5rem 4rem;position:relative;z-index:1;animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* Page header */
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.75rem;}
+.page-header-left{}
+.page-eyebrow{display:inline-flex;align-items:center;gap:0.5rem;color:var(--gold);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.4rem;}
+.page-eyebrow::before{content:'';width:20px;height:1px;background:var(--gold);}
+.page-title{font-family:'Playfair Display',serif;font-size:clamp(1.4rem,4vw,2rem);font-weight:800;color:var(--text);letter-spacing:-0.02em;}
+.page-title .gold{color:var(--gold-light);}
+.header-actions{display:flex;gap:0.6rem;flex-wrap:wrap;align-items:center;}
+
+/* Stats */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:1.75rem;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1rem;position:relative;overflow:hidden;transition:all 0.25s;}
+.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:0;transition:opacity 0.25s;}
+.stat-card.c-gold::after{background:linear-gradient(90deg,var(--gold-dark),var(--gold-light));}
+.stat-card.c-green::after{background:linear-gradient(90deg,#1a7a3c,var(--green));}
+.stat-card.c-red::after{background:linear-gradient(90deg,#7a1a1a,var(--red));}
+.stat-card.c-dim::after{background:linear-gradient(90deg,#3a3a3a,#6a6a6a);}
+.stat-card:hover{border-color:var(--border-hover);transform:translateY(-3px);}
+.stat-card:hover::after{opacity:1;}
+.stat-icon{font-size:1.3rem;margin-bottom:0.5rem;}
+.stat-val{font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:800;color:var(--gold-light);line-height:1;margin-bottom:0.25rem;}
+.stat-label{font-size:0.7rem;font-weight:700;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase;}
+
+/* Search form */
+.search-bar{display:flex;gap:0.6rem;margin-bottom:1.5rem;flex-wrap:wrap;}
+.search-input{flex:1;min-width:200px;padding:0.75rem 1rem;height:44px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:inherit;font-size:0.9rem;outline:none;transition:all 0.22s;-webkit-appearance:none;}
+.search-input::placeholder{color:var(--text-dim);}
+.search-input:focus{border-color:var(--border-hover);background:var(--surface3);box-shadow:0 0 0 3px rgba(201,168,76,0.08);}
+.search-btn{display:inline-flex;align-items:center;gap:0.4rem;height:44px;padding:0 1.25rem;border:none;border-radius:var(--radius-sm);background:linear-gradient(135deg,var(--gold-light),var(--gold-dark));color:#0C0C0F;font-family:inherit;font-size:0.88rem;font-weight:700;cursor:pointer;transition:all 0.22s;white-space:nowrap;}
+.search-btn:hover{box-shadow:0 4px 16px rgba(201,168,76,0.3);transform:translateY(-1px);}
+
+/* Table card */
+.table-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.table-card-header{padding:1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.6rem;}
+.table-card-title{font-size:0.88rem;font-weight:700;color:var(--text);}
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:0.83rem;}
+thead th{padding:0.85rem 1rem;text-align:left;background:var(--surface2);color:var(--gold-light);font-size:0.67rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;}
+tbody td{padding:0.85rem 1rem;color:var(--text-muted);border-bottom:1px solid rgba(255,255,255,0.03);vertical-align:middle;}
+tbody tr:hover td{background:rgba(201,168,76,0.03);}
+tbody tr:last-child td{border-bottom:none;}
+.td-primary{color:var(--text)!important;font-weight:600;}
+.empty-row td{text-align:center;padding:2.5rem;color:var(--text-dim);}
+
+/* Profile avatar */
+.avatar{width:40px;height:40px;border-radius:10px;object-fit:cover;border:1px solid var(--border);}
+.avatar-placeholder{width:40px;height:40px;border-radius:10px;background:var(--surface3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.1rem;}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:50px;font-size:0.7rem;font-weight:700;letter-spacing:0.05em;white-space:nowrap;}
+.badge-verified{background:rgba(52,152,219,0.12);color:var(--blue);border:1px solid rgba(52,152,219,0.25);}
+.badge-pending{background:rgba(201,168,76,0.12);color:var(--gold-light);border:1px solid rgba(201,168,76,0.25);}
+.badge-deactivated{background:rgba(231,76,60,0.12);color:var(--red);border:1px solid rgba(231,76,60,0.25);}
+
+/* Action buttons */
+.btn-group{display:flex;gap:0.4rem;flex-wrap:wrap;}
+.action-btn{display:inline-flex;align-items:center;padding:0.32rem 0.75rem;border-radius:8px;text-decoration:none;font-size:0.72rem;font-weight:700;transition:all 0.2s;white-space:nowrap;border:none;cursor:pointer;font-family:inherit;-webkit-tap-highlight-color:transparent;}
+.btn-verify{background:linear-gradient(135deg,var(--gold-light),var(--gold-dark));color:#0C0C0F;}
+.btn-verify:hover{box-shadow:0 3px 12px rgba(201,168,76,0.3);}
+.btn-deactivate{background:rgba(231,76,60,0.12);color:var(--red);border:1px solid rgba(231,76,60,0.2);}
+.btn-deactivate:hover{background:rgba(231,76,60,0.2);}
+.btn-kyc{background:rgba(52,152,219,0.12);color:var(--blue);border:1px solid rgba(52,152,219,0.2);}
+.btn-kyc:hover{background:rgba(52,152,219,0.2);}
+
+@media(max-width:768px){
+  .container{padding:1.25rem 1rem 3rem;}
+  .topbar{padding:0 1rem;}
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .page-header{flex-direction:column;}
+  thead th,tbody td{padding:0.7rem 0.75rem;}
+}
+@media(max-width:380px){.stats-row{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="ambient a1"></div>
+<div class="ambient a2"></div>
+
+<div class="topbar">
+  <div class="topbar-logo">Creditium</div>
+  <div class="topbar-right">
+    <a href="{{ url_for('admin_kyc_list') }}" class="back-btn">KYC Submissions</a>
+    <a href="{{ url_for('admin_dashboard') }}" class="back-btn primary">← Dashboard</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-eyebrow">Admin</div>
+      <div class="page-title">👥 User <span class="gold">Management</span></div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card c-gold">
+      <div class="stat-icon">👥</div>
+      <div class="stat-val">{{ total_users }}</div>
+      <div class="stat-label">Total Users</div>
+    </div>
+    <div class="stat-card c-green">
+      <div class="stat-icon">✅</div>
+      <div class="stat-val">{{ active_users }}</div>
+      <div class="stat-label">Verified</div>
+    </div>
+    <div class="stat-card c-red">
+      <div class="stat-icon">🚫</div>
+      <div class="stat-val">{{ deactive_users }}</div>
+      <div class="stat-label">Deactivated</div>
+    </div>
+    <div class="stat-card c-dim">
+      <div class="stat-icon">⏳</div>
+      <div class="stat-val">{{ pending_users }}</div>
+      <div class="stat-label">Pending</div>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <form action="{{ url_for('admin_users_list') }}" method="GET" class="search-bar">
+    <input type="text" name="q" placeholder="Search by name, email or mobile…" value="{{ search if search }}" class="search-input" />
+    <button type="submit" class="search-btn">🔍 Search</button>
+  </form>
+
+  <!-- Table -->
+  <div class="table-card">
+    <div class="table-card-header">
+      <span>📋</span>
+      <div class="table-card-title">All Registered Users</div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Profile</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Mobile</th>
+            <th>Age</th>
+            <th>Gender</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in users %}
+          <tr>
+            <td class="td-primary">#{{ u.id }}</td>
+            <td>
+              {% if u.profile_image %}
+                <img src="{{ u.profile_image }}" alt="Profile" class="avatar">
+              {% else %}
+                <div class="avatar-placeholder">👤</div>
+              {% endif %}
+            </td>
+            <td class="td-primary">{{ u.username }}</td>
+            <td>{{ u.email }}</td>
+            <td>{{ u.mobile }}</td>
+            <td>{{ u.age }}</td>
+            <td>{{ u.gender }}</td>
+            <td>
+              <span class="badge
+                {% if u.status == 'Verified' %}badge-verified
+                {% elif u.status == 'Deactivated' %}badge-deactivated
+                {% else %}badge-pending{% endif %}">
+                {{ u.status or 'Pending' }}
+              </span>
+            </td>
+            <td>
+              <div class="btn-group">
+                {% if u.status != 'Verified' %}
+                <a href="{{ url_for('admin_verify_user', user_id=u.id) }}" class="action-btn btn-verify">✔ Verify</a>
+                {% endif %}
+                {% if u.status != 'Deactivated' %}
+                <a href="{{ url_for('admin_deactivate_user', user_id=u.id) }}" class="action-btn btn-deactivate">✕ Deactivate</a>
+                {% endif %}
+                <a href="{{ url_for('admin_kyc_list', user_id=u.id) }}" class="action-btn btn-kyc">KYC</a>
+              </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr class="empty-row"><td colspan="9">No users found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

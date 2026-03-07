@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Loan Applications — Creditium Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold:#C9A84C;--gold-light:#E2C06B;--gold-dark:#A8862E;
+  --bg:#0C0C0F;--surface:#141418;--surface2:#1A1A20;--surface3:#22222A;
+  --border:rgba(201,168,76,0.15);--border-hover:rgba(201,168,76,0.4);
+  --text:#F5F0E8;--text-muted:#8A8490;--text-dim:#5A5560;
+  --green:#2ECC71;--green-dim:rgba(46,204,113,0.1);
+  --red:#E74C3C;--red-dim:rgba(231,76,60,0.1);
+  --orange:#E67E22;--orange-dim:rgba(230,126,34,0.1);
+  --radius:14px;--radius-sm:10px;--radius-xs:7px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:0.5;}
+.ambient{position:fixed;border-radius:50%;filter:blur(130px);pointer-events:none;z-index:0;}
+.a1{width:500px;height:500px;background:radial-gradient(circle,rgba(201,168,76,0.08) 0%,transparent 70%);top:-180px;right:-120px;animation:dA 22s ease-in-out infinite;}
+.a2{width:400px;height:400px;background:radial-gradient(circle,rgba(201,168,76,0.05) 0%,transparent 70%);bottom:-120px;left:-80px;animation:dB 26s ease-in-out infinite;}
+@keyframes dA{0%,100%{transform:translate(0,0)}50%{transform:translate(-45px,65px)}}
+@keyframes dB{0%,100%{transform:translate(0,0)}50%{transform:translate(55px,-45px)}}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--gold),var(--gold-dark));border-radius:4px}
+
+/* ── TOPBAR ── */
+.topbar{position:sticky;top:0;z-index:100;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 2rem;background:rgba(12,12,15,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--border);box-shadow:0 4px 24px rgba(0,0,0,0.4);}
+.topbar-logo{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:800;background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% auto;animation:shimmer 4s ease-in-out infinite;}
+@keyframes shimmer{0%,100%{background-position:0% center}50%{background-position:100% center}}
+.topbar-right{display:flex;align-items:center;gap:1rem;}
+.topbar-time{font-size:0.72rem;color:var(--text-dim);font-variant-numeric:tabular-nums;}
+.back-btn{display:inline-flex;align-items:center;gap:0.4rem;padding:0.45rem 1rem;border-radius:50px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);text-decoration:none;font-size:0.8rem;font-weight:600;transition:all 0.22s;}
+.back-btn:hover{border-color:var(--border-hover);color:var(--gold-light);background:var(--surface3);}
+
+/* ── LAYOUT ── */
+.container{max-width:1300px;margin:0 auto;padding:2rem 2rem 5rem;position:relative;z-index:1;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── PAGE HEADER ── */
+.page-header{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:2rem;animation:fadeUp 0.5s ease both;}
+.page-header-left{}
+.page-eyebrow{display:inline-flex;align-items:center;gap:0.5rem;color:var(--gold);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.4rem;}
+.page-eyebrow::before{content:'';width:20px;height:1px;background:var(--gold);}
+.page-title{font-family:'Playfair Display',serif;font-size:clamp(1.4rem,4vw,2rem);font-weight:800;letter-spacing:-0.02em;}
+.page-title .gold{color:var(--gold-light);}
+
+/* ── SUMMARY STRIP ── */
+.summary-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:2rem;animation:fadeUp 0.5s 0.08s ease both;}
+.sum-cell{background:var(--surface);padding:1rem 1.4rem;transition:background 0.2s;}
+.sum-cell:hover{background:var(--surface2);}
+.sum-cell-label{font-size:0.63rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:0.35rem;}
+.sum-cell-val{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:800;}
+.sum-cell-val.c-gold{color:var(--gold-light);}
+.sum-cell-val.c-green{color:var(--green);}
+.sum-cell-val.c-red{color:var(--red);}
+.sum-cell-val.c-orange{color:var(--orange);}
+.sum-cell-sub{font-size:0.68rem;color:var(--text-dim);margin-top:0.15rem;}
+
+/* ── TOOLBAR ── */
+.toolbar{display:flex;align-items:center;gap:0.75rem;margin-bottom:1.25rem;flex-wrap:wrap;animation:fadeUp 0.5s 0.12s ease both;}
+.search-wrap{position:relative;flex:1;min-width:200px;max-width:340px;}
+.search-icon{position:absolute;left:0.85rem;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:0.8rem;pointer-events:none;}
+.search-input{width:100%;padding:0.6rem 1rem 0.6rem 2.3rem;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.82rem;outline:none;transition:border-color 0.2s,box-shadow 0.2s;}
+.search-input::placeholder{color:var(--text-dim);}
+.search-input:focus{border-color:var(--border-hover);box-shadow:0 0 0 3px rgba(201,168,76,0.07);}
+
+/* Tab pills */
+.tab-group{display:flex;gap:0.4rem;flex-wrap:wrap;}
+.tab-pill{display:inline-flex;align-items:center;gap:0.45rem;padding:0.48rem 1rem;border-radius:50px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);font-size:0.75rem;font-weight:600;cursor:pointer;transition:all 0.18s;white-space:nowrap;-webkit-tap-highlight-color:transparent;}
+.tab-pill:hover{border-color:var(--border-hover);color:var(--text);}
+.tab-pill.t-all.active{background:rgba(201,168,76,0.1);border-color:var(--gold);color:var(--gold-light);}
+.tab-pill.t-approved.active{background:var(--green-dim);border-color:rgba(46,204,113,0.35);color:var(--green);}
+.tab-pill.t-rejected.active{background:var(--red-dim);border-color:rgba(231,76,60,0.35);color:var(--red);}
+.tab-pill.t-pending.active{background:var(--orange-dim);border-color:rgba(230,126,34,0.35);color:var(--orange);}
+.tab-count{font-size:0.65rem;font-weight:800;padding:1px 6px;border-radius:20px;background:rgba(255,255,255,0.06);}
+
+.results-info{font-size:0.72rem;color:var(--text-dim);margin-left:auto;white-space:nowrap;}
+.results-info strong{color:var(--gold-light);}
+.clear-btn{padding:0.48rem 0.9rem;border-radius:50px;border:1px solid var(--border);background:transparent;color:var(--text-dim);font-size:0.72rem;font-weight:600;cursor:pointer;transition:all 0.18s;display:none;}
+.clear-btn.show{display:inline-flex;align-items:center;gap:0.3rem;}
+.clear-btn:hover{color:var(--red);border-color:rgba(231,76,60,0.35);}
+
+/* ── TABLE CARD ── */
+.table-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;animation:fadeUp 0.5s 0.16s ease both;}
+.table-top-bar{height:2px;background:linear-gradient(90deg,transparent,var(--gold),var(--gold-light),var(--gold),transparent);}
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:0.83rem;}
+thead th{padding:0.85rem 1rem;text-align:left;background:var(--surface2);color:var(--gold-light);font-size:0.66rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none;transition:color 0.2s;}
+thead th:hover{color:var(--text);}
+thead th .sort-icon{margin-left:0.3rem;opacity:0.4;font-size:0.6rem;}
+thead th.sorted .sort-icon{opacity:1;color:var(--gold-light);}
+tbody td{padding:0.85rem 1rem;color:var(--text-muted);border-bottom:1px solid rgba(255,255,255,0.03);white-space:nowrap;vertical-align:middle;}
+tbody tr{transition:background 0.15s;}
+tbody tr:hover td{background:rgba(201,168,76,0.03);}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr.hidden-row{display:none;}
+
+.td-id{font-weight:700;color:var(--text-dim)!important;font-size:0.78rem;}
+.td-primary{color:var(--text)!important;font-weight:600;}
+.td-amount{color:var(--gold-light)!important;font-weight:700;}
+.td-mono{font-variant-numeric:tabular-nums;}
+
+/* Status badge */
+.badge{display:inline-flex;align-items:center;gap:0.3rem;padding:3px 10px;border-radius:50px;font-size:0.69rem;font-weight:700;letter-spacing:0.04em;white-space:nowrap;}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.badge-approved{background:var(--green-dim);color:var(--green);border:1px solid rgba(46,204,113,0.25);}
+.badge-approved::before{background:var(--green);}
+.badge-rejected{background:var(--red-dim);color:var(--red);border:1px solid rgba(231,76,60,0.25);}
+.badge-rejected::before{background:var(--red);}
+.badge-pending{background:var(--orange-dim);color:var(--orange);border:1px solid rgba(230,126,34,0.25);}
+.badge-pending::before{background:var(--orange);}
+
+/* View btn */
+.view-btn{display:inline-flex;align-items:center;gap:0.3rem;padding:0.35rem 0.85rem;border-radius:var(--radius-xs);background:linear-gradient(135deg,var(--gold-light),var(--gold-dark));color:#0C0C0F;font-family:inherit;font-size:0.73rem;font-weight:700;border:none;cursor:pointer;transition:all 0.22s;white-space:nowrap;}
+.view-btn:hover{box-shadow:0 4px 14px rgba(201,168,76,0.3);transform:translateY(-1px);}
+.view-btn:active{transform:translateY(0);}
+
+/* Highlighted match */
+mark{background:rgba(201,168,76,0.22);color:var(--gold-light);border-radius:2px;padding:0 2px;}
+
+/* No results */
+.no-results-row td{text-align:center;padding:3rem 1rem!important;color:var(--text-dim);font-size:0.85rem;}
+
+@media(max-width:960px){
+  .summary-strip{grid-template-columns:1fr 1fr;}
+  .page-header{flex-direction:column;align-items:flex-start;}
+}
+@media(max-width:600px){
+  .container{padding:1.25rem 1rem 3rem;}
+  .topbar{padding:0 1rem;}
+  .summary-strip{grid-template-columns:1fr 1fr;}
+  .toolbar{gap:0.5rem;}
+  .search-wrap{max-width:100%;flex:1 1 100%;}
+  .tab-group{flex:1 1 100%;}
+}
+</style>
+</head>
+<body>
+<div class="ambient a1"></div>
+<div class="ambient a2"></div>
+
+<div class="topbar">
+  <div class="topbar-logo">Creditium</div>
+  <div class="topbar-right">
+    <span class="topbar-time" id="liveTime"></span>
+    <a href="{{ url_for('admin_dashboard') }}" class="back-btn">← Dashboard</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-eyebrow">Admin · Loans</div>
+      <div class="page-title">Loan <span class="gold">Applications</span></div>
+    </div>
+  </div>
+
+  <!-- Summary strip -->
+  <div class="summary-strip">
+    <div class="sum-cell">
+      <div class="sum-cell-label">Total Applications</div>
+      <div class="sum-cell-val c-gold" id="sTotal">
+        {{ (approved_loans|length) + (rejected_loans|length) + (pending_loans|length) }}
+      </div>
+      <div class="sum-cell-sub">across all statuses</div>
+    </div>
+    <div class="sum-cell">
+      <div class="sum-cell-label">Approved</div>
+      <div class="sum-cell-val c-green" id="sApproved">{{ approved_loans|length }}</div>
+      <div class="sum-cell-sub">loans sanctioned</div>
+    </div>
+    <div class="sum-cell">
+      <div class="sum-cell-label">Pending Review</div>
+      <div class="sum-cell-val c-orange" id="sPending">{{ pending_loans|length }}</div>
+      <div class="sum-cell-sub">awaiting decision</div>
+    </div>
+    <div class="sum-cell">
+      <div class="sum-cell-label">Rejected</div>
+      <div class="sum-cell-val c-red" id="sRejected">{{ rejected_loans|length }}</div>
+      <div class="sum-cell-sub">not sanctioned</div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" id="searchInput" placeholder="Search name, loan, amount, ID…" oninput="applyFilters()" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="tab-group">
+      <button class="tab-pill t-all active" onclick="setTab('all',this)">All <span class="tab-count" id="cAll">–</span></button>
+      <button class="tab-pill t-pending" onclick="setTab('pending',this)">⏳ Pending <span class="tab-count" id="cPending">–</span></button>
+      <button class="tab-pill t-approved" onclick="setTab('approved',this)">✔ Approved <span class="tab-count" id="cApproved">–</span></button>
+      <button class="tab-pill t-rejected" onclick="setTab('rejected',this)">✕ Rejected <span class="tab-count" id="cRejected">–</span></button>
+    </div>
+    <button class="clear-btn" id="clearBtn" onclick="clearFilters()">✕ Clear</button>
+    <span class="results-info" id="resultsInfo"></span>
+  </div>
+
+  <!-- Single unified table -->
+  <div class="table-card">
+    <div class="table-top-bar"></div>
+    <div class="table-wrap">
+      <table id="loansTable">
+        <thead>
+          <tr>
+            <th onclick="sortTable(0)" data-col="0">Loan ID <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable(1)" data-col="1">User <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable(2)" data-col="2">Loan Name <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable(3)" data-col="3">Amount <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable(4)" data-col="4">Tenure <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable(5)" data-col="5">Interest <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable(6)" data-col="6">Status <span class="sort-icon">↕</span></th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="loansBody">
+
+          {# ── Approved ── #}
+          {% for loan in approved_loans %}
+          <tr data-status="approved"
+              data-search="{{ [loan.id|string, loan.user.name if loan.user else '', loan.loanname if loan.loanname else '', loan.amount|string if loan.amount else ''] | join(' ') | lower }}">
+            <td class="td-id">#{{ loan.id }}</td>
+            <td class="td-primary">{{ loan.user.name if loan.user else '—' }}</td>
+            <td>{{ loan.loanname if loan.loanname else '—' }}</td>
+            <td class="td-amount td-mono">₹ {{ "{:,.2f}".format(loan.amount) if loan.amount else '—' }}</td>
+            <td class="td-mono">{{ loan.tenure }} mo</td>
+            <td class="td-mono">{{ loan.interest_rate }}%</td>
+            <td><span class="badge badge-approved">Approved</span></td>
+            <td>
+              <form action="{{ url_for('admin_review_loan', loan_id=loan.id) }}" method="GET">
+                <button type="submit" class="view-btn">View →</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+
+          {# ── Rejected ── #}
+          {% for loan in rejected_loans %}
+          <tr data-status="rejected"
+              data-search="{{ [loan.id|string, loan.user.name if loan.user else '', loan.loanname if loan.loanname else '', loan.amount|string if loan.amount else ''] | join(' ') | lower }}">
+            <td class="td-id">#{{ loan.id }}</td>
+            <td class="td-primary">{{ loan.user.name if loan.user else '—' }}</td>
+            <td>{{ loan.loanname if loan.loanname else '—' }}</td>
+            <td class="td-amount td-mono">₹ {{ "{:,.2f}".format(loan.amount) if loan.amount else '—' }}</td>
+            <td class="td-mono">{{ loan.tenure }} mo</td>
+            <td class="td-mono">{{ loan.interest_rate }}%</td>
+            <td><span class="badge badge-rejected">Rejected</span></td>
+            <td>
+              <form action="{{ url_for('admin_review_loan', loan_id=loan.id) }}" method="GET">
+                <button type="submit" class="view-btn">View →</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+
+          {# ── Pending ── #}
+          {% for loan in pending_loans %}
+          <tr data-status="pending"
+              data-search="{{ [loan.id|string, loan.user.name if loan.user else '', loan.loanname if loan.loanname else '', loan.amount|string if loan.amount else ''] | join(' ') | lower }}">
+            <td class="td-id">#{{ loan.id }}</td>
+            <td class="td-primary">{{ loan.user.name if loan.user else '—' }}</td>
+            <td>{{ loan.loanname if loan.loanname else '—' }}</td>
+            <td class="td-amount td-mono">₹ {{ "{:,.2f}".format(loan.amount) if loan.amount else '—' }}</td>
+            <td class="td-mono">{{ loan.tenure }} mo</td>
+            <td class="td-mono">{{ loan.interest_rate }}%</td>
+            <td><span class="badge badge-pending">Pending</span></td>
+            <td>
+              <form action="{{ url_for('admin_review_loan', loan_id=loan.id) }}" method="GET">
+                <button type="submit" class="view-btn">View →</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── Live clock
+(function(){
+  const el = document.getElementById('liveTime');
+  function tick(){
+    el.textContent = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false})+' IST';
+  }
+  tick(); setInterval(tick,1000);
+})();
+
+// ── State
+let activeTab = 'all';
+const originalTexts = new WeakMap();
+
+// ── Store original cell texts for highlight restore
+function initOriginalTexts() {
+  document.querySelectorAll('#loansBody tr').forEach(row => {
+    row.querySelectorAll('td').forEach(td => {
+      if (!originalTexts.has(td)) originalTexts.set(td, td.innerHTML);
+    });
+  });
+  updateTabCounts();
+}
+
+// ── Tab counts
+function updateTabCounts() {
+  const rows = document.querySelectorAll('#loansBody tr');
+  let counts = {all:0,approved:0,rejected:0,pending:0};
+  rows.forEach(r => {
+    counts.all++;
+    counts[r.dataset.status]++;
+  });
+  document.getElementById('cAll').textContent      = counts.all;
+  document.getElementById('cApproved').textContent = counts.approved;
+  document.getElementById('cRejected').textContent = counts.rejected;
+  document.getElementById('cPending').textContent  = counts.pending;
+}
+
+// ── Tab switch
+function setTab(tab, btn) {
+  activeTab = tab;
+  document.querySelectorAll('.tab-pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+// ── Filter + search
+function applyFilters() {
+  const query = document.getElementById('searchInput').value.trim().toLowerCase();
+  const rows  = document.querySelectorAll('#loansBody tr');
+  const clearBtn = document.getElementById('clearBtn');
+  const info = document.getElementById('resultsInfo');
+
+  clearBtn.classList.toggle('show', query.length > 0 || activeTab !== 'all');
+
+  let visible = 0, total = rows.length;
+
+  rows.forEach(row => {
+    const statusOk = activeTab === 'all' || row.dataset.status === activeTab;
+    const textOk   = query === '' || (row.dataset.search || '').includes(query);
+    const show     = statusOk && textOk;
+
+    row.classList.toggle('hidden-row', !show);
+    if (show) visible++;
+
+    // Highlight
+    row.querySelectorAll('td').forEach(td => {
+      const orig = originalTexts.get(td);
+      if (!orig) return;
+      if (show && query) {
+        const esc = query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+        td.innerHTML = orig.replace(new RegExp('('+esc+')','gi'), '<mark>$1</mark>');
+      } else {
+        td.innerHTML = orig;
+      }
+    });
+  });
+
+  // No-results row
+  let noRow = document.getElementById('noResultsRow');
+  if (visible === 0) {
+    if (!noRow) {
+      noRow = document.createElement('tr');
+      noRow.id = 'noResultsRow';
+      noRow.className = 'no-results-row';
+      noRow.innerHTML = '<td colspan="8">🔎 No loans match your search.</td>';
+      document.getElementById('loansBody').appendChild(noRow);
+    }
+    noRow.style.display = '';
+  } else if (noRow) {
+    noRow.style.display = 'none';
+  }
+
+  info.innerHTML = (query || activeTab !== 'all')
+    ? `<strong>${visible}</strong> of ${total} loans`
+    : '';
+}
+
+// ── Clear
+function clearFilters() {
+  document.getElementById('searchInput').value = '';
+  activeTab = 'all';
+  document.querySelectorAll('.tab-pill').forEach(p => p.classList.remove('active'));
+  document.querySelector('.t-all').classList.add('active');
+  applyFilters();
+}
+
+// ── Sort
+let sortDir = {};
+function sortTable(colIdx) {
+  const tbody = document.getElementById('loansBody');
+  const rows  = Array.from(tbody.querySelectorAll('tr:not(#noResultsRow)'));
+  const dir   = (sortDir[colIdx] = -(sortDir[colIdx] || 1));
+
+  rows.sort((a, b) => {
+    const at = a.querySelectorAll('td')[colIdx]?.textContent.trim() || '';
+    const bt = b.querySelectorAll('td')[colIdx]?.textContent.trim() || '';
+    const an = parseFloat(at.replace(/[₹,% ]/g,''));
+    const bn = parseFloat(bt.replace(/[₹,% ]/g,''));
+    if (!isNaN(an) && !isNaN(bn)) return dir * (an - bn);
+    return dir * at.localeCompare(bt);
+  });
+
+  rows.forEach(r => tbody.appendChild(r));
+
+  document.querySelectorAll('thead th').forEach((th, i) => {
+    th.classList.toggle('sorted', i === colIdx);
+    const icon = th.querySelector('.sort-icon');
+    if (icon) icon.textContent = i === colIdx ? (dir === 1 ? '↑' : '↓') : '↕';
+  });
+}
+
+// ── Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
+    e.preventDefault();
+    document.getElementById('searchInput').focus();
+  }
+  if (e.key === 'Escape') { clearFilters(); document.getElementById('searchInput').blur(); }
+});
+
+window.addEventListener('DOMContentLoaded', initOriginalTexts);
+</script>
+</body>
+</html>

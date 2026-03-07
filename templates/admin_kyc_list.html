@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>KYC Documents — Creditium Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #C9A84C; --gold-light: #E2C06B; --gold-dark: #A8862E;
+  --bg: #0C0C0F; --surface: #141418; --surface2: #1A1A20; --surface3: #22222A;
+  --border: rgba(201,168,76,0.15); --border-hover: rgba(201,168,76,0.4);
+  --text: #F5F0E8; --text-muted: #8A8490; --text-dim: #5A5560;
+  --green: #2ECC71; --red: #E74C3C; --orange: #E67E22;
+  --radius: 14px; --radius-sm: 10px;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { -webkit-text-size-adjust:100%; }
+body {
+  font-family:'DM Sans', sans-serif; background:var(--bg); color:var(--text);
+  min-height:100vh; overflow-x:hidden;
+}
+body::before {
+  content:''; position:fixed; inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none; z-index:9999; opacity:0.5;
+}
+.ambient { position:fixed; border-radius:50%; filter:blur(130px); pointer-events:none; z-index:0; }
+.a1 { width:500px; height:500px; background:radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%); top:-180px; right:-120px; animation:dA 22s ease-in-out infinite; }
+.a2 { width:400px; height:400px; background:radial-gradient(circle, rgba(201,168,76,0.05) 0%, transparent 70%); bottom:-120px; left:-80px; animation:dB 26s ease-in-out infinite; }
+@keyframes dA{0%,100%{transform:translate(0,0)}50%{transform:translate(-45px,65px)}}
+@keyframes dB{0%,100%{transform:translate(0,0)}50%{transform:translate(55px,-45px)}}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--gold),var(--gold-dark));border-radius:4px}
+
+.topbar {
+  position:sticky; top:0; z-index:100; height:60px;
+  display:flex; align-items:center; justify-content:space-between; padding:0 1.5rem;
+  background:rgba(12,12,15,0.92); backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border); box-shadow:0 4px 24px rgba(0,0,0,0.4);
+}
+.topbar-logo {
+  font-family:'Playfair Display', serif; font-size:1.25rem; font-weight:800;
+  background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  background-size:200% auto; animation:shimmer 4s ease-in-out infinite;
+}
+@keyframes shimmer{0%,100%{background-position:0% center}50%{background-position:100% center}}
+.back-btn {
+  display:inline-flex; align-items:center; gap:0.4rem;
+  padding:0.45rem 1rem; border-radius:50px;
+  border:1px solid var(--border); background:var(--surface2);
+  color:var(--text-muted); text-decoration:none;
+  font-size:0.8rem; font-weight:600; transition:all 0.22s;
+}
+.back-btn:hover,.back-btn:active { border-color:var(--border-hover); color:var(--gold-light); background:var(--surface3); }
+
+.container { max-width:1100px; margin:0 auto; padding:2rem 1.5rem 4rem; position:relative; z-index:1; animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both; }
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+.page-header { margin-bottom:2rem; }
+.page-eyebrow { display:inline-flex; align-items:center; gap:0.5rem; color:var(--gold); font-size:0.68rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:0.5rem; }
+.page-eyebrow::before { content:''; width:20px; height:1px; background:var(--gold); }
+.page-title { font-family:'Playfair Display', serif; font-size:clamp(1.5rem,4vw,2.2rem); font-weight:800; color:var(--text); letter-spacing:-0.02em; }
+.page-title .gold { color:var(--gold-light); }
+
+.sec-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+.sec-card-header { padding:1rem 1.4rem; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:0.6rem; }
+.sec-card-title { font-size:0.88rem; font-weight:700; color:var(--text); }
+
+.table-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-size:0.83rem; }
+thead th {
+  padding:0.85rem 1rem; text-align:left;
+  background:var(--surface2); color:var(--gold-light);
+  font-size:0.67rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;
+  border-bottom:1px solid var(--border); white-space:nowrap;
+}
+tbody td { padding:0.85rem 1rem; color:var(--text-muted); border-bottom:1px solid rgba(255,255,255,0.03); white-space:nowrap; }
+tbody tr:hover td { background:rgba(201,168,76,0.04); color:var(--text); }
+tbody tr:last-child td { border-bottom:none; }
+.td-primary { color:var(--text) !important; font-weight:600; }
+.empty-row td { text-align:center; padding:2.5rem; color:var(--text-dim); }
+
+/* Status badges */
+.badge {
+  display:inline-flex; align-items:center; padding:3px 10px; border-radius:50px;
+  font-size:0.7rem; font-weight:700; letter-spacing:0.05em;
+}
+.badge-verified { background:rgba(46,204,113,0.12); color:var(--green); border:1px solid rgba(46,204,113,0.25); }
+.badge-rejected { background:rgba(231,76,60,0.12); color:var(--red); border:1px solid rgba(231,76,60,0.25); }
+.badge-pending { background:rgba(201,168,76,0.12); color:var(--gold-light); border:1px solid rgba(201,168,76,0.25); }
+
+.review-btn {
+  display:inline-flex; align-items:center; gap:0.35rem;
+  padding:0.38rem 0.9rem; border-radius:var(--radius-sm);
+  background:linear-gradient(135deg,var(--gold-light),var(--gold-dark));
+  color:#0C0C0F; text-decoration:none; font-size:0.75rem; font-weight:700;
+  transition:all 0.22s; white-space:nowrap;
+}
+.review-btn:hover { box-shadow:0 4px 14px rgba(201,168,76,0.3); transform:translateY(-1px); }
+
+.no-kyc { text-align:center; padding:3rem 1rem; color:var(--red); font-size:0.9rem; }
+
+@media(max-width:600px){
+  .container{padding:1.25rem 1rem 3rem;}
+  .topbar{padding:0 1rem;}
+  thead th,tbody td{padding:0.7rem 0.75rem;}
+}
+</style>
+</head>
+<body>
+<div class="ambient a1"></div>
+<div class="ambient a2"></div>
+
+<div class="topbar">
+  <div class="topbar-logo">Creditium</div>
+  <a href="{{ url_for('admin_dashboard') }}" class="back-btn">← Dashboard</a>
+</div>
+
+<div class="container">
+  <div class="page-header">
+    <div class="page-eyebrow">Compliance</div>
+    <div class="page-title">🪪 KYC <span class="gold">Documents</span></div>
+  </div>
+
+  {% if kycs %}
+  <div class="sec-card">
+    <div class="sec-card-header">
+      <span>📋</span>
+      <div class="sec-card-title">All KYC Submissions</div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>KYC ID</th>
+            <th>User</th>
+            <th>Status</th>
+            <th>Submitted</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for kyc in kycs %}
+          <tr>
+            <td class="td-primary">#{{ kyc.id }}</td>
+            <td class="td-primary">{{ kyc.user.username if kyc.user else 'User ' ~ kyc.user_id }}</td>
+            <td>
+              <span class="badge {% if kyc.status == 'Verified' %}badge-verified{% elif kyc.status == 'Rejected' %}badge-rejected{% else %}badge-pending{% endif %}">
+                {{ kyc.status }}
+              </span>
+            </td>
+            <td>
+              {% if kyc.timestamp %}{{ kyc.timestamp.strftime('%Y-%m-%d %H:%M') }}{% else %}N/A{% endif %}
+            </td>
+            <td>
+              <a href="{{ url_for('admin_review_kyc', kyc_id=kyc.id) }}" class="review-btn">Review →</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% else %}
+    <div class="no-kyc">No KYC submissions found.</div>
+  {% endif %}
+</div>
+</body>
+</html>

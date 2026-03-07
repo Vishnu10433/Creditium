@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Overdue EMI Payments — Creditium Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#C9A84C;--gold-lt:#E2C06B;--gold-dk:#9A7528;--bg:#080809;--surface:#121217;--surface2:#18181F;--surface3:#202028;--border:rgba(201,168,76,0.11);--border-md:rgba(201,168,76,0.22);--border-hi:rgba(201,168,76,0.45);--text:#F0EBE0;--text-muted:#8A8490;--text-dim:#4E4A55;--green:#27AE6B;--red:#D94040;--orange:#D4742A;--header-h:62px;--r:14px;--r-sm:9px;}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");opacity:.6;}
+.orb{position:fixed;border-radius:50%;filter:blur(130px);pointer-events:none;z-index:0;}
+.o1{width:600px;height:600px;background:radial-gradient(circle,rgba(217,64,64,.06) 0%,transparent 70%);top:-200px;right:-150px;animation:d1 26s ease-in-out infinite;}
+.o2{width:380px;height:380px;background:radial-gradient(circle,rgba(201,168,76,.04) 0%,transparent 70%);bottom:-120px;left:-100px;animation:d2 30s ease-in-out infinite;}
+@keyframes d1{0%,100%{transform:translate(0,0)}50%{transform:translate(-50px,70px)}}
+@keyframes d2{0%,100%{transform:translate(0,0)}50%{transform:translate(55px,-45px)}}
+::-webkit-scrollbar{width:4px;height:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--gold),var(--gold-dk));border-radius:4px;}
+
+.header{position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:var(--header-h);background:rgba(8,8,9,.9);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border-bottom:1px solid var(--border);box-shadow:0 8px 40px rgba(0,0,0,.45);}
+.hl{display:flex;align-items:center;gap:.85rem;}
+.logo{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:800;text-decoration:none;background:linear-gradient(130deg,var(--gold-lt),var(--gold),var(--gold-dk));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% auto;animation:ls 5s ease-in-out infinite;}
+@keyframes ls{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.admin-badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:50px;background:linear-gradient(135deg,rgba(201,168,76,.16),rgba(201,168,76,.05));border:1px solid rgba(201,168,76,.28);color:var(--gold-lt);font-size:.58rem;font-weight:800;letter-spacing:.1em;}
+.back-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:50px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);text-decoration:none;font-size:.78rem;font-weight:700;transition:all .22s;}
+.back-btn:hover{border-color:var(--border-md);color:var(--gold-lt);background:rgba(201,168,76,.07);}
+
+.page{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:2rem 1.5rem 5rem;}
+.sec-eye{display:inline-flex;align-items:center;gap:.45rem;color:var(--gold);font-size:.62rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase;margin-bottom:.5rem;}
+.sec-eye::before{content:'';width:18px;height:1px;background:var(--gold);}
+.sec-title{font-family:'Cormorant Garamond',serif;font-size:clamp(1.5rem,3.5vw,2.2rem);font-weight:800;color:var(--text);letter-spacing:-.01em;line-height:1.1;margin-bottom:.4rem;}
+.sec-title .g{color:var(--red);}
+.page-top{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;margin-bottom:1.75rem;flex-wrap:wrap;}
+
+/* Alert banner */
+.alert-banner{display:flex;align-items:center;gap:.75rem;padding:1rem 1.25rem;border-radius:var(--r-sm);background:rgba(217,64,64,.08);border:1px solid rgba(217,64,64,.2);margin-bottom:1.5rem;}
+.ab-icon{font-size:1.1rem;flex-shrink:0;}
+.ab-txt{font-size:.8rem;color:var(--text-muted);line-height:1.5;}
+.ab-txt strong{color:var(--red);}
+
+/* Summary pills */
+.pills{display:flex;gap:.5rem;flex-wrap:wrap;}
+.pill{display:inline-flex;align-items:center;gap:.4rem;background:var(--surface2);border:1px solid var(--border);border-radius:50px;padding:.3rem .75rem;font-size:.7rem;color:var(--text-muted);white-space:nowrap;}
+.pill-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid rgba(217,64,64,.15);}
+table{width:100%;border-collapse:collapse;min-width:750px;}
+thead th{background:var(--surface2);color:var(--gold-lt);padding:.9rem 1rem;text-align:left;font-size:.67rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;border-bottom:1px solid var(--border-md);white-space:nowrap;}
+tbody tr{background:rgba(217,64,64,.03);border-bottom:1px solid rgba(217,64,64,.08);transition:background .18s;}
+tbody tr:last-child{border:none;}
+tbody tr:hover{background:rgba(217,64,64,.08);}
+tbody td{padding:.82rem 1rem;font-size:.8rem;color:var(--text-muted);vertical-align:middle;}
+tbody td strong{color:var(--text);font-weight:600;}
+td.id-col{color:var(--text-dim);font-size:.72rem;font-weight:600;font-family:monospace;}
+td.amount{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:700;color:var(--gold-lt);}
+td.date-cell{white-space:nowrap;font-size:.75rem;}
+td.overdue-status{color:var(--red);font-weight:800;font-size:.75rem;}
+
+/* Days overdue pill */
+.days-pill{display:inline-flex;align-items:center;padding:3px 9px;border-radius:50px;font-size:.65rem;font-weight:800;white-space:nowrap;}
+.days-low{background:rgba(212,116,42,.13);color:var(--orange);border:1px solid rgba(212,116,42,.22);}
+.days-mid{background:rgba(217,64,64,.12);color:var(--red);border:1px solid rgba(217,64,64,.2);}
+.days-high{background:rgba(180,0,0,.2);color:#ff6b6b;border:1px solid rgba(217,64,64,.4);}
+
+/* Empty / All clear */
+.clear-state{padding:3rem;text-align:center;}
+.clear-icon{font-size:2.5rem;margin-bottom:.65rem;}
+.clear-title{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;color:var(--green);margin-bottom:.35rem;}
+.clear-sub{font-size:.82rem;color:var(--text-dim);}
+
+@media(max-width:900px){.page{padding:1.25rem .9rem 5rem;}.header{padding:0 1rem;}}
+@media(max-width:768px){
+  .table-wrap{border:none;}
+  table,thead,tbody,tr,th,td{display:block;}
+  thead{display:none;}
+  tbody tr{background:rgba(217,64,64,.04);border:1px solid rgba(217,64,64,.15);border-radius:var(--r);margin-bottom:.75rem;padding:.85rem 1rem;position:relative;overflow:hidden;}
+  tbody tr::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#7a1a1a,var(--red));}
+  tbody td{padding:.3rem 0 .3rem 46%;position:relative;border:none;border-bottom:1px solid rgba(255,255,255,.025);font-size:.78rem;display:flex;align-items:center;min-height:28px;}
+  tbody td:last-child{border:none;}
+  tbody td::before{content:attr(data-label);position:absolute;left:0;width:44%;font-size:.62rem;font-weight:800;color:var(--text-dim);letter-spacing:.06em;text-transform:uppercase;}
+}
+</style>
+</head>
+<body>
+<div class="orb o1"></div><div class="orb o2"></div>
+
+<header class="header">
+  <div class="hl">
+    <a href="/" class="logo">Creditium</a>
+    <div class="admin-badge">⚡ ADMIN</div>
+  </div>
+  <a href="{{ url_for('admin_dashboard') }}" class="back-btn">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Dashboard
+  </a>
+</header>
+
+<div class="page">
+  <div class="page-top">
+    <div>
+      <div class="sec-eye">Collections</div>
+      <div class="sec-title">Overdue <span class="g">EMI Payments</span></div>
+    </div>
+    <div class="pills">
+      <div class="pill"><div class="pill-dot" style="background:var(--red)"></div>Overdue: <strong style="color:var(--text);margin-left:3px">{{ payments|length }}</strong></div>
+    </div>
+  </div>
+
+  {% if payments %}
+  <div class="alert-banner">
+    <div class="ab-icon">⚠️</div>
+    <div class="ab-txt"><strong>{{ payments|length }} overdue EMI(s)</strong> require immediate attention. Contact borrowers and escalate where necessary.</div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>EMI ID</th>
+          <th>User</th>
+          <th>Email</th>
+          <th>Loan Type</th>
+          <th>EMI Amount</th>
+          <th>Due Date</th>
+          <th>Status</th>
+          <th>Days Overdue</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in payments %}
+        {% set days = (today - p.due_date.date()).days %}
+        <tr>
+          <td class="id-col" data-label="ID">#{{ p.emi_id }}</td>
+          <td data-label="User"><strong>{{ p.username }}</strong></td>
+          <td data-label="Email">{{ p.email }}</td>
+          <td data-label="Loan">{{ p.loanname }}</td>
+          <td class="amount" data-label="EMI">₹{{ p.emi_amount }}</td>
+          <td class="date-cell" data-label="Due Date">{{ p.due_date.strftime("%d %b %Y") }}</td>
+          <td class="overdue-status" data-label="Status">● Overdue</td>
+          <td data-label="Days Overdue">
+            <span class="days-pill {% if days <= 7 %}days-low{% elif days <= 30 %}days-mid{% else %}days-high{% endif %}">
+              {{ days }}d overdue
+            </span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% else %}
+  <div class="clear-state">
+    <div class="clear-icon">🎉</div>
+    <div class="clear-title">All Clear!</div>
+    <div class="clear-sub">No overdue EMIs — all borrowers are on track.</div>
+  </div>
+  {% endif %}
+</div>
+</body>
+</html>

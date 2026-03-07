@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Loan History — Creditium Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold:#C9A84C;--gold-light:#E2C06B;--gold-dark:#A8862E;
+  --bg:#0C0C0F;--surface:#141418;--surface2:#1A1A20;--surface3:#22222A;
+  --border:rgba(201,168,76,0.15);--border-hover:rgba(201,168,76,0.4);
+  --text:#F5F0E8;--text-muted:#8A8490;--text-dim:#5A5560;
+  --green:#2ECC71;--red:#E74C3C;--orange:#E67E22;
+  --radius:14px;--radius-sm:10px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:0.5;}
+.ambient{position:fixed;border-radius:50%;filter:blur(130px);pointer-events:none;z-index:0;}
+.a1{width:500px;height:500px;background:radial-gradient(circle,rgba(201,168,76,0.08) 0%,transparent 70%);top:-180px;right:-120px;animation:dA 22s ease-in-out infinite;}
+.a2{width:400px;height:400px;background:radial-gradient(circle,rgba(201,168,76,0.05) 0%,transparent 70%);bottom:-120px;left:-80px;animation:dB 26s ease-in-out infinite;}
+@keyframes dA{0%,100%{transform:translate(0,0)}50%{transform:translate(-45px,65px)}}
+@keyframes dB{0%,100%{transform:translate(0,0)}50%{transform:translate(55px,-45px)}}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--gold),var(--gold-dark));border-radius:4px}
+
+.topbar{position:sticky;top:0;z-index:100;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;background:rgba(12,12,15,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--border);box-shadow:0 4px 24px rgba(0,0,0,0.4);}
+.topbar-logo{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:800;background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% auto;animation:shimmer 4s ease-in-out infinite;}
+@keyframes shimmer{0%,100%{background-position:0% center}50%{background-position:100% center}}
+.back-btn{display:inline-flex;align-items:center;gap:0.4rem;padding:0.45rem 1rem;border-radius:50px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);text-decoration:none;font-size:0.8rem;font-weight:600;transition:all 0.22s;-webkit-tap-highlight-color:transparent;}
+.back-btn:hover,.back-btn:active{border-color:var(--border-hover);color:var(--gold-light);background:var(--surface3);}
+
+.container{max-width:1300px;margin:0 auto;padding:2rem 1.5rem 4rem;position:relative;z-index:1;animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+.page-eyebrow{display:inline-flex;align-items:center;gap:0.5rem;color:var(--gold);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.4rem;}
+.page-eyebrow::before{content:'';width:20px;height:1px;background:var(--gold);}
+.page-title{font-family:'Playfair Display',serif;font-size:clamp(1.4rem,4vw,2rem);font-weight:800;color:var(--text);letter-spacing:-0.02em;margin-bottom:1.75rem;}
+.page-title .gold{color:var(--gold-light);}
+
+/* Filter card */
+.filter-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:1.25rem 1.4rem;margin-bottom:1.5rem;
+}
+.filter-row{display:flex;gap:0.75rem;flex-wrap:wrap;align-items:flex-end;}
+.filter-field{display:flex;flex-direction:column;gap:0.35rem;flex:1;min-width:180px;}
+.filter-label{font-size:0.67rem;font-weight:700;color:var(--text-dim);letter-spacing:0.07em;text-transform:uppercase;}
+.filter-input,.filter-select{
+  height:44px;padding:0 1rem;
+  border-radius:var(--radius-sm);border:1px solid var(--border);
+  background:var(--surface2);color:var(--text);
+  font-family:inherit;font-size:0.88rem;outline:none;
+  transition:all 0.22s;-webkit-appearance:none;
+}
+.filter-input::placeholder{color:var(--text-dim);}
+.filter-input:focus,.filter-select:focus{border-color:var(--border-hover);background:var(--surface3);box-shadow:0 0 0 3px rgba(201,168,76,0.08);}
+.filter-select option{background:var(--surface2);}
+.filter-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:0.4rem;
+  height:44px;padding:0 1.25rem;border:none;border-radius:var(--radius-sm);
+  background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));
+  color:#0C0C0F;font-family:inherit;font-size:0.88rem;font-weight:700;
+  cursor:pointer;white-space:nowrap;transition:all 0.22s;
+  -webkit-tap-highlight-color:transparent;
+}
+.filter-btn:hover{box-shadow:0 4px 16px rgba(201,168,76,0.3);transform:translateY(-1px);}
+.filter-btn:active{transform:translateY(0);}
+
+/* Table card */
+.table-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.25rem;}
+.table-card-header{padding:1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.6rem;}
+.table-card-title{font-size:0.88rem;font-weight:700;color:var(--text);}
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:0.83rem;}
+thead th{padding:0.85rem 1rem;text-align:left;background:var(--surface2);color:var(--gold-light);font-size:0.67rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;}
+tbody td{padding:0.85rem 1rem;color:var(--text-muted);border-bottom:1px solid rgba(255,255,255,0.03);white-space:nowrap;vertical-align:middle;}
+tbody tr:hover td{background:rgba(201,168,76,0.03);}
+tbody tr:last-child td{border-bottom:none;}
+.td-primary{color:var(--text)!important;font-weight:600;}
+.td-amount{color:var(--gold-light)!important;font-weight:700;}
+.empty-row td{text-align:center;padding:2.5rem;color:var(--text-dim);}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:50px;font-size:0.7rem;font-weight:700;letter-spacing:0.05em;white-space:nowrap;}
+.badge-approved{background:rgba(46,204,113,0.12);color:var(--green);border:1px solid rgba(46,204,113,0.25);}
+.badge-rejected{background:rgba(231,76,60,0.12);color:var(--red);border:1px solid rgba(231,76,60,0.25);}
+.badge-pending{background:rgba(201,168,76,0.12);color:var(--gold-light);border:1px solid rgba(201,168,76,0.25);}
+.badge-sent{background:rgba(46,204,113,0.12);color:var(--green);border:1px solid rgba(46,204,113,0.25);}
+.badge-not-sent{background:rgba(231,76,60,0.12);color:var(--red);border:1px solid rgba(231,76,60,0.25);}
+
+/* View btn */
+.view-btn{
+  display:inline-flex;align-items:center;gap:0.3rem;
+  padding:0.35rem 0.85rem;border-radius:8px;
+  background:linear-gradient(135deg,var(--gold-light),var(--gold-dark));
+  color:#0C0C0F;font-family:inherit;font-size:0.73rem;font-weight:700;
+  border:none;cursor:pointer;transition:all 0.22s;white-space:nowrap;
+  text-decoration:none;-webkit-tap-highlight-color:transparent;
+}
+.view-btn:hover{box-shadow:0 4px 14px rgba(201,168,76,0.3);transform:translateY(-1px);}
+.view-btn:active{transform:translateY(0);}
+
+/* Pagination */
+.pagination{display:flex;justify-content:center;align-items:center;gap:0.5rem;margin-top:1.5rem;flex-wrap:wrap;}
+.page-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:0.45rem 0.9rem;border-radius:var(--radius-sm);
+  background:var(--surface2);border:1px solid var(--border);
+  color:var(--text-muted);text-decoration:none;font-size:0.8rem;font-weight:600;
+  transition:all 0.22s;-webkit-tap-highlight-color:transparent;
+}
+.page-btn:hover,.page-btn:active{border-color:var(--border-hover);color:var(--gold-light);}
+.page-btn.active{background:linear-gradient(135deg,var(--gold-light),var(--gold-dark));color:#0C0C0F;border-color:transparent;font-weight:800;}
+
+@media(max-width:1024px){
+  table,thead,tbody,th,td,tr{display:block;}
+  thead{display:none;}
+  tbody tr{margin-bottom:1rem;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.5rem 0;}
+  tbody td{padding:0.55rem 1rem 0.55rem 45%;position:relative;border:none;border-bottom:1px solid rgba(255,255,255,0.03);white-space:normal;text-align:right;}
+  tbody td:last-child{border-bottom:none;}
+  tbody td::before{content:attr(data-label);position:absolute;left:1rem;width:40%;font-size:0.67rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;top:50%;transform:translateY(-50%);text-align:left;}
+}
+@media(max-width:768px){.container{padding:1.25rem 1rem 3rem;}.topbar{padding:0 1rem;}.filter-field{min-width:100%;}.filter-btn{width:100%;}}
+</style>
+</head>
+<body>
+<div class="ambient a1"></div>
+<div class="ambient a2"></div>
+
+<div class="topbar">
+  <div class="topbar-logo">Creditium</div>
+  <a href="{{ url_for('admin_dashboard') }}" class="back-btn">← Dashboard</a>
+</div>
+
+<div class="container">
+
+  <div class="page-eyebrow">Loans</div>
+  <div class="page-title">📜 Loan Application <span class="gold">History</span></div>
+
+  <!-- Filters -->
+  <div class="filter-card">
+    <form method="GET">
+      <div class="filter-row">
+        <div class="filter-field">
+          <label class="filter-label">Search</label>
+          <input type="text" name="search" class="filter-input" placeholder="Username or loan name…" value="{{ request.args.get('search', '') }}">
+        </div>
+
+        <div class="filter-field" style="max-width:180px;">
+          <label class="filter-label">Status</label>
+          <select name="status" class="filter-select">
+            <option value="">All Status</option>
+            <option value="Pending"  {% if request.args.get('status')=='Pending'  %}selected{% endif %}>Pending</option>
+            <option value="Approved" {% if request.args.get('status')=='Approved' %}selected{% endif %}>Approved</option>
+            <option value="Rejected" {% if request.args.get('status')=='Rejected' %}selected{% endif %}>Rejected</option>
+          </select>
+        </div>
+
+        <div class="filter-field" style="max-width:180px;">
+          <label class="filter-label">Money Sent?</label>
+          <select name="money_sent" class="filter-select">
+            <option value="">Any</option>
+            <option value="1" {% if request.args.get('money_sent')=='1' %}selected{% endif %}>Sent</option>
+            <option value="0" {% if request.args.get('money_sent')=='0' %}selected{% endif %}>Not Sent</option>
+          </select>
+        </div>
+
+        <button type="submit" class="filter-btn">🔍 Apply Filters</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Table -->
+  <div class="table-card">
+    <div class="table-card-header">
+      <span>📄</span>
+      <div class="table-card-title">All Loan Records</div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th><th>User</th><th>Loan Name</th><th>Amount</th>
+            <th>Status</th><th>Date</th><th>Money Sent</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+
+        {# ── Variant A: loans.items (paginated object from Flask-SQLAlchemy) ── #}
+        {% if loans.items is defined %}
+          {% for loan in loans.items %}
+          <tr>
+            <td data-label="ID" class="td-primary">#{{ loan.id }}</td>
+            <td data-label="User">{{ loan.user.username }}</td>
+            <td data-label="Loan Name">{{ loan.loanname or '—' }}</td>
+            <td data-label="Amount" class="td-amount">₹{{ loan.amount }}</td>
+            <td data-label="Status">
+              <span class="badge {% if loan.status=='Approved' %}badge-approved{% elif loan.status=='Rejected' %}badge-rejected{% else %}badge-pending{% endif %}">
+                {{ loan.status }}
+              </span>
+            </td>
+            <td data-label="Date">{{ loan.timestamp.strftime('%d-%m-%Y') if loan.timestamp else '—' }}</td>
+            <td data-label="Money Sent">
+              <span class="badge {% if loan.money_sent %}badge-sent{% else %}badge-not-sent{% endif %}">
+                {% if loan.money_sent %}✔ Sent{% else %}✘ Not Sent{% endif %}
+              </span>
+            </td>
+            <td data-label="Action">
+              <a href="{{ url_for('admin_view_loan', loan_id=loan.id) }}" class="view-btn">View →</a>
+            </td>
+          </tr>
+          {% else %}
+          <tr class="empty-row"><td colspan="8">No loan records found.</td></tr>
+          {% endfor %}
+
+        {# ── Variant B: loans (plain list) ── #}
+        {% else %}
+          {% for loan in loans %}
+          <tr>
+            <td data-label="ID" class="td-primary">#{{ loan.id }}</td>
+            <td data-label="User">{{ loan.user.username }}</td>
+            <td data-label="Loan Name">{{ loan.loanname or '—' }}</td>
+            <td data-label="Amount" class="td-amount">₹{{ loan.amount }}</td>
+            <td data-label="Status">
+              <span class="badge {% if loan.status=='Approved' %}badge-approved{% elif loan.status=='Rejected' %}badge-rejected{% else %}badge-pending{% endif %}">
+                {{ loan.status }}
+              </span>
+            </td>
+            <td data-label="Date">{{ loan.timestamp.strftime('%d-%m-%Y') if loan.timestamp else '—' }}</td>
+            <td data-label="Money Sent">
+              <span class="badge {% if loan.money_sent %}badge-sent{% else %}badge-not-sent{% endif %}">
+                {% if loan.money_sent %}✔ Sent{% else %}✘ Not Sent{% endif %}
+              </span>
+            </td>
+            <td data-label="Action">
+              <form method="GET" action="{{ url_for('admin_review_loan', loan_id=loan.id) }}">
+                <button class="view-btn">View →</button>
+              </form>
+            </td>
+          </tr>
+          {% else %}
+          <tr class="empty-row"><td colspan="8">No loan records found.</td></tr>
+          {% endfor %}
+        {% endif %}
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pagination (SQLAlchemy paginate object) -->
+  {% if loans.items is defined %}
+  <div class="pagination">
+    {% if loans.has_prev %}
+      <a href="{{ url_for('admin_loans_history', page=loans.prev_num, search=request.args.get('search',''), status=request.args.get('status',''), money_sent=request.args.get('money_sent','')) }}" class="page-btn">← Prev</a>
+    {% endif %}
+    <span class="page-btn active">{{ loans.page }}</span>
+    {% if loans.has_next %}
+      <a href="{{ url_for('admin_loans_history', page=loans.next_num, search=request.args.get('search',''), status=request.args.get('status',''), money_sent=request.args.get('money_sent','')) }}" class="page-btn">Next →</a>
+    {% endif %}
+  </div>
+
+  <!-- Pagination (manual prev_page / next_page variables) -->
+  {% elif prev_page is defined or next_page is defined %}
+  <div class="pagination">
+    {% if prev_page %}
+      <a href="{{ url_for('admin_loan_history', page=prev_page) }}" class="page-btn">← Prev</a>
+    {% endif %}
+    <span class="page-btn active">{{ page }}</span>
+    {% if next_page %}
+      <a href="{{ url_for('admin_loan_history', page=next_page) }}" class="page-btn">Next →</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+</div>
+</body>
+</html>
