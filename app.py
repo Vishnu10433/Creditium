@@ -5,6 +5,7 @@ from werkzeug.utils import secure_filename
 from sqlalchemy import or_, extract
 from datetime import datetime, timedelta, timezone
 from flask_babel import Babel, _
+from flask import abort
 
 # PDF
 from reportlab.platypus import SimpleDocTemplate, Paragraph
@@ -84,7 +85,7 @@ class User(db.Model):
     rewards = db.relationship('Reward', backref='user', lazy=True)
     auto_debits = db.relationship('AutoDebit', backref='user', lazy=True)
     kycs = db.relationship('KYC', backref='user', lazy=True)
-    loan_applications = db.relationship('LoanApplication', backref='user', lazy=True)
+    loan_applications = db.relationship('LoanApplication', lazy=True)
 
 
 class Loan(db.Model):
@@ -103,7 +104,7 @@ class LoanApplication(db.Model):
     __tablename__ = 'loan_application'
     id = db.Column(db.Integer, primary_key=True)
     loan_id = db.Column(db.Integer, db.ForeignKey('loan.id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # ← must come first
     loanname = db.Column(db.String(100))
     amount = db.Column(db.Float, nullable=False)
     tenure = db.Column(db.Integer, nullable=False)
@@ -114,12 +115,10 @@ class LoanApplication(db.Model):
     account_number = db.Column(db.String(50), nullable=True)
     ifsc_code = db.Column(db.String(20), nullable=True)
     money_sent = db.Column(db.Boolean, default=False)
-    
-    # Add proper relationship to EMIs
+
+    # Relationships — place AFTER all columns
     emis = db.relationship('EMI', backref='loan', lazy=True)
-  # dynamic allows queries
-
-
+    user = db.relationship('User', foreign_keys='LoanApplication.user_id', overlaps="loan_applications,loan_applications_rel")
 class EMI(db.Model):
     __tablename__ = 'emi'
     id = db.Column(db.Integer, primary_key=True)
@@ -613,28 +612,58 @@ def loan_status():
 @app.route('/share-bank-details/<int:loan_id>', methods=['GET', 'POST'])
 def share_bank_details(loan_id):
     if 'user_id' not in session:
+        flash("Please login first.", "warning")
         return redirect(url_for('login'))
 
     application = LoanApplication.query.get_or_404(loan_id)
 
-    # Only allow user to share bank details if they own this application
     if application.user_id != session['user_id']:
         flash("You are not allowed to update this loan.", "danger")
         return redirect(url_for('loan_status'))
 
-    if request.method == 'POST':
-        bank_name = request.form.get('bank_name')
-        account_number = request.form.get('account_number')
-        ifsc_code = request.form.get('ifsc_code')
+    if application.status == 'Rejected':
+        flash("Bank details cannot be submitted for a rejected loan.", "danger")
+        return redirect(url_for('loan_status'))
 
-        application.bank_name = bank_name
+    if application.money_sent:
+        flash("Money has already been disbursed. Bank details cannot be changed.", "warning")
+        return redirect(url_for('loan_status'))
+
+    if request.method == 'POST':
+        import re
+        bank_name      = request.form.get('bank_name', '').strip()
+        account_number = request.form.get('account_number', '').strip()
+        ifsc_code      = request.form.get('ifsc_code', '').strip().upper()
+
+        errors = []
+        if not bank_name:
+            errors.append("Bank name is required.")
+        if not account_number or not account_number.isdigit() or not (9 <= len(account_number) <= 18):
+            errors.append("Account number must be 9–18 digits.")
+        if not ifsc_code or not re.match(r'^[A-Z]{4}0[A-Z0-9]{6}$', ifsc_code):
+            errors.append("IFSC code is invalid. Format: XXXX0XXXXXX")
+
+        if errors:
+            for error in errors:
+                flash(error, "danger")
+            return render_template('share_bank_details.html', app=application)
+
+        application.bank_name      = bank_name
         application.account_number = account_number
-        application.ifsc_code = ifsc_code
-        db.session.commit()
-        flash("Bank details shared successfully!", "success")
+        application.ifsc_code      = ifsc_code
+
+        try:
+            db.session.commit()
+            flash("Bank details submitted successfully!", "success")
+        except Exception as e:
+            db.session.rollback()
+            print("share_bank_details error:", e)
+            flash("Something went wrong. Please try again.", "danger")
+
         return redirect(url_for('loan_status'))
 
     return render_template('share_bank_details.html', app=application)
+
 
 
 # ----- EMI & Wallet -----
@@ -847,9 +876,9 @@ def update_profile():
 # ---------------- Admin Routes ----------------
 
 # ---------------- Admin Registration ----------------
+
 @app.route('/admin_register', methods=['GET', 'POST'])
 def admin_register():
-    # Check if an admin already exists
     if Admin.query.first():
         flash("Admin account already exists! Please login.", "warning")
         return redirect(url_for('admin_login'))
@@ -861,13 +890,16 @@ def admin_register():
         password = request.form.get("password", "")
         confirm_password = request.form.get("confirm_password", "")
 
-        # Password validation
+        if not username or not email or not mobile or not password or not confirm_password:
+            flash("All fields are required!", "danger")
+            return redirect(url_for('admin_register'))
+
         if password != confirm_password:
             flash("Passwords do not match!", "danger")
             return redirect(url_for('admin_register'))
 
-        # Create the admin
         hashed_password = generate_password_hash(password)
+
         new_admin = Admin(
             username=username,
             email=email,
@@ -880,29 +912,27 @@ def admin_register():
         flash("Admin registered successfully! Please login.", "success")
         return redirect(url_for('admin_login'))
 
-    # GET request: show registration form
     return render_template("admin_register.html")
 
 
-# ---------------- Admin Login ----------------
 @app.route('/admin_login', methods=['GET', 'POST'])
 def admin_login():
     if request.method == 'POST':
-        admin = Admin.query.filter_by(email=request.form['email']).first()
-        if admin and check_password_hash(admin.password, request.form['password']):
+        email = request.form.get('email', '').strip().lower()
+        password = request.form.get('password', '')
+
+        admin = Admin.query.filter_by(email=email).first()
+
+        if admin and check_password_hash(admin.password, password):
+            session.clear()
             session['admin_logged_in'] = True
             session['admin_id'] = admin.id
             return redirect(url_for('admin_dashboard'))
         else:
             flash("Invalid credentials", "danger")
+            return redirect(url_for('admin_login'))
 
     return render_template('admin_login.html')
-
-
-    # GET request: show login form
-    return render_template("admin_login.html")
-
-
 # ---------------- Admin Dashboard ----------------
 @app.route('/admin/dashboard')
 def admin_dashboard():
@@ -1163,17 +1193,36 @@ def admin_review_kyc(kyc_id):
     if 'admin_id' not in session:
         return redirect(url_for('admin_login'))
 
-    kyc = KYC.query.get_or_404(kyc_id)
-    user = User.query.get(kyc.user_id)
+    kyc = db.session.get(KYC, kyc_id)
+    if not kyc:
+        abort(404)
+
+    user = db.session.get(User, kyc.user_id)
+    if not user:
+        abort(404)
 
     if request.method == 'POST':
         action = request.form.get('action')
+
+        latest_loan = LoanApplication.query.filter_by(
+            user_id=kyc.user_id,
+            status='Pending'
+        ).order_by(LoanApplication.id.desc()).first()
+
         if action == 'approve':
             kyc.status = 'Approved'
+            if latest_loan:
+                latest_loan.status = 'Approved'
+            db.session.commit()
+            flash(f"KYC for {user.username} approved and loan auto-approved.", "success")
+
         elif action == 'reject':
             kyc.status = 'Rejected'
-        db.session.commit()
-        flash(f"KYC for {user.username} has been {kyc.status}.", "success")
+            if latest_loan:
+                latest_loan.status = 'Rejected'
+            db.session.commit()
+            flash(f"KYC for {user.username} rejected and loan auto-rejected.", "warning")
+
         return redirect(url_for('admin_kyc_list'))
 
     return render_template('admin_kyc_review.html', kyc=kyc, user=user)
@@ -1263,14 +1312,16 @@ def admin_user_bank_details():
     if 'admin_logged_in' not in session:
         return redirect(url_for('admin_login'))
 
-    loans = LoanApplication.query.filter(
-        LoanApplication.bank_name != None,
-        LoanApplication.account_number != None,
-        LoanApplication.ifsc_code != None
-    ).all()
+    # Order by newest first so newly shared bank details appear at top
+    all_loans = LoanApplication.query.order_by(LoanApplication.id.desc()).all()
+    loans = [
+        l for l in all_loans
+        if l.bank_name and l.bank_name.strip() and l.bank_name.strip() != 'None'
+        and l.account_number and l.account_number.strip() and l.account_number.strip() != 'None'
+        and l.ifsc_code and l.ifsc_code.strip() and l.ifsc_code.strip() != 'None'
+    ]
 
-    today = date.today()  # Pass today's date to template
-
+    today = date.today()
     return render_template('admin_user_bank_details.html', loans=loans, today=today)
 
 
@@ -1901,6 +1952,17 @@ def admin_view_loan(loan_id):
     loan = LoanApplication.query.get_or_404(loan_id)
     return render_template("admin_loan_review.html", loan=loan)
 
+
+
+@app.route('/admin/debug-bank')
+def debug_bank():
+    if 'admin_logged_in' not in session:
+        return redirect(url_for('admin_login'))
+    loans = LoanApplication.query.all()
+    result = "<h2>All Loans Bank Data</h2>"
+    for l in loans:
+        result += f"<p>ID:{l.id} | bank='{l.bank_name}' | acc='{l.account_number}' | ifsc='{l.ifsc_code}' | status='{l.status}'</p>"
+    return result
 
 @app.route('/admin/managers')
 @app.route('/admin/loans')
