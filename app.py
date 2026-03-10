@@ -52,8 +52,8 @@ app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = 'youremail@gmail.com'       # your gmail
 app.config['MAIL_PASSWORD'] = 'your_app_password'         # gmail app password
 # ---------------- DB setup ----------------
-db_path = os.path.join(basedir, 'database.db')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://loanapp_user:2805@localhost:5432/loanapp_db'
+
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
