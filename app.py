@@ -53,7 +53,7 @@ app.config['MAIL_USERNAME'] = 'youremail@gmail.com'       # your gmail
 app.config['MAIL_PASSWORD'] = 'your_app_password'         # gmail app password
 # ---------------- DB setup ----------------
 db_path = os.path.join(basedir, 'database.db')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + db_path + '?check_same_thread=False'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://loanapp_user:2805@localhost:5432/loanapp_db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -1533,7 +1533,11 @@ def admin_loans_status():
 
 @app.route('/admin/loans/approve')
 def admin_loans_approve():
-    approved_loans = LoanApplication.query.filter_by(status='Approved').all()
+    if 'admin_logged_in' not in session:
+        return redirect(url_for('admin_login'))
+
+    approved_loans = LoanApplication.query.filter_by(status='Approved').all() + \
+                 LoanApplication.query.filter_by(status='Disbursed').all()
     rejected_loans = LoanApplication.query.filter_by(status='Rejected').all()
     pending_loans = LoanApplication.query.filter_by(status='Pending').all()
 

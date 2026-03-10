@@ -14,6 +14,7 @@
   --green:#2ECC71;--green-dim:rgba(46,204,113,0.1);
   --red:#E74C3C;--red-dim:rgba(231,76,60,0.1);
   --orange:#E67E22;--orange-dim:rgba(230,126,34,0.1);
+  --blue:#3498DB;--blue-dim:rgba(52,152,219,0.1);
   --radius:14px;--radius-sm:10px;--radius-xs:7px;
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
@@ -42,14 +43,13 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
 /* ── PAGE HEADER ── */
 .page-header{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:2rem;animation:fadeUp 0.5s ease both;}
-.page-header-left{}
 .page-eyebrow{display:inline-flex;align-items:center;gap:0.5rem;color:var(--gold);font-size:0.68rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.4rem;}
 .page-eyebrow::before{content:'';width:20px;height:1px;background:var(--gold);}
 .page-title{font-family:'Playfair Display',serif;font-size:clamp(1.4rem,4vw,2rem);font-weight:800;letter-spacing:-0.02em;}
 .page-title .gold{color:var(--gold-light);}
 
 /* ── SUMMARY STRIP ── */
-.summary-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:2rem;animation:fadeUp 0.5s 0.08s ease both;}
+.summary-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:2rem;animation:fadeUp 0.5s 0.08s ease both;}
 .sum-cell{background:var(--surface);padding:1rem 1.4rem;transition:background 0.2s;}
 .sum-cell:hover{background:var(--surface2);}
 .sum-cell-label{font-size:0.63rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:0.35rem;}
@@ -58,6 +58,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .sum-cell-val.c-green{color:var(--green);}
 .sum-cell-val.c-red{color:var(--red);}
 .sum-cell-val.c-orange{color:var(--orange);}
+.sum-cell-val.c-blue{color:var(--blue);}
 .sum-cell-sub{font-size:0.68rem;color:var(--text-dim);margin-top:0.15rem;}
 
 /* ── TOOLBAR ── */
@@ -74,6 +75,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .tab-pill:hover{border-color:var(--border-hover);color:var(--text);}
 .tab-pill.t-all.active{background:rgba(201,168,76,0.1);border-color:var(--gold);color:var(--gold-light);}
 .tab-pill.t-approved.active{background:var(--green-dim);border-color:rgba(46,204,113,0.35);color:var(--green);}
+.tab-pill.t-disbursed.active{background:var(--blue-dim);border-color:rgba(52,152,219,0.35);color:var(--blue);}
 .tab-pill.t-rejected.active{background:var(--red-dim);border-color:rgba(231,76,60,0.35);color:var(--red);}
 .tab-pill.t-pending.active{background:var(--orange-dim);border-color:rgba(230,126,34,0.35);color:var(--orange);}
 .tab-count{font-size:0.65rem;font-weight:800;padding:1px 6px;border-radius:20px;background:rgba(255,255,255,0.06);}
@@ -104,11 +106,13 @@ tbody tr.hidden-row{display:none;}
 .td-amount{color:var(--gold-light)!important;font-weight:700;}
 .td-mono{font-variant-numeric:tabular-nums;}
 
-/* Status badge */
+/* Status badges */
 .badge{display:inline-flex;align-items:center;gap:0.3rem;padding:3px 10px;border-radius:50px;font-size:0.69rem;font-weight:700;letter-spacing:0.04em;white-space:nowrap;}
 .badge::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 .badge-approved{background:var(--green-dim);color:var(--green);border:1px solid rgba(46,204,113,0.25);}
 .badge-approved::before{background:var(--green);}
+.badge-disbursed{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(52,152,219,0.25);}
+.badge-disbursed::before{background:var(--blue);}
 .badge-rejected{background:var(--red-dim);color:var(--red);border:1px solid rgba(231,76,60,0.25);}
 .badge-rejected::before{background:var(--red);}
 .badge-pending{background:var(--orange-dim);color:var(--orange);border:1px solid rgba(230,126,34,0.25);}
@@ -164,24 +168,31 @@ mark{background:rgba(201,168,76,0.22);color:var(--gold-light);border-radius:2px;
   <div class="summary-strip">
     <div class="sum-cell">
       <div class="sum-cell-label">Total Applications</div>
-      <div class="sum-cell-val c-gold" id="sTotal">
+      <div class="sum-cell-val c-gold">
         {{ (approved_loans|length) + (rejected_loans|length) + (pending_loans|length) }}
       </div>
       <div class="sum-cell-sub">across all statuses</div>
     </div>
     <div class="sum-cell">
       <div class="sum-cell-label">Approved</div>
-      <div class="sum-cell-val c-green" id="sApproved">{{ approved_loans|length }}</div>
+      <div class="sum-cell-val c-green">{{ approved_loans|length }}</div>
       <div class="sum-cell-sub">loans sanctioned</div>
     </div>
     <div class="sum-cell">
+      <div class="sum-cell-label">Disbursed</div>
+      <div class="sum-cell-val c-blue">
+        {{ approved_loans | selectattr('status','equalto','Disbursed') | list | length }}
+      </div>
+      <div class="sum-cell-sub">money sent</div>
+    </div>
+    <div class="sum-cell">
       <div class="sum-cell-label">Pending Review</div>
-      <div class="sum-cell-val c-orange" id="sPending">{{ pending_loans|length }}</div>
+      <div class="sum-cell-val c-orange">{{ pending_loans|length }}</div>
       <div class="sum-cell-sub">awaiting decision</div>
     </div>
     <div class="sum-cell">
       <div class="sum-cell-label">Rejected</div>
-      <div class="sum-cell-val c-red" id="sRejected">{{ rejected_loans|length }}</div>
+      <div class="sum-cell-val c-red">{{ rejected_loans|length }}</div>
       <div class="sum-cell-sub">not sanctioned</div>
     </div>
   </div>
@@ -196,46 +207,53 @@ mark{background:rgba(201,168,76,0.22);color:var(--gold-light);border-radius:2px;
       <button class="tab-pill t-all active" onclick="setTab('all',this)">All <span class="tab-count" id="cAll">–</span></button>
       <button class="tab-pill t-pending" onclick="setTab('pending',this)">⏳ Pending <span class="tab-count" id="cPending">–</span></button>
       <button class="tab-pill t-approved" onclick="setTab('approved',this)">✔ Approved <span class="tab-count" id="cApproved">–</span></button>
+      <button class="tab-pill t-disbursed" onclick="setTab('disbursed',this)">💸 Disbursed <span class="tab-count" id="cDisbursed">–</span></button>
       <button class="tab-pill t-rejected" onclick="setTab('rejected',this)">✕ Rejected <span class="tab-count" id="cRejected">–</span></button>
     </div>
     <button class="clear-btn" id="clearBtn" onclick="clearFilters()">✕ Clear</button>
     <span class="results-info" id="resultsInfo"></span>
   </div>
 
-  <!-- Single unified table -->
+  <!-- Unified table -->
   <div class="table-card">
     <div class="table-top-bar"></div>
     <div class="table-wrap">
       <table id="loansTable">
         <thead>
           <tr>
-            <th onclick="sortTable(0)" data-col="0">Loan ID <span class="sort-icon">↕</span></th>
-            <th onclick="sortTable(1)" data-col="1">User <span class="sort-icon">↕</span></th>
-            <th onclick="sortTable(2)" data-col="2">Loan Name <span class="sort-icon">↕</span></th>
-            <th onclick="sortTable(3)" data-col="3">Amount <span class="sort-icon">↕</span></th>
-            <th onclick="sortTable(4)" data-col="4">Tenure <span class="sort-icon">↕</span></th>
-            <th onclick="sortTable(5)" data-col="5">Interest <span class="sort-icon">↕</span></th>
-            <th onclick="sortTable(6)" data-col="6">Status <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable(0)">Loan ID <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable(1)">User <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable(2)">Loan Name <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable(3)">Amount <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable(4)">Tenure <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable(5)">Interest <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable(6)">Status <span class="sort-icon">↕</span></th>
             <th>Action</th>
           </tr>
         </thead>
         <tbody id="loansBody">
 
-          {# ── Approved ── #}
+          {# ── Approved / Disbursed ── #}
           {% for loan in approved_loans %}
-          <tr data-status="approved"
-              data-search="{{ [loan.id|string, loan.user.name if loan.user else '', loan.loanname if loan.loanname else '', loan.amount|string if loan.amount else ''] | join(' ') | lower }}">
+          <tr data-status="{{ loan.status | lower }}"
+              data-search="{{ [loan.id|string, loan.user.username if loan.user else '', loan.loanname if loan.loanname else '', loan.amount|string if loan.amount else ''] | join(' ') | lower }}">
             <td class="td-id">#{{ loan.id }}</td>
-            <td class="td-primary">{{ loan.user.name if loan.user else '—' }}</td>
+            <td class="td-primary">{{ loan.user.username if loan.user else '—' }}</td>
             <td>{{ loan.loanname if loan.loanname else '—' }}</td>
             <td class="td-amount td-mono">₹ {{ "{:,.2f}".format(loan.amount) if loan.amount else '—' }}</td>
             <td class="td-mono">{{ loan.tenure }} mo</td>
-            <td class="td-mono">{{ loan.interest_rate }}%</td>
-            <td><span class="badge badge-approved">Approved</span></td>
+            <td class="td-mono">{{ loan.loan.interest_rate if loan.loan else '—' }}%</td>
             <td>
-              <form action="{{ url_for('admin_review_loan', loan_id=loan.id) }}" method="GET">
-                <button type="submit" class="view-btn">View →</button>
-              </form>
+              {% if loan.status == 'Disbursed' %}
+                <span class="badge badge-disbursed">Disbursed</span>
+              {% else %}
+                <span class="badge badge-approved">Approved</span>
+              {% endif %}
+            </td>
+            <td>
+              <a href="{{ url_for('admin_review_loan', loan_id=loan.id) }}">
+                <button type="button" class="view-btn">View →</button>
+              </a>
             </td>
           </tr>
           {% endfor %}
@@ -243,18 +261,18 @@ mark{background:rgba(201,168,76,0.22);color:var(--gold-light);border-radius:2px;
           {# ── Rejected ── #}
           {% for loan in rejected_loans %}
           <tr data-status="rejected"
-              data-search="{{ [loan.id|string, loan.user.name if loan.user else '', loan.loanname if loan.loanname else '', loan.amount|string if loan.amount else ''] | join(' ') | lower }}">
+              data-search="{{ [loan.id|string, loan.user.username if loan.user else '', loan.loanname if loan.loanname else '', loan.amount|string if loan.amount else ''] | join(' ') | lower }}">
             <td class="td-id">#{{ loan.id }}</td>
-            <td class="td-primary">{{ loan.user.name if loan.user else '—' }}</td>
+            <td class="td-primary">{{ loan.user.username if loan.user else '—' }}</td>
             <td>{{ loan.loanname if loan.loanname else '—' }}</td>
             <td class="td-amount td-mono">₹ {{ "{:,.2f}".format(loan.amount) if loan.amount else '—' }}</td>
             <td class="td-mono">{{ loan.tenure }} mo</td>
-            <td class="td-mono">{{ loan.interest_rate }}%</td>
+            <td class="td-mono">{{ loan.loan.interest_rate if loan.loan else '—' }}%</td>
             <td><span class="badge badge-rejected">Rejected</span></td>
             <td>
-              <form action="{{ url_for('admin_review_loan', loan_id=loan.id) }}" method="GET">
-                <button type="submit" class="view-btn">View →</button>
-              </form>
+              <a href="{{ url_for('admin_review_loan', loan_id=loan.id) }}">
+                <button type="button" class="view-btn">View →</button>
+              </a>
             </td>
           </tr>
           {% endfor %}
@@ -262,18 +280,18 @@ mark{background:rgba(201,168,76,0.22);color:var(--gold-light);border-radius:2px;
           {# ── Pending ── #}
           {% for loan in pending_loans %}
           <tr data-status="pending"
-              data-search="{{ [loan.id|string, loan.user.name if loan.user else '', loan.loanname if loan.loanname else '', loan.amount|string if loan.amount else ''] | join(' ') | lower }}">
+              data-search="{{ [loan.id|string, loan.user.username if loan.user else '', loan.loanname if loan.loanname else '', loan.amount|string if loan.amount else ''] | join(' ') | lower }}">
             <td class="td-id">#{{ loan.id }}</td>
-            <td class="td-primary">{{ loan.user.name if loan.user else '—' }}</td>
+            <td class="td-primary">{{ loan.user.username if loan.user else '—' }}</td>
             <td>{{ loan.loanname if loan.loanname else '—' }}</td>
             <td class="td-amount td-mono">₹ {{ "{:,.2f}".format(loan.amount) if loan.amount else '—' }}</td>
             <td class="td-mono">{{ loan.tenure }} mo</td>
-            <td class="td-mono">{{ loan.interest_rate }}%</td>
+            <td class="td-mono">{{ loan.loan.interest_rate if loan.loan else '—' }}%</td>
             <td><span class="badge badge-pending">Pending</span></td>
             <td>
-              <form action="{{ url_for('admin_review_loan', loan_id=loan.id) }}" method="GET">
-                <button type="submit" class="view-btn">View →</button>
-              </form>
+              <a href="{{ url_for('admin_review_loan', loan_id=loan.id) }}">
+                <button type="button" class="view-btn">View →</button>
+              </a>
             </td>
           </tr>
           {% endfor %}
@@ -295,11 +313,9 @@ mark{background:rgba(201,168,76,0.22);color:var(--gold-light);border-radius:2px;
   tick(); setInterval(tick,1000);
 })();
 
-// ── State
 let activeTab = 'all';
 const originalTexts = new WeakMap();
 
-// ── Store original cell texts for highlight restore
 function initOriginalTexts() {
   document.querySelectorAll('#loansBody tr').forEach(row => {
     row.querySelectorAll('td').forEach(td => {
@@ -309,21 +325,21 @@ function initOriginalTexts() {
   updateTabCounts();
 }
 
-// ── Tab counts
 function updateTabCounts() {
   const rows = document.querySelectorAll('#loansBody tr');
-  let counts = {all:0,approved:0,rejected:0,pending:0};
+  let counts = {all:0, approved:0, rejected:0, pending:0, disbursed:0};
   rows.forEach(r => {
+    const s = r.dataset.status;
     counts.all++;
-    counts[r.dataset.status]++;
+    if (counts[s] !== undefined) counts[s]++;
   });
-  document.getElementById('cAll').textContent      = counts.all;
-  document.getElementById('cApproved').textContent = counts.approved;
-  document.getElementById('cRejected').textContent = counts.rejected;
-  document.getElementById('cPending').textContent  = counts.pending;
+  document.getElementById('cAll').textContent       = counts.all;
+  document.getElementById('cApproved').textContent  = counts.approved;
+  document.getElementById('cDisbursed').textContent = counts.disbursed;
+  document.getElementById('cRejected').textContent  = counts.rejected;
+  document.getElementById('cPending').textContent   = counts.pending;
 }
 
-// ── Tab switch
 function setTab(tab, btn) {
   activeTab = tab;
   document.querySelectorAll('.tab-pill').forEach(p => p.classList.remove('active'));
@@ -331,12 +347,11 @@ function setTab(tab, btn) {
   applyFilters();
 }
 
-// ── Filter + search
 function applyFilters() {
-  const query = document.getElementById('searchInput').value.trim().toLowerCase();
-  const rows  = document.querySelectorAll('#loansBody tr');
+  const query    = document.getElementById('searchInput').value.trim().toLowerCase();
+  const rows     = document.querySelectorAll('#loansBody tr');
   const clearBtn = document.getElementById('clearBtn');
-  const info = document.getElementById('resultsInfo');
+  const info     = document.getElementById('resultsInfo');
 
   clearBtn.classList.toggle('show', query.length > 0 || activeTab !== 'all');
 
@@ -350,7 +365,6 @@ function applyFilters() {
     row.classList.toggle('hidden-row', !show);
     if (show) visible++;
 
-    // Highlight
     row.querySelectorAll('td').forEach(td => {
       const orig = originalTexts.get(td);
       if (!orig) return;
@@ -363,7 +377,6 @@ function applyFilters() {
     });
   });
 
-  // No-results row
   let noRow = document.getElementById('noResultsRow');
   if (visible === 0) {
     if (!noRow) {
@@ -383,7 +396,6 @@ function applyFilters() {
     : '';
 }
 
-// ── Clear
 function clearFilters() {
   document.getElementById('searchInput').value = '';
   activeTab = 'all';
@@ -392,7 +404,6 @@ function clearFilters() {
   applyFilters();
 }
 
-// ── Sort
 let sortDir = {};
 function sortTable(colIdx) {
   const tbody = document.getElementById('loansBody');
@@ -417,7 +428,6 @@ function sortTable(colIdx) {
   });
 }
 
-// ── Keyboard
 document.addEventListener('keydown', e => {
   if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
     e.preventDefault();
